@@ -49,9 +49,11 @@ class TTObject {
         $acts = ($this | Get-Member -static -member property).where{ $_.Name -like 'Action_*' }
         $acts.foreach{ 
             Invoke-Expression "[$($this.gettype())]::$_" 
+
         }.where{ $_ -ne '' }.foreach{
             $i = $actions.count + 1
             $actions.Add( "$i) $((Get-Help $_).synopsis)", $_ )
+
         }
         return $actions
     }
