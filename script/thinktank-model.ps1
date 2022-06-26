@@ -42,20 +42,37 @@ class TTObject {
 
     
     #region Object Action
-    static [string] $Action_DiscardResources = ''
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
 
-    [hashtable] GetActions() {      # @{ "1) stnopsis" = "act_function",,,, }
-        $actions = [ordered] @{}
-        $acts = ($this | Get-Member -static -member property).where{ $_.Name -like 'Action_*' }
-        $acts.foreach{ 
-            Invoke-Expression "[$($this.gettype())]::$_" 
+    [bool] InvokeAction( $name ) {
+        $func = Invoke-Expression "[$($this.gettype())]::$name"
+        $title = ((Get-Help $func).synopsis)
+        $ret = (&$func $this)
+        [TTTool]::debug_message( $this, "DoAction: @{ $title, $func }" )
 
-        }.where{ $_ -ne '' }.foreach{
-            $i = $actions.count + 1
-            $actions.Add( "$i) $((Get-Help $_).synopsis)", $_ )
+        return $ret
+    }
+    [bool] InvokeAction() {
+        return $this.InvokeAction('Action')
+    }
+    [hashtable] GetActions() {
+        $title_funcs = [ordered] @{}
+        ($this | Get-Member -static -member property).where{
+            $_.Name -match 'Action.+'
+
+        }.foreach{ # [220626] ↓ここ配列ではなく、辞書にしたい @{ Action = 'Actinoxxx', Function = 'ttact_xxx' }
+            @( $_, Invoke-Expression "[$($this.gettype())]::$_.Name" ) # @( 'Actionxxx', 'ttact_xxx' )
+
+        }.where{ 0 -eq $_[1].length }.foreach{
+            $no = $actions.count + 1
+            $title_funcs.Add( "$no) $((Get-Help $_[1]).synopsis)", $_[0] )
 
         }
-        return $actions
+
+        # @{ "1) title_A" = "act_function",
+        #    "2) title_B" = "act_function2", ,, }
+        return $title_funcs
     }
 
     #endregion ----------------------------------------------------------------------------------------------------------
@@ -262,20 +279,11 @@ class TTCollection : TTObject {
 
 
     #region Object Action
-    static [string] $Action_OpenItem = ''
-    static [string] $Action_DiscardResources = ''
-    static [string] $Action_DisplayInShelf = ''
-    static [string] $Action_DisplayInIndex = ''
-    static [string] $Action_DisplayInCabinet = ''
-    static [string] $Action_DisplayInCabinet = ''
-    [hashtable] GetActions() {     # should be override
-        return [ordered]@{ 
-            DisplayShelf =      'ttact_display_in_shelf'
-            DisplayIndex =      'ttact_display_in_index'
-            OpenFile =          'ttact_select_file'
-            DiscardResources =  'ttact_discard_resources'
-        }
-    }
+    static [string] $ActionToShelf = ''
+    static [string] $ActionToIndex = ''
+    static [string] $ActionToCabinet = ''
+    static [string] $ActionDataLocaiton = ''
+
     #endregion ----------------------------------------------------------------------------------------------------------
 
 }
@@ -379,12 +387,7 @@ class TTConfig : TTObject {
     #endregion ----------------------------------------------------------------------------------------------------------
 
     #region Object Action
-    [hashtable] GetActions() {     # should be override
-        return [ordered]@{ 
-            InvokeAction =      'ttact_open_folder'
-            DiscardResources =  'ttact_discard_resources'
-        }
-    }
+    static [string] $ActionDataLocaiton = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
 }
@@ -518,11 +521,7 @@ class TTState : TTObject {
     #endregion ----------------------------------------------------------------------------------------------------------
 
     #region Object Action
-    [hashtable] GetActions() {     # should be override
-        return [ordered]@{ 
-            InvokeAction =      'ttact_do_action'
-        }
-    }
+    static [string] $ActionFilter = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
 }
@@ -604,13 +603,7 @@ class TTCommand : TTObject {
 
 
     #region Object Display
-   [hashtable] GetDisplay() {      # should be override 
-        return @{
-            Shelf = "Name,Description"
-            Index = "Description,Name"
-            Cabinet = "Name,Description"
-        }
-    }
+    static [string] $ActionInvokeCommand = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
 
@@ -734,13 +727,10 @@ class TTSearchMethod : TTObject {
     
 
     #region Object Action
-    [hashtable] GetActions() {     # should be override
-        return [ordered]@{ 
-            InvokeAction =  'ttact_do_action'
-            DiscardResources =       'ttact_discard_resources'
-        }
-    }
-
+    static [string] $ActionDataLocation = ''
+    static [string] $ActionToEditor = ''
+    static [string] $ActionOpenUrl = ''
+    static [string] $ActionToClipboard = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
 }
@@ -927,16 +917,10 @@ class TTExternalLink : TTObject {
     #endregion ----------------------------------------------------------------------------------------------------------
     
     #region Object Action
-    [hashtable] GetActions() {     # should be override
-        return [ordered]@{ 
-            InvokeAction =      'ttact_open_url_ex'
-            OpenInnerBrowser =  'ttact_open_url'
-            CopyToClipboard =   'ttact_copy_url_toclipboard'
-            OpenDataLocation =  'ttact_open_memo'
-            DiscardResources =           'ttact_discard_resources'
-        }
-    }
-
+    static [string] $ActionDataLocation = ''
+    static [string] $ActionOpenUrl = ''
+    static [string] $ActionOpenUrlEx = ''
+    static [string] $ActionToClipboard = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
 }
@@ -1090,12 +1074,9 @@ class TTMemo : TTObject {
     #endregion ----------------------------------------------------------------------------------------------------------
 
     #region Object Action
-    [hashtable] GetActions() {     # should be override
-        return [ordered]@{ 
-            InvokeAction =  'ttact_open_memo'
-            DiscardResources =       'ttact_discard_resources'
-        }
-    }
+    static [string] $ActionOpen = ''
+    static [string] $ActionDataLocation = ''
+    static [string] $ActionToClipboard = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
 }
@@ -1235,13 +1216,8 @@ class TTEditing : TTObject {
     #endregion ----------------------------------------------------------------------------------------------------------
 
     #region Object Action
-    [hashtable] GetActions() {     # should be override
-        return [ordered]@{ 
-            InvokeAction =  'ttact_open_memo'
-            DiscardResources =       'ttact_discard_resources'
-        }
-    }
-
+    static [string] $ActionOpen = ''
+    static [string] $ActionDataLocation = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
 }

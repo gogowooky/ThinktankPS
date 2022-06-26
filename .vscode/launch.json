@@ -8,7 +8,7 @@
             "name": "PowerShell: Launch Current File",
             "type": "PowerShell",
             "request": "launch",
-            "script": "C:\\Users\\shin\\Documents\\ThinktankPS2\\thinktank2.ps1",
+            "script": "C:\\Users\\shin\\Documents\\ThinktankPS2\\thinktank.ps1",
             "args": []
         },
         {

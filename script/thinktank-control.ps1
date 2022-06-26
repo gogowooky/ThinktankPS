@@ -551,22 +551,20 @@ class TTGroupController {
         $global:AppMan.Focus( $panel )
         return $this
     }
-    [bool] invoke_action( [string]$panel, [string]$name ){
+    [bool] invoke_action( [string]$panel ){
         $item = $global:AppMan.$panel.SelectedItem()
-        if( $name -eq '' ){
-            $func =($item.GetActions().Values)[0]
-        }else{
-            $func =($item.GetActions()[$name])[0]
-        }
-        return (&$func $item)
+        return $item.InvokeAction()
     }
-    [bool] select_actions( [string]$panel ){
+    [bool] select_actions_then_invoke( [string]$panel ){
         $items = $global:AppMan.$panel.SelectedItems()
+
         $title = "{0}:{1}:アクション選択" -f $global:AppMan.$panel.Caption(), $panel
-        $actions = $items[0].GetActions().Values
-        $synopsis =  $actions.foreach{ (Get-Help $_).synopsis }
-        $selected = $global:AppMan.PopupMenu.Caption( $title ).Items( $synopsis ).Show()
-        $selected.foreach{ $func = $actions[$synopsis.IndexOf($_)]; &$func $item }
+        $actions = $items[0].GetActions()
+        $selected = $global:AppMan.PopupMenu.Caption( $title ).Items( $actions.Keys ).Show()
+        $selected.foreach{
+            $action = $_[1]
+            $items.foreach{ $_.InvokeAction($action) }
+        }
         return $true
     }
 

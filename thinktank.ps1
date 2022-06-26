@@ -84,11 +84,11 @@ Add-Type -AssemblyName PresentationFramework, System.Windows.Forms, System.Drawi
 #　external script
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 . .\script\thinktank-tool.ps1           #  支援
-. .\script\thinktank-event2.ps1         #  .NET Framework（UI入力）
-. .\script\thinktank-view2.ps1          #  .NET Framework（UI出力）
-. .\script\thinktank-model2.ps1         #　データ管理クラス
-. .\script\thinktank-control2.ps1       #　データ-UI連携
-. .\script\thinktank-command2.ps1        #　コマンド
+. .\script\thinktank-event.ps1          #  .NET Framework（UI入力）
+. .\script\thinktank-view.ps1           #  .NET Framework（UI出力）
+. .\script\thinktank-model.ps1          #　データ管理クラス
+. .\script\thinktank-control.ps1        #　データ-UI連携
+. .\script\thinktank-command.ps1        #　コマンド
 
 #endregion###############################################################################################################
 
@@ -122,7 +122,6 @@ $global:TTBackupDirPath = "$($global:TTMemoDirPath)\backup"
 [void]( New-Item $global:TTBackupDirPath -ItemType Directory -Force )
 
 #endregion###############################################################################################################
-
 
 #region timer setup 
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''

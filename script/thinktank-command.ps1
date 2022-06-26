@@ -1,14 +1,66 @@
 ﻿
 
 
-
-#region　Actions
+#region　Model Actions
 #########################################################################################################################
+#region　Binding
+#''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+[TTObject]::Action =                    'ttact_noop'
+[TTObject]::ActionDiscardResources =    'ttact_noop'
+[TTCollection]::Action =                    'ttact_noop'
+[TTCollection]::ActionDiscardResources =    'ttact_discard_resources'
+[TTCollection]::ActionToShelf =             'ttact_display_in_shelf'
+[TTCollection]::ActionToIndex =             'ttact_display_in_index'
+[TTCollection]::ActionToCabinet =           'ttact_display_in_cabinet'
+[TTCollection]::ActionDataLocaiton =        'ttact_select_file'
+[TTConfig]::Action =                    'ttact_noop'
+[TTConfig]::ActionDiscardResources =    'ttact_noop'
+[TTConfig]::ActionDataLocaiton =        'ttact_noop'
+[TTState]::Action =                     'ttact_noop'
+[TTState]::ActionDiscardResources =     'ttact_noop'
+[TTState]::ActionFilter =               'ttact_noop'
+[TTCommand]::Action =                   'ttact_noop'
+[TTCommand]::ActionDiscardResources =   'ttact_noop'
+[TTCommand]::ActionInvokeCommand =      'ttact_noop'
+[TTSearchMethod]::Action =                  'ttact_noop'
+[TTSearchMethod]::ActionDiscardResources =  'ttact_noop'
+[TTSearchMethod]::ActionDataLocation =      'ttact_noop'
+[TTSearchMethod]::ActionToEditor =          'ttact_noop'
+[TTSearchMethod]::ActionOpenUrl =           'ttact_open_url'
+[TTSearchMethod]::ActionOpenUrlEx =         'ttact_open_url_ex'
+[TTSearchMethod]::ActionToClipboard =       'ttact_copy_url_toclipboard'
+[TTSearchMethod]::Action =                  'ttact_noop'
+[TTSearchMethod]::ActionDiscardResources =  'ttact_noop'
+[TTSearchMethod]::ActionDataLocation =      'ttact_noop'
+[TTSearchMethod]::ActionOpenUrl =           'ttact_open_url'
+[TTSearchMethod]::ActionOpenUrlEx =         'ttact_open_url_ex'
+[TTSearchMethod]::ActionToClipboard =       'ttact_copy_url_toclipboard'
+[TTMemo]::Action =                  'ttact_open_memo'
+[TTMemo]::ActionDiscardResources =  'ttact_discard_resources'
+[TTMemo]::ActionOpen =              'ttact_open_memo'
+[TTMemo]::ActionDataLocation =      'ttact_select_file'
+[TTMemo]::ActionToClipboard =       'ttact_noop'
+[TTEditing]::Action =                  'ttact_open_memo'
+[TTEditing]::ActionDiscardResources =  'ttact_discard_resources'
+[TTEditing]::ActionDataLocation =      'ttact_select_file'
+
+#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+#region　Functions
+#''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+function ttact_noop( $ttobj ){
+    #.SYNOPSIS
+    # 何もしない
+
+    [TTTool]::debug_message( $ttobj, "ttact_noop" )
+}
 function ttact_select_file( $ttobj ){
     #.SYNOPSIS
     # 関連ファイルをエクスプローラーで選択する
 
-    Write-Host "$($ttobj.Name): ttact_select_file"
+    [TTTool]::debug_message( $ttobj, "ttact_select_file" )
+
     if( ($ttobj -is [TTCollection]) -or
         ($ttobj -is [TTMemo]) -or
         ($ttobj -is [TTEditing]) -or 
@@ -22,7 +74,8 @@ function ttact_discard_resources( $ttobj ){
     #.SYNOPSIS
     # 関連リソースを開放する
 
-    Write-Host "$($ttobj.Name): discard_resources"
+    [TTTool]::debug_message( $ttobj, "ttact_discard_resources" )
+
     switch( $true ){
         { $ttobj -is [TTCollection] }{ $ttobj.DiscardResources() }
         { $ttobj -is [TTMemo] }{ $ttobj.DiscardResources() }
@@ -33,18 +86,22 @@ function ttact_display_in_shelf( $ttobj ){
     #.SYNOPSIS
     # Shelfパネルに表示する
 
-    Write-Host "$($ttobj.Name): ttact_display_in_shelf"
+    [TTTool]::debug_message( $ttobj, "ttact_display_in_shelf" )
     $global:appcon.group.load( 'Shelf', $ttobj.Name )
 }
 function ttact_display_in_index( $ttobj ){
     #.SYNOPSIS
     # Indexパネルに表示する
 
-    Write-Host "$($ttobj.Name): ttact_display_in_index"
+    [TTTool]::debug_message( $ttobj, "ttact_display_in_index" )
     $global:appcon.group.load( 'Index', $ttobj.Name )
 }
+function ttact_display_in_cabinet( $ttobj ){
+    #.SYNOPSIS
+    # Cabinetパネルに表示する（未実装）
 
-
+    [TTTool]::debug_message( $ttobj, "ttact_display_in_cabinet" )
+}
 
 function ttact_open_memo( $ttobj ){
     #.SYNOPSIS
@@ -76,16 +133,13 @@ function ttact_open_folder( $ttobj ){
 
     Write-Host "$($ttobj.Name): ttact_open_folder"
 }
-function ttact_do_action( $ttobj ){
-    #.SYNOPSIS
-    # オブジェクトを実行する
+#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-    Write-Host "$($ttobj.Name): do_action"
-}
 #endregion###############################################################################################################
 
 
-#region　Application
+
+#region　Application Commands
 #########################################################################################################################
 #region　Application Window
 #''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -170,7 +224,7 @@ function ttcmd_application_border_inwpanel_right( $source, $mod, $key ){
 
 #endregion###############################################################################################################
 
-#region　Menu系共通 ( PopMenu, Cabinet )
+#region　Menu系共通 ( PopMenu, Cabinet ) Commands
 #########################################################################################################################
 function ttcmd_menu_cancel( $source, $mod, $key ){
     #.SYNOPSIS
@@ -211,7 +265,7 @@ function ttcmd_menu_move_last( $source, $mod, $key ){
 
 #endregion###############################################################################################################
 
-#region　Panel系共通 ( Library, Index, Shelf, Desk, Cabinet )
+#region　Panel系共通 ( Library, Index, Shelf, Desk, Cabinet ) Commands
 #########################################################################################################################
 #region tentative
 function ttcmd_focus_tentative_shelf( $source, $mod, $key ){
@@ -528,8 +582,6 @@ function ttcmd_panel_sort_asc_6thcolumn( $source, $mod, $key ){
 #endregion
 
 #endregion###############################################################################################################
-
-
 
 
 
