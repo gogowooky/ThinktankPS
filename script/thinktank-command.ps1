@@ -30,12 +30,12 @@
 [TTSearchMethod]::ActionOpenUrl =           'ttact_open_url'
 [TTSearchMethod]::ActionOpenUrlEx =         'ttact_open_url_ex'
 [TTSearchMethod]::ActionToClipboard =       'ttact_copy_url_toclipboard'
-[TTSearchMethod]::Action =                  'ttact_noop'
-[TTSearchMethod]::ActionDiscardResources =  'ttact_noop'
-[TTSearchMethod]::ActionDataLocation =      'ttact_noop'
-[TTSearchMethod]::ActionOpenUrl =           'ttact_open_url'
-[TTSearchMethod]::ActionOpenUrlEx =         'ttact_open_url_ex'
-[TTSearchMethod]::ActionToClipboard =       'ttact_copy_url_toclipboard'
+[TTExternalLink]::Action =                  'ttact_noop'
+[TTExternalLink]::ActionDiscardResources =  'ttact_noop'
+[TTExternalLink]::ActionDataLocation =      'ttact_noop'
+[TTExternalLink]::ActionOpenUrl =           'ttact_open_url'
+[TTExternalLink]::ActionOpenUrlEx =         'ttact_open_url_ex'
+[TTExternalLink]::ActionToClipboard =       'ttact_copy_url_toclipboard'
 [TTMemo]::Action =                  'ttact_open_memo'
 [TTMemo]::ActionDiscardResources =  'ttact_discard_resources'
 [TTMemo]::ActionOpen =              'ttact_open_memo'
@@ -451,14 +451,14 @@ function ttcmd_panel_action_select( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの選択アイテムを選択・実行する
 
-    $global:appcon.group.action( $source, 'SelectedItems', 'SelectAction' )
+    $global:appcon.group.select_actions_then_invole( $source )
 
 }
 function ttcmd_panel_action_invoke( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの選択アイテムを実行する
 
-    $global:appcon.group.action( $source, 'SelectedItems', 'InvokeAction' )
+    $global:appcon.group.invoke_action( $source )
 
 }
 function ttcmd_panel_filter_clear( $source, $mod, $key ){

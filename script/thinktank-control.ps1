@@ -559,8 +559,7 @@ class TTGroupController {
         $items = $global:AppMan.$panel.SelectedItems()
 
         $title = "{0}:{1}:アクション選択" -f $global:AppMan.$panel.Caption(), $panel
-        $actions = $items[0].GetActions()
-        $selected = $global:AppMan.PopupMenu.Caption( $title ).Items( $actions.Keys ).Show()
+        $selected = $global:AppMan.PopupMenu.Caption( $title ).Items( $items[0].GetActions().Keys ).Show()
         $selected.foreach{
             $action = $_[1]
             $items.foreach{ $_.InvokeAction($action) }

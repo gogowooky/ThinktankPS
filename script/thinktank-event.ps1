@@ -87,12 +87,12 @@ Library+    Alt         P           ttcmd_panel_move_up
 Library+    Alt         N           ttcmd_panel_move_down
 Library+    Alt, Shift  P           ttcmd_panel_move_first
 Library+    Alt, Shift  N           ttcmd_panel_move_last
-Library+    Alt         Space       ttcmd_panel_action_select
 Library+    Alt         Up          ttcmd_application_border_inlpanel_up
 Library+    Alt         Down        ttcmd_application_border_inlpanel_down
 Library+    Alt         Left        ttcmd_application_border_inwindow_left
 Library+    Alt         Right       ttcmd_application_border_inwindow_right
 Library+    Alt         L           ttcmd_focus_tentative_library
+Library+    Alt         Space       ttcmd_panel_action_invoke
 
 Library     None        Up          ttcmd_panel_move_up
 Library     None        Down        ttcmd_panel_move_down
@@ -113,6 +113,7 @@ Library     None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Library     Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Library     None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Library     Shift       F6          ttcmd_panel_sort_asc_6thcolumn
+Library     Alt, Shift  Space       ttcmd_panel_action_select
 Library     None        Return      ttcmd_panel_action_select
 '@,
     #Index
@@ -121,12 +122,12 @@ Index+      Alt         P           ttcmd_panel_move_up
 Index+      Alt         N           ttcmd_panel_move_down
 Index+      Alt, Shift  P           ttcmd_panel_move_first
 Index+      Alt, Shift  N           ttcmd_panel_move_last
-Index+      Alt         Space       ttcmd_panel_action_select
 Index+      Alt         Up          ttcmd_application_border_inlpanel_up
 Index+      Alt         Down        ttcmd_application_border_inlpanel_down
 Index+      Alt         Left        ttcmd_application_border_inwindow_left
 Index+      Alt         Right       ttcmd_application_border_inwindow_right
 Index+      Alt         I           ttcmd_focus_tentative_index
+Index+      Alt         Space       ttcmd_panel_action_invoke
 
 Index       None        Up          ttcmd_panel_move_up
 Index       None        Down        ttcmd_panel_move_down
@@ -147,6 +148,7 @@ Index       None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Index       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Index       None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Index       Shift       F6          ttcmd_panel_sort_asc_6thcolumn
+Index       Alt, Shift  Space       ttcmd_panel_action_select
 Index       None        Return      ttcmd_panel_action_select
 '@,
     #Shelf
@@ -155,12 +157,12 @@ Shelf+      Alt         P           ttcmd_panel_move_up
 Shelf+      Alt         N           ttcmd_panel_move_down
 Shelf+      Alt, Shift  P           ttcmd_panel_move_first
 Shelf+      Alt, Shift  N           ttcmd_panel_move_last
-Shelf+      Alt         Space       ttcmd_panel_action_select
 Shelf+      Alt         Up          ttcmd_application_border_inrpanel_up
 Shelf+      Alt         Down        ttcmd_application_border_inrpanel_down
 Shelf+      Alt         Left        ttcmd_application_border_inwpanel_left
 Shelf+      Alt         Right       ttcmd_application_border_inwpanel_right
 Shelf+      Alt         S           ttcmd_focus_tentative_shelf
+Shelf+      Alt         Space       ttcmd_panel_action_invoke
 
 Shelf       None        Up          ttcmd_panel_move_up
 Shelf       None        Down        ttcmd_panel_move_down
@@ -181,6 +183,7 @@ Shelf       None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Shelf       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Shelf       None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Shelf       Shift       F6          ttcmd_panel_sort_asc_6thcolumn
+Shelf       Alt, Shift  Space       ttcmd_panel_action_select
 Shelf       None        Return      ttcmd_panel_action_select
 '@,
     #Misc
@@ -282,7 +285,11 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
     $panel =    $global:appcon._get( 'Focus.Application' )
     $tttv  =    [TTTentativeKeyBindingMode]::Name
 
-    if( $tttv -ne '' ){
+    if( $source -eq 'PopupMenu' ){
+        $panel = $source
+        $command = try{ $global:TTKeyEvents[$panel][$mod][$key] }catch{ $null }
+
+    }elseif( $tttv -ne '' ){
         $panel = $tttv
         $command = try{ $global:TTKeyEvents["$panel+"][$mod][$key] }catch{ $null }
     }else{

@@ -62,11 +62,12 @@ class TTObject {
             $_.Name -match 'Action.+'
 
         }.foreach{ # [220626] ↓ここ配列ではなく、辞書にしたい @{ Action = 'Actinoxxx', Function = 'ttact_xxx' }
-            @( $_, Invoke-Expression "[$($this.gettype())]::$_.Name" ) # @( 'Actionxxx', 'ttact_xxx' )
-
-        }.where{ 0 -eq $_[1].length }.foreach{
+            @{  Action = $_
+                Function = (Invoke-Expression "[$($this.gettype())]::$_.Name" ) 
+            }
+        }.where{ 0 -eq $_.Function.length }.foreach{
             $no = $actions.count + 1
-            $title_funcs.Add( "$no) $((Get-Help $_[1]).synopsis)", $_[0] )
+            $title_funcs.Add( "$no) $((Get-Help $_.Function).synopsis)", $_.Action )
 
         }
 
@@ -730,6 +731,7 @@ class TTSearchMethod : TTObject {
     static [string] $ActionDataLocation = ''
     static [string] $ActionToEditor = ''
     static [string] $ActionOpenUrl = ''
+    static [string] $ActionOpenUrlEx = ''
     static [string] $ActionToClipboard = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
