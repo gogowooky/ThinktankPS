@@ -1344,10 +1344,10 @@ class TTPopupMenuManager {
     [TTPopupMenuManager] Items( $items ){
         $this._list.ItemsSource = $items
 
-        # $view = [System.Windows.Data.CollectionViewSource]::GetDefaultView( $this._list.ItemsSource )
-        # $view.SortDescriptions.Clear()
-        # $sortDescription = New-Object System.ComponentModel.SortDescription( $view.Columns[0].Header, 'Ascending' )
-        # $view.SortDescriptions.Add($sortDescription)
+        $view = [System.Windows.Data.CollectionViewSource]::GetDefaultView( $this._list.ItemsSource )
+        $view.SortDescriptions.Clear()
+        $sortDescription = New-Object System.ComponentModel.SortDescription( "", 'Ascending' )
+        $view.SortDescriptions.Add($sortDescription)
 
         $width = (
             $this._list.ItemsSource.foreach{

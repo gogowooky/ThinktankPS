@@ -5,7 +5,7 @@
 # https://www.reza-aghaei.com/net-action-func-delegate-lambda-expression-in-powershell/
 
 
-#region TTModel
+#region TTModel event
 [ScriptBlock] $global:TTStatus_OnSave = {
     $collection = $args[0]
     @( 'Library', 'Index', 'Shelf' ).where{
@@ -15,9 +15,10 @@
     }
 }
 
-#endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-#region　Binding
+
+#region　TTModel Action Binding
 #''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 [TTCollection]::Action =                    'ttact_display_in_shelf'
@@ -105,7 +106,7 @@ PopupMenu   Alt             Return      ttcmd_menu_ok
 PopupMenu   Alt             Space       ttcmd_menu_ok
 PopupMenu   None            Return      ttcmd_menu_ok
 '@,
-    #$Cabinaet
+    #$Cabinet
 @'
 Cabinet         Alt             P           ttcmd_panel_move_up
 Cabinet         Alt             N           ttcmd_panel_move_down
@@ -134,7 +135,8 @@ Library+    Alt         Down        ttcmd_application_border_inlpanel_down
 Library+    Alt         Left        ttcmd_application_border_inwindow_left
 Library+    Alt         Right       ttcmd_application_border_inwindow_right
 Library+    Alt         L           ttcmd_focus_tentative_library
-Library+    Alt         Space       ttcmd_panel_action_invoke
+Library+    Alt, Shift  Space       ttcmd_panel_action_invoke
+Library+    Alt         Space       ttcmd_panel_action_select
 
 Library     None        Up          ttcmd_panel_move_up
 Library     None        Down        ttcmd_panel_move_down
@@ -169,7 +171,8 @@ Index+      Alt         Down        ttcmd_application_border_inlpanel_down
 Index+      Alt         Left        ttcmd_application_border_inwindow_left
 Index+      Alt         Right       ttcmd_application_border_inwindow_right
 Index+      Alt         I           ttcmd_focus_tentative_index
-Index+      Alt         Space       ttcmd_panel_action_invoke
+Index+      Alt, Shift  Space       ttcmd_panel_action_invoke
+Index+      Alt         Space       ttcmd_panel_action_select
 
 Index       None        Up          ttcmd_panel_move_up
 Index       None        Down        ttcmd_panel_move_down
@@ -204,7 +207,8 @@ Shelf+      Alt         Down        ttcmd_application_border_inrpanel_down
 Shelf+      Alt         Left        ttcmd_application_border_inwpanel_left
 Shelf+      Alt         Right       ttcmd_application_border_inwpanel_right
 Shelf+      Alt         S           ttcmd_focus_tentative_shelf
-Shelf+      Alt         Space       ttcmd_panel_action_invoke
+Shelf+      Alt, Shift  Space       ttcmd_panel_action_invoke
+Shelf+      Alt         Space       ttcmd_panel_action_select
 
 Shelf       None        Up          ttcmd_panel_move_up
 Shelf       None        Down        ttcmd_panel_move_down
@@ -328,10 +332,13 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
     $tttv  =    [TTTentativeKeyBindingMode]::Name
 
     if( $source -eq 'PopupMenu' ){
-        $command = try{ $global:TTKeyEvents['PopupMenu'][$mod][$key] }catch{ $null }
+        $panel = $source
+        $command = try{ $global:TTKeyEvents[$panel][$mod][$key] }catch{ $null }
+
     }elseif( $tttv -ne '' ){
         $panel = $tttv
         $command = try{ $global:TTKeyEvents["$panel+"][$mod][$key] }catch{ $null }
+
     }else{
         $command = @( 'Application', "$panel+", $panel ).foreach{
             try{ $global:TTKeyEvents[$_][$mod][$key] }catch{ $null }
@@ -354,23 +361,26 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
 
 [ScriptBlock] $global:TTPreviewKeyUp = {
     if( [TTTentativeKeyBindingMode]::Check( $args[1].Key ) ){
-        ttcmd_menu_cancel 'PopMenu' '' ''
+        ttcmd_menu_cancel 'PopupMenu' '' ''
         $args[1].Handled = $True
     }
 }
 
 
-#endregion###############################################################################################################
+#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 
 #region 専用
-[ScriptBlock] $global:TTWindowLoaded =      { $global:appcon.initialize_application() }
-[ScriptBlock] $global:TTPanel_SizeChanged = { $global:appcon.set_border_status( $args ) }
+[ScriptBlock] $global:TTWindowLoaded =  { $global:appcon.initialize_application() }
 
-[ScriptBlock] $global:TTPanel_GotFocus =    { $global:appcon.set_gotfocus_status( $args ) }
-[ScriptBlock] $global:TTPanel_LostFocus =   { $global:appcon.set_lostfocus_status( $args ) }
+[ScriptBlock] $global:TTPanel_SizeChanged =             { $global:appcon.set_border_status( $args ) }
+[ScriptBlock] $global:TTPanel_GotFocus =                { $global:appcon.set_gotfocus_status( $args ) }
+[ScriptBlock] $global:TTPanel_LostFocus =               { $global:appcon.set_lostfocus_status( $args ) }
+[ScriptBlock] $global:TTPanel_TextChanged_ToExtract =   { $global:appcon.group.textbox_on_textchanged( $args ) }
+
 [ScriptBlock] $global:TTTool_GotFocus =     { $global:appcon.set_gotfocus_status( $args ) }
 [ScriptBlock] $global:TTTool_LostFocus =    { $global:appcon.set_lostfocus_status( $args ) }
+
 [ScriptBlock] $global:TTWork_GotFocus =     { $global:appcon.set_gotfocus_status( $args ) }
 [ScriptBlock] $global:TTWork_LostFocus =    { $global:appcon.set_lostfocus_status( $args ) }
 
@@ -378,10 +388,9 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
 [ScriptBlock] $global:TTDataGrid_SelectionChanged = { $global:appcon.group.datagrid_on_selectionchanged( $args ) }
 [ScriptBlock] $global:TTDataGrid_GotFocus =         { $global:appcon.group.datagrid_on_gotfocus( $args ) }
 [ScriptBlock] $script:TTDataGrid_PreviewMouseDown = { $global:appcon.group.datagrid_on_previewmousedown( $args ) }
-[ScriptBlock] $global:TTPanel_TextChanged_ToExtract = { $global:appcon.group.textbox_on_textchanged( $args ) }
 
 
-#endregion :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 #region　
 

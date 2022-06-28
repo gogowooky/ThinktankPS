@@ -49,7 +49,7 @@ class TTObject {
         $func = Invoke-Expression "[$($this.gettype())]::$name"
         $title = ((Get-Help $func).synopsis)
         $ret = (&$func $this)
-        [TTTool]::debug_message( $this, "DoAction: @{ $title, $func }" )
+        [TTTool]::debug_message( $this, "InvokeAction: @{ $title, $func }" )
 
         return $ret
     }
@@ -61,18 +61,16 @@ class TTObject {
         ($this | Get-Member -static -member property).where{
             $_.Name -match 'Action.+'
 
-        }.foreach{ # [220626] ↓ここ配列ではなく、辞書にしたい @{ Action = 'Actinoxxx', Function = 'ttact_xxx' }
-            @{  Action = $_
-                Function = (Invoke-Expression "[$($this.gettype())]::$_.Name" ) 
+        }.foreach{
+            @{  Action = $_.Name
+                Function = (Invoke-Expression "[$($this.gettype())]::$($_.Name)" ) 
             }
-        }.where{ 0 -eq $_.Function.length }.foreach{
-            $no = $actions.count + 1
+        }.where{ 0 -lt $_.Function.length }.foreach{
+            $no = $title_funcs.count + 1
             $title_funcs.Add( "$no) $((Get-Help $_.Function).synopsis)", $_.Action )
 
         }
 
-        # @{ "1) title_A" = "act_function",
-        #    "2) title_B" = "act_function2", ,, }
         return $title_funcs
     }
 
@@ -107,6 +105,13 @@ class TTCollection : TTObject {
         $this.children =        @{}
         $this.count =          0
         $this.loading =         $false
+
+        ($this | Get-Member -static -member property).where{
+            $_.Name -match 'Action.*'
+        }.foreach{
+            Invoke-Expression "[$($this.gettype().Name)]::$($_.Name) = [$($this.gettype().BaseType.Name)]::$($_.Name)"
+        }
+
     }
     [hashtable] GetDictionary() {   # should be override
         return @{
@@ -280,11 +285,12 @@ class TTCollection : TTObject {
 
 
     #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
     static [string] $ActionToShelf = ''
     static [string] $ActionToIndex = ''
     static [string] $ActionToCabinet = ''
     static [string] $ActionDataLocaiton = ''
-
     #endregion ----------------------------------------------------------------------------------------------------------
 
 }
@@ -341,6 +347,14 @@ class TTResources : TTCollection {
     }
     #endregion ----------------------------------------------------------------------------------------------------------
 
+    #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
+    static [string] $ActionToShelf = ''
+    static [string] $ActionToIndex = ''
+    static [string] $ActionToCabinet = ''
+    static [string] $ActionDataLocaiton = ''
+    #endregion ----------------------------------------------------------------------------------------------------------
 
 }
 
@@ -388,6 +402,8 @@ class TTConfig : TTObject {
     #endregion ----------------------------------------------------------------------------------------------------------
 
     #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
     static [string] $ActionDataLocaiton = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
@@ -484,6 +500,15 @@ class TTConfigs: TTCollection {
     }
     #endregion ----------------------------------------------------------------------------------------------------------
 
+    #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
+    static [string] $ActionToShelf = ''
+    static [string] $ActionToIndex = ''
+    static [string] $ActionToCabinet = ''
+    static [string] $ActionDataLocaiton = ''
+    #endregion ----------------------------------------------------------------------------------------------------------
+    
 }
 
 #endregion###############################################################################################################
@@ -522,6 +547,8 @@ class TTState : TTObject {
     #endregion ----------------------------------------------------------------------------------------------------------
 
     #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
     static [string] $ActionFilter = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
@@ -577,6 +604,15 @@ class TTStatus : TTCollection {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
+    #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
+    static [string] $ActionToShelf = ''
+    static [string] $ActionToIndex = ''
+    static [string] $ActionToCabinet = ''
+    static [string] $ActionDataLocaiton = ''
+    #endregion ----------------------------------------------------------------------------------------------------------
+    
 }
 
 #endregion###############################################################################################################
@@ -586,7 +622,6 @@ class TTStatus : TTCollection {
 class TTCommand : TTObject {
 
     #region Object itself (Dictionary)
-
     [string]$Description
 
     TTCommand(){
@@ -604,19 +639,22 @@ class TTCommand : TTObject {
 
 
     #region Object Display
-    static [string] $ActionInvokeCommand = ''
-    #endregion ----------------------------------------------------------------------------------------------------------
-
-
-    #region Object Action
-    [hashtable] GetActions() {     # should be override
-        return [ordered]@{ 
-            InvokeAction =      'ttact_do_action'
-            DiscardResources =  'ttact_discard_resources'
+    [hashtable] GetDisplay() {      # should be override 
+        return @{
+            Shelf = "Name,Description"
+            Index = "Name,Description"
+            Cabinet = "Name,Description"
         }
     }
-
     #endregion ----------------------------------------------------------------------------------------------------------
+
+    #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionInvokeCommand = ''
+    static [string] $ActionDiscardResources = ''
+    static [string] $ActionFilter = ''
+    #endregion ----------------------------------------------------------------------------------------------------------
+
 
 }
 
@@ -674,6 +712,15 @@ class TTCommands: TTCollection {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
+    #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
+    static [string] $ActionToShelf = ''
+    static [string] $ActionToIndex = ''
+    static [string] $ActionToCabinet = ''
+    static [string] $ActionDataLocaiton = ''
+    #endregion ----------------------------------------------------------------------------------------------------------
+    
 }
 
 #endregion###############################################################################################################
@@ -728,6 +775,8 @@ class TTSearchMethod : TTObject {
     
 
     #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
     static [string] $ActionDataLocation = ''
     static [string] $ActionToEditor = ''
     static [string] $ActionOpenUrl = ''
@@ -868,6 +917,15 @@ class TTSearchMethods: TTCollection {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
+    #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
+    static [string] $ActionToShelf = ''
+    static [string] $ActionToIndex = ''
+    static [string] $ActionToCabinet = ''
+    static [string] $ActionDataLocaiton = ''
+    #endregion ----------------------------------------------------------------------------------------------------------
+    
 }
 
 #endregion###############################################################################################################
@@ -919,6 +977,8 @@ class TTExternalLink : TTObject {
     #endregion ----------------------------------------------------------------------------------------------------------
     
     #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
     static [string] $ActionDataLocation = ''
     static [string] $ActionOpenUrl = ''
     static [string] $ActionOpenUrlEx = ''
@@ -1028,6 +1088,15 @@ class TTExternalLinks: TTCollection {
     }
     #endregion ----------------------------------------------------------------------------------------------------------
 
+    #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
+    static [string] $ActionToShelf = ''
+    static [string] $ActionToIndex = ''
+    static [string] $ActionToCabinet = ''
+    static [string] $ActionDataLocaiton = ''
+    #endregion ----------------------------------------------------------------------------------------------------------
+    
 }
 
 #endregion###############################################################################################################
@@ -1076,6 +1145,8 @@ class TTMemo : TTObject {
     #endregion ----------------------------------------------------------------------------------------------------------
 
     #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
     static [string] $ActionOpen = ''
     static [string] $ActionDataLocation = ''
     static [string] $ActionToClipboard = ''
@@ -1164,6 +1235,15 @@ class TTMemos: TTCollection {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
+    #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
+    static [string] $ActionToShelf = ''
+    static [string] $ActionToIndex = ''
+    static [string] $ActionToCabinet = ''
+    static [string] $ActionDataLocaiton = ''
+    #endregion ----------------------------------------------------------------------------------------------------------
+    
 }
 
 
@@ -1218,6 +1298,8 @@ class TTEditing : TTObject {
     #endregion ----------------------------------------------------------------------------------------------------------
 
     #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
     static [string] $ActionOpen = ''
     static [string] $ActionDataLocation = ''
     #endregion ----------------------------------------------------------------------------------------------------------
@@ -1260,6 +1342,15 @@ class TTEditings: TTCollection {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
+    #region Object Action
+    static [string] $Action = ''
+    static [string] $ActionDiscardResources = ''
+    static [string] $ActionToShelf = ''
+    static [string] $ActionToIndex = ''
+    static [string] $ActionToCabinet = ''
+    static [string] $ActionDataLocaiton = ''
+    #endregion ----------------------------------------------------------------------------------------------------------
+    
 }
 
 #endregion###############################################################################################################
