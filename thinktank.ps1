@@ -84,10 +84,10 @@ Add-Type -AssemblyName PresentationFramework, System.Windows.Forms, System.Drawi
 #　external script
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 . .\script\thinktank-tool.ps1           #  支援
-. .\script\thinktank-event.ps1          #  .NET Framework（UI入力）
 . .\script\thinktank-view.ps1           #  .NET Framework（UI出力）
 . .\script\thinktank-model.ps1          #　データ管理クラス
 . .\script\thinktank-control.ps1        #　データ-UI連携
+. .\script\thinktank-event.ps1          #  .NET Framework（UI入力）
 . .\script\thinktank-command.ps1        #　コマンド
 
 #endregion###############################################################################################################

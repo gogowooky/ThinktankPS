@@ -17,6 +17,48 @@
 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+#region　Binding
+#''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+[TTCollection]::Action =                    'ttact_display_in_shelf'
+[TTCollection]::ActionDiscardResources =    'ttact_discard_resources'
+[TTCollection]::ActionToShelf =             'ttact_display_in_shelf'
+[TTCollection]::ActionToIndex =             'ttact_display_in_index'
+[TTCollection]::ActionToCabinet =           'ttact_display_in_cabinet'
+[TTCollection]::ActionDataLocaiton =        'ttact_select_file'
+[TTConfig]::Action =                    'ttact_noop'
+[TTConfig]::ActionDiscardResources =    'ttact_noop'
+[TTConfig]::ActionDataLocaiton =        'ttact_noop'
+[TTState]::Action =                     'ttact_noop'
+[TTState]::ActionDiscardResources =     'ttact_noop'
+[TTState]::ActionFilter =               'ttact_noop'
+[TTCommand]::Action =                   'ttact_noop'
+[TTCommand]::ActionDiscardResources =   'ttact_noop'
+[TTCommand]::ActionInvokeCommand =      'ttact_noop'
+[TTSearchMethod]::Action =                  'ttact_noop'
+[TTSearchMethod]::ActionDiscardResources =  'ttact_noop'
+[TTSearchMethod]::ActionDataLocation =      'ttact_noop'
+[TTSearchMethod]::ActionToEditor =          'ttact_noop'
+[TTSearchMethod]::ActionOpenUrl =           'ttact_open_url'
+[TTSearchMethod]::ActionOpenUrlEx =         'ttact_open_url_ex'
+[TTSearchMethod]::ActionToClipboard =       'ttact_copy_url_toclipboard'
+[TTExternalLink]::Action =                  'ttact_noop'
+[TTExternalLink]::ActionDiscardResources =  'ttact_noop'
+[TTExternalLink]::ActionDataLocation =      'ttact_noop'
+[TTExternalLink]::ActionOpenUrl =           'ttact_open_url'
+[TTExternalLink]::ActionOpenUrlEx =         'ttact_open_url_ex'
+[TTExternalLink]::ActionToClipboard =       'ttact_copy_url_toclipboard'
+[TTMemo]::Action =                  'ttact_open_memo'
+[TTMemo]::ActionDiscardResources =  'ttact_discard_resources'
+[TTMemo]::ActionOpen =              'ttact_open_memo'
+[TTMemo]::ActionDataLocation =      'ttact_select_file'
+[TTMemo]::ActionToClipboard =       'ttact_noop'
+[TTEditing]::Action =                  'ttact_open_memo'
+[TTEditing]::ActionDiscardResources =  'ttact_discard_resources'
+[TTEditing]::ActionDataLocation =      'ttact_select_file'
+
+#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 
 #region key binding setup 
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -286,9 +328,7 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
     $tttv  =    [TTTentativeKeyBindingMode]::Name
 
     if( $source -eq 'PopupMenu' ){
-        $panel = $source
-        $command = try{ $global:TTKeyEvents[$panel][$mod][$key] }catch{ $null }
-
+        $command = try{ $global:TTKeyEvents['PopupMenu'][$mod][$key] }catch{ $null }
     }elseif( $tttv -ne '' ){
         $panel = $tttv
         $command = try{ $global:TTKeyEvents["$panel+"][$mod][$key] }catch{ $null }
@@ -314,6 +354,7 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
 
 [ScriptBlock] $global:TTPreviewKeyUp = {
     if( [TTTentativeKeyBindingMode]::Check( $args[1].Key ) ){
+        ttcmd_menu_cancel 'PopMenu' '' ''
         $args[1].Handled = $True
     }
 }

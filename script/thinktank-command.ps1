@@ -3,49 +3,6 @@
 
 #region　Model Actions
 #########################################################################################################################
-#region　Binding
-#''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-[TTObject]::Action =                    'ttact_noop'
-[TTObject]::ActionDiscardResources =    'ttact_noop'
-[TTCollection]::Action =                    'ttact_noop'
-[TTCollection]::ActionDiscardResources =    'ttact_discard_resources'
-[TTCollection]::ActionToShelf =             'ttact_display_in_shelf'
-[TTCollection]::ActionToIndex =             'ttact_display_in_index'
-[TTCollection]::ActionToCabinet =           'ttact_display_in_cabinet'
-[TTCollection]::ActionDataLocaiton =        'ttact_select_file'
-[TTConfig]::Action =                    'ttact_noop'
-[TTConfig]::ActionDiscardResources =    'ttact_noop'
-[TTConfig]::ActionDataLocaiton =        'ttact_noop'
-[TTState]::Action =                     'ttact_noop'
-[TTState]::ActionDiscardResources =     'ttact_noop'
-[TTState]::ActionFilter =               'ttact_noop'
-[TTCommand]::Action =                   'ttact_noop'
-[TTCommand]::ActionDiscardResources =   'ttact_noop'
-[TTCommand]::ActionInvokeCommand =      'ttact_noop'
-[TTSearchMethod]::Action =                  'ttact_noop'
-[TTSearchMethod]::ActionDiscardResources =  'ttact_noop'
-[TTSearchMethod]::ActionDataLocation =      'ttact_noop'
-[TTSearchMethod]::ActionToEditor =          'ttact_noop'
-[TTSearchMethod]::ActionOpenUrl =           'ttact_open_url'
-[TTSearchMethod]::ActionOpenUrlEx =         'ttact_open_url_ex'
-[TTSearchMethod]::ActionToClipboard =       'ttact_copy_url_toclipboard'
-[TTExternalLink]::Action =                  'ttact_noop'
-[TTExternalLink]::ActionDiscardResources =  'ttact_noop'
-[TTExternalLink]::ActionDataLocation =      'ttact_noop'
-[TTExternalLink]::ActionOpenUrl =           'ttact_open_url'
-[TTExternalLink]::ActionOpenUrlEx =         'ttact_open_url_ex'
-[TTExternalLink]::ActionToClipboard =       'ttact_copy_url_toclipboard'
-[TTMemo]::Action =                  'ttact_open_memo'
-[TTMemo]::ActionDiscardResources =  'ttact_discard_resources'
-[TTMemo]::ActionOpen =              'ttact_open_memo'
-[TTMemo]::ActionDataLocation =      'ttact_select_file'
-[TTMemo]::ActionToClipboard =       'ttact_noop'
-[TTEditing]::Action =                  'ttact_open_memo'
-[TTEditing]::ActionDiscardResources =  'ttact_discard_resources'
-[TTEditing]::ActionDataLocation =      'ttact_select_file'
-
-#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 #region　Functions
 #''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -53,13 +10,13 @@ function ttact_noop( $ttobj ){
     #.SYNOPSIS
     # 何もしない
 
-    [TTTool]::debug_message( $ttobj, "ttact_noop" )
+    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_noop" )
 }
 function ttact_select_file( $ttobj ){
     #.SYNOPSIS
     # 関連ファイルをエクスプローラーで選択する
 
-    [TTTool]::debug_message( $ttobj, "ttact_select_file" )
+    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_select_file" )
 
     if( ($ttobj -is [TTCollection]) -or
         ($ttobj -is [TTMemo]) -or
@@ -74,7 +31,7 @@ function ttact_discard_resources( $ttobj ){
     #.SYNOPSIS
     # 関連リソースを開放する
 
-    [TTTool]::debug_message( $ttobj, "ttact_discard_resources" )
+    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_discard_resources" )
 
     switch( $true ){
         { $ttobj -is [TTCollection] }{ $ttobj.DiscardResources() }
@@ -86,52 +43,52 @@ function ttact_display_in_shelf( $ttobj ){
     #.SYNOPSIS
     # Shelfパネルに表示する
 
-    [TTTool]::debug_message( $ttobj, "ttact_display_in_shelf" )
-    $global:appcon.group.load( 'Shelf', $ttobj.Name )
+    [TTTool]::debug_message( $ttobj.gettype(), "ttact_display_in_shelf" )
+    $global:appcon.group.load( 'Shelf', $ttobj.name )
 }
 function ttact_display_in_index( $ttobj ){
     #.SYNOPSIS
     # Indexパネルに表示する
 
-    [TTTool]::debug_message( $ttobj, "ttact_display_in_index" )
-    $global:appcon.group.load( 'Index', $ttobj.Name )
+    [TTTool]::debug_message( $ttobj.gettype(), "ttact_display_in_index" )
+    $global:appcon.group.load( 'Index', $ttobj.name )
 }
 function ttact_display_in_cabinet( $ttobj ){
     #.SYNOPSIS
     # Cabinetパネルに表示する（未実装）
 
-    [TTTool]::debug_message( $ttobj, "ttact_display_in_cabinet" )
+    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_display_in_cabinet" )
 }
 
 function ttact_open_memo( $ttobj ){
     #.SYNOPSIS
     # メモを開く
 
-    Write-Host "$($ttobj.Name): ttact_open_memo"
+    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_memo" )
 }
 function ttact_copy_url_toclipboard( $ttobj ){
     #.SYNOPSIS
     # urlをクリップボードに保存する
 
-    Write-Host "$($ttobj.Name): ttact_copy_url_toclipboard"
+    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_copy_url_toclipboard" )
 }
 function ttact_open_url_ex( $ttobj ){
     #.SYNOPSIS
     # urlを外部ツールで開く
 
-    Write-Host "$($ttobj.Name): ttact_open_url_ex"
+    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_url_ex" )
 }
 function ttact_open_url( $ttobj ){
     #.SYNOPSIS
     # urlを開く
 
-    Write-Host "$($ttobj.Name): ttact_open_url"
+    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_url" )
 }
 function ttact_open_folder( $ttobj ){
     #.SYNOPSIS
     # フォルダを開く
 
-    Write-Host "$($ttobj.Name): ttact_open_folder"
+    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_folder" )
 }
 #endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -451,7 +408,7 @@ function ttcmd_panel_action_select( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの選択アイテムを選択・実行する
 
-    $global:appcon.group.select_actions_then_invole( $source )
+    $global:appcon.group.select_actions_then_invoke( $source )
 
 }
 function ttcmd_panel_action_invoke( $source, $mod, $key ){
