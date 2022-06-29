@@ -36,8 +36,8 @@ class TTTool{
         if( $url -like "*[param]*" ){
             $url = $url.replace( "[param]", [System.Web.HttpUtility]::UrlEncode($script:app.keyword()) )
         }
-        Start-Process $url
-        Start-Process "microsoft-edge:$url"    
+        # Start-Process $url
+        Start-Process "microsoft-edge:$url"
     
     }
     static [string]index_to_filepath( [string]$index ){

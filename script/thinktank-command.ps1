@@ -76,13 +76,22 @@ function ttact_open_url_ex( $ttobj ){
     #.SYNOPSIS
     # urlを外部ツールで開く
 
-    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_url_ex" )
+    [TTTool]::debug_message( $ttobj.gettype().Index, "ttact_open_url_ex" )
+    switch( $ttobj.GetType() ){
+        'TTExternalLink' {
+            [TTTool]::open_url( $ttobj.Uri )
+        }
+        'TTSearchMethod' {
+            [TTTool]::open_url( $ttobj.Url )
+        }
+    }
 }
 function ttact_open_url( $ttobj ){
     #.SYNOPSIS
     # urlを開く
 
-    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_url" )
+    [TTTool]::debug_message( $ttobj.gettype(), "ttact_open_url" )
+
 }
 function ttact_open_folder( $ttobj ){
     #.SYNOPSIS
