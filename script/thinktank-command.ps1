@@ -55,9 +55,10 @@ function ttact_display_in_index( $ttobj ){
 }
 function ttact_display_in_cabinet( $ttobj ){
     #.SYNOPSIS
-    # Cabinetパネルに表示する（未実装）
+    # Cabinetパネルに表示する
 
-    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_display_in_cabinet" )
+    [TTTool]::debug_message( $ttobj.gettype(), "ttact_display_in_cabinet" )
+    $global:appcon.group.load( 'Cabinet', $ttobj.name ).focus('Cabinet')
 }
 
 function ttact_open_memo( $ttobj ){

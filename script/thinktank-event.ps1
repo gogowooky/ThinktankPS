@@ -5,7 +5,7 @@
 # https://www.reza-aghaei.com/net-action-func-delegate-lambda-expression-in-powershell/
 
 
-#region TTModel event
+#region　Model Event Binding
 [ScriptBlock] $global:TTStatus_OnSave = {
     $collection = $args[0]
     @( 'Library', 'Index', 'Shelf' ).where{
@@ -18,9 +18,8 @@
 #endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 
-#region　TTModel Action Binding
+#region　Model Action Binding
 #''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
 [TTCollection]::Action =                    'ttact_display_in_shelf'
 [TTCollection]::ActionDiscardResources =    'ttact_discard_resources'
 [TTCollection]::ActionToShelf =             'ttact_display_in_shelf'
@@ -61,7 +60,7 @@
 #endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 
-#region key binding setup 
+#region　View Command Binding 
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #　oem1 = semicolon [;]
 #　
@@ -122,7 +121,7 @@ Cabinet         Alt             Return      ttcmd_menu_ok
 Cabinet         Alt             Space       ttcmd_menu_ok
 Cabinet         None            Return      ttcmd_menu_ok
 Cabinet         Alt             C           ttcmd_panel_filter_clear
-Cabinet         Alt             Oem1        ttcmd_panel_filter_clear
+!Cabinet         Alt             Oem1        ttcmd_panel_filter_clear
 '@,
     #Library
 @'
@@ -331,7 +330,11 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
     $panel =    $global:appcon._get( 'Focus.Application' )
     $tttv  =    [TTTentativeKeyBindingMode]::Name
 
-    if( $source -eq 'PopupMenu' ){
+    if( $source -eq 'Cabinet' ){
+        $panel = $source
+        $command = try{ $global:TTKeyEvents[$panel][$mod][$key] }catch{ $null }
+
+    }elseif( $source -eq 'PopupMenu' ){
         $panel = $source
         $command = try{ $global:TTKeyEvents[$panel][$mod][$key] }catch{ $null }
 
@@ -370,7 +373,7 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
 #endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 
-#region 専用
+#region　View Event Binding
 [ScriptBlock] $global:TTWindowLoaded =  { $global:appcon.initialize_application() }
 
 [ScriptBlock] $global:TTPanel_SizeChanged =             { $global:appcon.set_border_status( $args ) }

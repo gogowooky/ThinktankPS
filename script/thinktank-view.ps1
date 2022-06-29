@@ -130,10 +130,7 @@ class TTAppManager {
         if( -not $this.Focusable( $target ) ){ return '' }
 
         switch -regex ( $target ){
-            "Cabinet" {
-                return $this.Cabinet.Show()
-            }
-            "(Library|Index|Shelf|Desk)" {
+            "(Library|Index|Shelf|Desk|Cabinet)" {
                 return $this.$target.Focus()
             }
             "Work(?<num>[123])" {
@@ -170,6 +167,7 @@ class TTAppManager {
     }
     [bool] Focusable( [string]$id ){
         switch -wildcard ( $id ){
+            'Cabinet'   { return $true }
             'Library'   { return ( $this.Border('Layout.Library.Width') -ne 0 -and   $this.Border('Layout.Library.Height') -ne 0 ) }
             'Index'     { return ( $this.Border('Layout.Library.Width') -ne 0 -and   $this.Border('Layout.Library.Height') -ne 100 ) }
             'Shelf'     { return ( $this.Border('Layout.Library.Width') -ne 100 -and $this.Border('Layout.Shelf.Height') -ne '0' ) }
@@ -198,7 +196,6 @@ class TTAppManager {
     }
 
 }
-
 
 #region TTPanelManager / TTLibraryManager / TTIndexManager / TTShellManager / TTDeskManager / TTCabinaetManager
 class TTPanelManager {
@@ -499,7 +496,6 @@ class TTPanelManager {
 
 }
 
-
 class TTLibraryManager : TTPanelManager {
 
     TTLibraryManager( [TTAppManager]$app ) : base( "Library", $app ){
@@ -620,7 +616,7 @@ class TTCabinetManager : TTPanelManager {
 
         $this._window.Add_GotFocus( $global:TTPanel_GotFocus )
         $this._window.Add_LostFocus( $global:TTPanel_LostFocus )
-        $this._window.Add_Loaded( { $global:AppMan.Cabinet.Focus() } )
+        # $this._window.Add_Loaded({ $global:AppMan.Cabinet.Focus() })
         $this._window.Add_Closing({ $args[1].Cancel = $True })
         $this._window.Add_MouseLeftButtonDown({ $global:AppMan.Cabinet._window.DragMove() })
         $this._window.Add_MouseDoubleClick({ $global:AppMan.Cabinet.Hide($true); $args[1].Handled=$True })
@@ -640,7 +636,7 @@ class TTCabinetManager : TTPanelManager {
     }
     [object[]] Show(){
         $this._textbox.Focus()
-        $global:AppMan.Cabinet._window.ShowDialog()
+        $this._window.ShowDialog()
         return $this._selected
     }
     [TTCabinetManager] Hide( [bool]$result ){
