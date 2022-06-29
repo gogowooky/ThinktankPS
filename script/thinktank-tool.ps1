@@ -102,6 +102,9 @@ class TTClipboard {
     static [string] $_key
     static [object] $_copied
 
+    static [void]Copy( [string]$text ){
+        [Clipboard]::SetText( $text )    
+    }
     static [void]Copy( [object]$object ){ # TTObject
         [Clipboard]::SetData( "TTObject", $object )
         [TTClipboard]::_copied = $object
