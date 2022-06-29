@@ -16,7 +16,7 @@ function ttact_select_file( $ttobj ){
     #.SYNOPSIS
     # 関連ファイルをエクスプローラーで選択する
 
-    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_select_file" )
+    [TTTool]::debug_message( $ttobj.GetType(), "ttact_select_file" )
 
     if( ($ttobj -is [TTCollection]) -or
         ($ttobj -is [TTMemo]) -or
@@ -71,25 +71,32 @@ function ttact_copy_url_toclipboard( $ttobj ){
     #.SYNOPSIS
     # urlをクリップボードに保存する
 
-    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_copy_url_toclipboard" )
+    [TTTool]::debug_message( $ttobj.gettype().Index, "ttact_copy_url_toclipboard" )
+    switch( $ttobj.GetType() ){
+        'TTExternalLink' { [TTClipboard]::Copy( $ttobj.Uri ) }
+        'TTSearchMethod' { [TTClipboard]::Copy( $ttobj.Url ) }
+    }
 }
 function ttact_open_url_ex( $ttobj ){
     #.SYNOPSIS
     # urlを外部ツールで開く
 
-    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_url_ex" )
+    [TTTool]::debug_message( $ttobj.gettype().Index, "ttact_open_url_ex" )
+    switch( $ttobj.GetType() ){
+        'TTExternalLink' { [TTTool]::open_url( $ttobj.Uri ) }
+        'TTSearchMethod' { [TTTool]::open_url( $ttobj.Url ) }
+    }
 }
 function ttact_open_url( $ttobj ){
     #.SYNOPSIS
-    # urlを開く
+    # urlを開く（未実装）
 
-    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_url" )
-}
-function ttact_open_folder( $ttobj ){
-    #.SYNOPSIS
-    # フォルダを開く
+    [TTTool]::debug_message( $ttobj.gettype().Index, "ttact_open_url" )
+    switch( $ttobj.GetType() ){
+        'TTExternalLink' { [TTTool]::open_url( $ttobj.Uri ) }
+        'TTSearchMethod' { [TTTool]::open_url( $ttobj.Url ) }
+    }
 
-    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_folder" )
 }
 #endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
