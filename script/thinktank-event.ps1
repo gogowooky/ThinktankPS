@@ -5,62 +5,7 @@
 # https://www.reza-aghaei.com/net-action-func-delegate-lambda-expression-in-powershell/
 
 
-#region　Model Event Binding
-[ScriptBlock] $global:TTStatus_OnSave = {
-    $collection = $args[0]
-    @( 'Library', 'Index', 'Shelf' ).where{
-        $global:appcon._get( "$_.Resource" ) -eq $collection.Name
-    }.foreach{
-        $global:appcon.group.refresh( $_ )   
-    }
-}
-
-#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-
-#region　Model Action Binding
-#''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-[TTCollection]::Action =                    'ttact_display_in_shelf'
-[TTCollection]::ActionDiscardResources =    'ttact_discard_resources'
-[TTCollection]::ActionToShelf =             'ttact_display_in_shelf'
-[TTCollection]::ActionToIndex =             'ttact_display_in_index'
-[TTCollection]::ActionToCabinet =           'ttact_display_in_cabinet'
-[TTCollection]::ActionDataLocaiton =        'ttact_select_file'
-[TTConfig]::Action =                    'ttact_noop'
-[TTConfig]::ActionDiscardResources =    'ttact_noop'
-[TTConfig]::ActionDataLocaiton =        'ttact_noop'
-[TTState]::Action =                     'ttact_noop'
-[TTState]::ActionDiscardResources =     'ttact_noop'
-[TTState]::ActionFilter =               'ttact_noop'
-[TTCommand]::Action =                   'ttact_noop'
-[TTCommand]::ActionDiscardResources =   'ttact_noop'
-[TTCommand]::ActionInvokeCommand =      'ttact_noop'
-[TTSearchMethod]::Action =                  'ttact_noop'
-[TTSearchMethod]::ActionDiscardResources =  'ttact_noop'
-[TTSearchMethod]::ActionDataLocation =      'ttact_noop'
-[TTSearchMethod]::ActionToEditor =          'ttact_noop'
-[TTSearchMethod]::ActionOpenUrl =           'ttact_open_url'
-[TTSearchMethod]::ActionOpenUrlEx =         'ttact_open_url_ex'
-[TTSearchMethod]::ActionToClipboard =       'ttact_copy_url_toclipboard'
-[TTExternalLink]::Action =                  'ttact_noop'
-[TTExternalLink]::ActionDiscardResources =  'ttact_noop'
-[TTExternalLink]::ActionDataLocation =      'ttact_noop'
-[TTExternalLink]::ActionOpenUrl =           'ttact_open_url'
-[TTExternalLink]::ActionOpenUrlEx =         'ttact_open_url_ex'
-[TTExternalLink]::ActionToClipboard =       'ttact_copy_url_toclipboard'
-[TTMemo]::Action =                  'ttact_open_memo'
-[TTMemo]::ActionDiscardResources =  'ttact_discard_resources'
-[TTMemo]::ActionOpen =              'ttact_open_memo'
-[TTMemo]::ActionDataLocation =      'ttact_select_file'
-[TTMemo]::ActionToClipboard =       'ttact_noop'
-[TTEditing]::Action =                  'ttact_open_memo'
-[TTEditing]::ActionDiscardResources =  'ttact_discard_resources'
-[TTEditing]::ActionDataLocation =      'ttact_select_file'
-
-#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-
-#region　View Command Binding 
+#region　View Key-Command Binding 
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #　oem1 = semicolon [;]
 #　
@@ -74,7 +19,7 @@ Application     None            Escape      ttcmd_application_window_quit
 Application     Alt             L           ttcmd_focus_tentative_library
 Application     Alt             I           ttcmd_focus_tentative_index
 Application     Alt             S           ttcmd_focus_tentative_shelf
-Application     Alt             C           ttcmd_focus_tentative_cabinet
+Application     Alt             C           ttcmd_focus_cabinet
 
 !Application     Alt             Oem1        ttcmd_application_commands_execute
 !Application     Alt, Shift      L           ttcmd_panel_focus_library_revtgl
@@ -89,39 +34,24 @@ Application     Alt             C           ttcmd_focus_tentative_cabinet
 !Application     Control         Tab         ttcmd_desk_works_focus_current_norm
 !Application     Control, Shift  Tab         ttcmd_desk_works_focus_current_rev
 '@,
-    #PopupMenu
-@'
-PopupMenu   Alt             P           ttcmd_menu_move_up
-PopupMenu   Alt             N           ttcmd_menu_move_down
-PopupMenu   None            Up          ttcmd_menu_move_up
-PopupMenu   None            Down        ttcmd_menu_move_down
-PopupMenu   Alt, Shift      P           ttcmd_menu_move_first
-PopupMenu   Alt, Shift      N           ttcmd_menu_move_last
-PopupMenu   Shift           Up          ttcmd_menu_move_first
-PopupMenu   Shift           Down        ttcmd_menu_move_last
-popupMenu   Alt             Escape      ttcmd_menu_cancel
-PopupMenu   None            Escape      ttcmd_menu_cancel
-PopupMenu   Alt             Return      ttcmd_menu_ok
-PopupMenu   Alt             Space       ttcmd_menu_ok
-PopupMenu   None            Return      ttcmd_menu_ok
-'@,
     #$Cabinet
 @'
 Cabinet         Alt             P           ttcmd_panel_move_up
 Cabinet         Alt             N           ttcmd_panel_move_down
-Cabinet         None            Up          ttcmd_panel_move_up
-Cabinet         None            Down        ttcmd_panel_move_down
 Cabinet         Alt, Shift      P           ttcmd_panel_move_first
 Cabinet         Alt, Shift      N           ttcmd_panel_move_last
+Cabinet         None            Up          ttcmd_panel_move_up
+Cabinet         None            Down        ttcmd_panel_move_down
 Cabinet         Shift           Up          ttcmd_panel_move_first
 Cabinet         Shift           Down        ttcmd_panel_move_last
+Cabinet         Ctrl            D           ttcmd_panel_discard_selected
+Cabinet         Ctrl            C           ttcmd_panel_filter_clear
+Cabinet         Ctrl            R           ttcmd_panel_reload
 Cabinet         Alt             Escape      ttcmd_menu_cancel
 Cabinet         None            Escape      ttcmd_menu_cancel
 Cabinet         Alt             Return      ttcmd_menu_ok
 Cabinet         Alt             Space       ttcmd_menu_ok
 Cabinet         None            Return      ttcmd_menu_ok
-Cabinet         Alt             C           ttcmd_panel_filter_clear
-!Cabinet         Alt             Oem1        ttcmd_panel_filter_clear
 '@,
     #Library
 @'
@@ -311,7 +241,23 @@ xEditor      Control, Shift  P               ttcmd_editor_select_toprevline
 xEditor      Control, Shift  N               ttcmd_editor_select_tonextline
 xEditor      Control, Shift  B               ttcmd_editor_select_toleftchar
 xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
-'@
+'@,
+#PopupMenu
+@'
+PopupMenu   Alt             P           ttcmd_menu_move_up
+PopupMenu   Alt             N           ttcmd_menu_move_down
+PopupMenu   None            Up          ttcmd_menu_move_up
+PopupMenu   None            Down        ttcmd_menu_move_down
+PopupMenu   Alt, Shift      P           ttcmd_menu_move_first
+PopupMenu   Alt, Shift      N           ttcmd_menu_move_last
+PopupMenu   Shift           Up          ttcmd_menu_move_first
+PopupMenu   Shift           Down        ttcmd_menu_move_last
+popupMenu   Alt             Escape      ttcmd_menu_cancel
+PopupMenu   None            Escape      ttcmd_menu_cancel
+PopupMenu   Alt             Return      ttcmd_menu_ok
+PopupMenu   Alt             Space       ttcmd_menu_ok
+PopupMenu   None            Return      ttcmd_menu_ok
+'@ 
 ) -join "`n" ).split("`n").foreach{
     if( $_ -match "(?<mode>[^ ]+)\s{2,}(?<mod>[^ ]+( [^ ]+)?)\s{2,}(?<keyname>[^ ]+)\s{2,}(?<command>[^\s]+)\s*" ){
         $global:TTKeyEvents[$Matches.mode] += @{}
@@ -390,7 +336,7 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
 [ScriptBlock] $global:TTDataGrid_Sorting =          { $global:appcon.group.datagrid_on_sorting( $args ) }
 [ScriptBlock] $global:TTDataGrid_SelectionChanged = { $global:appcon.group.datagrid_on_selectionchanged( $args ) }
 [ScriptBlock] $global:TTDataGrid_GotFocus =         { $global:appcon.group.datagrid_on_gotfocus( $args ) }
-[ScriptBlock] $script:TTDataGrid_PreviewMouseDown = { $global:appcon.group.datagrid_on_previewmousedown( $args ) }
+[ScriptBlock] $global:TTDataGrid_PreviewMouseDown = { $global:appcon.group.datagrid_on_previewmousedown( $args ) }
 
 
 #endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -437,7 +383,7 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
     # }
 
 }
-[ScriptBlock] $script:IndexItems_PreviewMouseDown = {
+[ScriptBlock] $global:IndexItems_PreviewMouseDown = {
 
     $mouse = $args[1]
 
@@ -451,7 +397,7 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
     }
 
 }
-[ScriptBlock] $script:ShelfItems_PreviewMouseDown = {
+[ScriptBlock] $global:ShelfItems_PreviewMouseDown = {
 
     $mouse = $args[1]
 
@@ -471,7 +417,7 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
 
 #region　Document event
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-[ScriptBlock] $script:TextxEditors_TextChanged = {
+[ScriptBlock] $global:TextxEditors_TextChanged = {
     $editor = $args[0]
     $script:DocMan.Tool( $editor.Name ).UpdatexEditorFolding()
     switch( $editor.Name ){
@@ -480,7 +426,7 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
         'xEditor3' { TTTimerResistEvent "TextxEditors3_TextChanged" 40 0 { $script:desk.tool('xEditor3').save() } }
     }
 }
-[ScriptBlock] $script:TextxEditors_GotFocus = {
+[ScriptBlock] $global:TextxEditors_GotFocus = {
     
     $editor = $args[0]
     $name = $editor.Name
@@ -499,7 +445,7 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
     $script:app._set( 'Desk.CurrentxEditor', $editor.Name )
     $script:app._set( 'Application.Focused', $editor.Name )
 }
-[ScriptBlock] $script:TextxEditors_PreviewMouseDown = {
+[ScriptBlock] $global:TextxEditors_PreviewMouseDown = {
     $editor   = $args[0]
     $memoitem = $args[1]
 
@@ -513,7 +459,7 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
         }
     }
 }
-[ScriptBlock] $script:TextxEditors_PreviewDrop = {
+[ScriptBlock] $global:TextxEditors_PreviewDrop = {
     $editor = $args[0]
     $drag = $args[1]
     Write-Host $drag   
@@ -524,6 +470,66 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
 }
 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+
+
+
+
+#region　Model Event Binding
+[ScriptBlock] $global:TTStatus_OnSave = {
+    $collection = $args[0]
+    @( 'Library', 'Index', 'Shelf' ).where{
+        $global:appcon._get( "$_.Resource" ) -eq $collection.Name
+    }.foreach{
+        $global:appcon.group.refresh( $_ )   
+    }
+}
+
+#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+#region　Model Action Binding
+#''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+[TTCollection]::Action =                    'ttact_display_in_shelf'
+[TTCollection]::ActionDiscardResources =    'ttact_discard_resources'
+[TTCollection]::ActionToShelf =             'ttact_display_in_shelf'
+[TTCollection]::ActionToIndex =             'ttact_display_in_index'
+[TTCollection]::ActionToCabinet =           'ttact_display_in_cabinet'
+[TTCollection]::ActionDataLocaiton =        'ttact_select_file'
+[TTConfig]::Action =                    'ttact_noop'
+[TTConfig]::ActionDiscardResources =    'ttact_noop'
+[TTConfig]::ActionDataLocaiton =        'ttact_noop'
+[TTState]::Action =                     'ttact_noop'
+[TTState]::ActionDiscardResources =     'ttact_noop'
+[TTState]::ActionFilter =               'ttact_noop'
+[TTCommand]::Action =                   'ttact_noop'
+[TTCommand]::ActionDiscardResources =   'ttact_noop'
+[TTCommand]::ActionInvokeCommand =      'ttact_noop'
+[TTSearchMethod]::Action =                  'ttact_noop'
+[TTSearchMethod]::ActionDiscardResources =  'ttact_noop'
+[TTSearchMethod]::ActionDataLocation =      'ttact_noop'
+[TTSearchMethod]::ActionToEditor =          'ttact_noop'
+[TTSearchMethod]::ActionOpenUrl =           'ttact_open_url'
+[TTSearchMethod]::ActionOpenUrlEx =         'ttact_open_url_ex'
+[TTSearchMethod]::ActionToClipboard =       'ttact_copy_url_toclipboard'
+[TTExternalLink]::Action =                  'ttact_noop'
+[TTExternalLink]::ActionDiscardResources =  'ttact_noop'
+[TTExternalLink]::ActionDataLocation =      'ttact_noop'
+[TTExternalLink]::ActionOpenUrl =           'ttact_open_url'
+[TTExternalLink]::ActionOpenUrlEx =         'ttact_open_url_ex'
+[TTExternalLink]::ActionToClipboard =       'ttact_copy_url_toclipboard'
+[TTMemo]::Action =                  'ttact_open_memo'
+[TTMemo]::ActionDiscardResources =  'ttact_discard_resources'
+[TTMemo]::ActionOpen =              'ttact_open_memo'
+[TTMemo]::ActionDataLocation =      'ttact_select_file'
+[TTMemo]::ActionToClipboard =       'ttact_noop'
+[TTEditing]::Action =                  'ttact_open_memo'
+[TTEditing]::ActionDiscardResources =  'ttact_discard_resources'
+[TTEditing]::ActionDataLocation =      'ttact_select_file'
+
+#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+
 
 
 

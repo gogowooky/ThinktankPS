@@ -8,6 +8,8 @@ using namespace System.Windows
 
 
 
+
+
 class TTAppManager {
     #region variables
     [System.Windows.Window]$_window
@@ -32,7 +34,7 @@ class TTAppManager {
         [xml]$xaml = Get-Content ( $global:TTScriptDirPath + "\thinktank.xaml" )
         $this._window = [System.Windows.Markup.XamlReader]::Load( (New-Object XmlNodeReader $xaml) )
 
-        $this._window.Add_Loaded( $script:TTWindowLoaded )
+        $this._window.Add_Loaded( $global:TTWindowLoaded )
         $this._window.Add_PreviewKeyDown( $global:TTPreviewKeyDown )
         $this._window.Add_PreviewKeyUp( $global:TTPreviewKeyUp )
 
@@ -197,7 +199,7 @@ class TTAppManager {
 
 }
 
-#region TTPanelManager / TTLibraryManager / TTIndexManager / TTShellManager / TTDeskManager / TTCabinaetManager
+#region TTPanelManager (TTLibraryManager, TTIndexManager, TTShellManager, TTDeskManager, TTCabinaetManager )
 class TTPanelManager {
 
     #region variables
@@ -506,7 +508,6 @@ class TTLibraryManager : TTPanelManager {
         $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToExtract )
     }
 }
-
 class TTIndexManager : TTPanelManager {
     
     TTIndexManager( [TTAppManager]$app ) : base( "Index", $app ){
@@ -517,25 +518,23 @@ class TTIndexManager : TTPanelManager {
         $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToExtract )
 
 
-        $this._datagrid.Add_PreviewMouseDown( $script:IndexItems_PreviewMouseDown )
+        $this._datagrid.Add_PreviewMouseDown( $global:IndexItems_PreviewMouseDown )
     }
 }
-
 class TTShelfManager : TTPanelManager {
 
     TTShelfManager( [TTAppManager]$app ) : base( "Shelf", $app ){
-        $this._datagrid.Add_Sorting(            $global:TTDataGrid_Sorting )
-        $this._datagrid.Add_SelectionChanged(   $script:TTDataGrid_SelectionChanged )
-        $this._datagrid.Add_GotFocus(           $global:TTDataGrid_GotFocus )
-        $this._datagrid.Add_PreviewMouseDown(   $global:TTDataGrid_PreviewMouseDown )
-        $this._textbox.Add_TextChanged(         $global:TTPanel_TextChanged_ToExtract )
+        $this._datagrid.Add_Sorting( $global:TTDataGrid_Sorting )
+        $this._datagrid.Add_SelectionChanged( $global:TTDataGrid_SelectionChanged )
+        $this._datagrid.Add_GotFocus( $global:TTDataGrid_GotFocus )
+        $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
+        $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToExtract )
 
 
-        $this._datagrid.Add_PreviewMouseDown( $script:ShelfItems_PreviewMouseDown )
+        $this._datagrid.Add_PreviewMouseDown( $global:ShelfItems_PreviewMouseDown )
     }
 
 }
-
 class TTDeskManager : TTPanelManager {
 
     TTDeskManager( [TTAppManager]$app ) : base ( "Desk", $app ){
@@ -549,7 +548,6 @@ class TTDeskManager : TTPanelManager {
     }
 
 }
-
 class TTCabinetManager : TTPanelManager {
 
     #region variables
@@ -564,7 +562,7 @@ class TTCabinetManager : TTPanelManager {
         Title="Cabinet" Name="Cabinet"  Top="10" Left="10" WindowStyle="None" AllowsTransparency="True" Topmost="True" >
 
         <Window.Resources>
-            <ResourceDictionary Source="$global:PSScriptRoot\script\thinktank-style.xaml"/>
+            <ResourceDictionary Source="C:\Users\shin\Documents\ThinktankPS2\script\thinktank-style.xaml"/>
         </Window.Resources>
 
         <Border BorderBrush="Black" BorderThickness="1">
@@ -653,8 +651,7 @@ class TTCabinetManager : TTPanelManager {
     }
 
 }
-
-#endregion###############################################################################################################
+#endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
 #region　TTDocumentManager
@@ -706,9 +703,9 @@ class TTDocumentManager{
 
 
 }
+#endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-#　TTToolsManager / TTEditorsManager / TTBrowsersManager / TTGridsManager
-#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#region　TTToolsManager / TTEditorsManager / TTBrowsersManager / TTGridsManager
 class TTToolsManager { # abstract
     #region varinats
     [TTAppManager] $app
@@ -1260,7 +1257,8 @@ class TTGridsManager : TTToolsManager{
     }
     
 }
-#endregion###############################################################################################################
+#endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 
 
 #region TTPopupMenuManager
@@ -1279,7 +1277,7 @@ class TTPopupMenuManager {
         Title="PopupMenu" Name="PopupMenu" WindowStyle="None" AllowsTransparency="True" Topmost="True">
 
         <Window.Resources>
-            <ResourceDictionary Source="$global:PSScriptRoot\script\thinktank-style.xaml"/>
+            <ResourceDictionary Source="C:\Users\shin\Documents\ThinktankPS2\script\thinktank-style.xaml"/>
         </Window.Resources>
     
         <Border BorderBrush="Black" BorderThickness="1">
@@ -1304,7 +1302,7 @@ class TTPopupMenuManager {
     #endregion
 
     TTPopupMenuManager( [TTAppManager]$app ){
-        $this._window = [Markup.XamlReader]::Load( (New-Object XmlNodeReader ([xml]$this.xml) ) )
+        $this._window = [Markup.XamlReader]::Load((New-Object XmlNodeReader ([xml]$this.xml)))
         $this._name = $this._window.Name
         $this._list = $this._window.FindName("PopupMenuItems")
 
@@ -1378,7 +1376,7 @@ class TTPopupMenuManager {
 
 }
 
-#endregion###############################################################################################################
+#endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
 
