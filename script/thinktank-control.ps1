@@ -503,7 +503,7 @@ class TTGroupController {
         $this.caption( 'Desk', '' )
         $this.keyword( 'Desk', $this.app._get('Desk.Keyword') )
 
-        $this.focus( $this.app._get('Focus.Panel') )
+        $this.focus( $this.app._get('Focus.Panel'), '', '' )
 
         return $this
     }
@@ -528,29 +528,72 @@ class TTGroupController {
     [string] keyword( [string]$panel ){
         return $global:AppMan.$panel.Keyword()
     }
-    [TTGroupController] tentative_focus( $panel, $mod, $key ){
+    [TTGroupController] focus( $panel, $mod, $key ){
 
-        if( [TTTentativeKeyBindingMode]::Name -eq '' ){
+        switch -regex ( $panel ){
 
-            $nopanel = ( $this.app.view.focusable( $panel ) -eq $false )
-            if( $nopanel ){ $this.app.view.style( $panel, 'Default' ) }
- 
-            [TTTentativeKeyBindingMode]::Start( $panel, $mod, $key )
-            [TTTentativeKeyBindingMode]::Add_OnExit({
-                if( $script:nopanel ){ $global:appcon.view.style( $script:panel, 'None' ) }
-            }.GetNewClosure() )
+            "\+(?<panel>Library|Index|Shelf)" { #### tentative focus
 
-        }elseif( [TTTentativeKeyBindingMode]::Name -eq $panel ){
-            [TTTentativeKeyBindingMode]::Initialize()
-            $global:appcon.group.focus($panel)
+                $ttp = $Matches.panel
 
+                if( $this.app._eq( 'Focus.Application', $ttp ) ){ #:::: on panel already
+                    return $this.focus( $ttp, $mod, $key )
+
+                }elseif( [TTTentativeKeyBindingMode]::Started() ){ #::: not started
+
+                    $nopanel = ( $this.app.view.focusable( $ttp ) -eq $false )
+                    if( $nopanel ){ $this.app.view.style( $ttp, 'Default' ) }
+         
+                    [TTTentativeKeyBindingMode]::Start( $ttp, $mod, $key )
+                    [TTTentativeKeyBindingMode]::Add_OnExit({
+                        if( $script:nopanel ){ $global:appcon.view.style( $script:ttp, 'None' ) }
+                    }.GetNewClosure() )
+
+                }elseif( [TTTentativeKeyBindingMode]::Name -eq $ttp ){ #::: started
+                    [TTTentativeKeyBindingMode]::Initialize()
+                    $global:appcon.group.focus( $ttp )
+
+                }
+            }
+            default { #### normal focus
+
+                if( $this.app._eq( 'Focus.Application', $panel ) ){ #::: on panel already
+                    break;
+
+                }else{
+                    $global:AppMan.Focus( $panel )
+
+                }
+            }
         }
+
         return $this
     }
-    [TTGroupController] focus( [string]$panel ){
-        $global:AppMan.Focus( $panel )
-        return $this
-    }
+
+    # [TTGroupController] tentative_focus( $panel, $mod, $key ){
+
+    #     if( [TTTentativeKeyBindingMode]::Name -eq '' ){
+
+    #         $nopanel = ( $this.app.view.focusable( $panel ) -eq $false )
+    #         if( $nopanel ){ $this.app.view.style( $panel, 'Default' ) }
+ 
+    #         [TTTentativeKeyBindingMode]::Start( $panel, $mod, $key )
+    #         [TTTentativeKeyBindingMode]::Add_OnExit({
+    #             if( $script:nopanel ){ $global:appcon.view.style( $script:panel, 'None' ) }
+    #         }.GetNewClosure() )
+
+    #     }elseif( [TTTentativeKeyBindingMode]::Name -eq $panel ){
+
+    #         [TTTentativeKeyBindingMode]::Initialize()
+    #         $global:appcon.group.focus($panel)
+
+    #     }
+    #     return $this
+    # }
+    # [TTGroupController] focus( [string]$panel ){
+    #     $global:AppMan.Focus( $panel )
+    #     return $this
+    # }
     [bool] invoke_action( [string]$panel ){
         $item = $global:AppMan.$panel.SelectedItem()
         return $item.InvokeAction()
@@ -647,7 +690,7 @@ class TTGroupController {
     }
     [bool] datagrid_on_gotfocus( $params ){ # Library/Index/Shelf/Desk/Cabinet
         $panel = ( $params[0].Name -replace "(Library|Index|Shelf|Cabinet).*", '$1' )
-        $this.focus( $panel )
+        $this.focus( $panel, '', '' )
         return $true
     }
     [bool] datagrid_on_previewmousedown( $params ){

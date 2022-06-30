@@ -237,25 +237,25 @@ function ttcmd_focus_tentative_shelf( $source, $mod, $key ){
     #.SYNOPSIS
     # Shelfに一時的フォーカス、その後、フォーカス
  
-    $global:appcon.group.tentative_focus( 'Shelf', $mod, $key )
+    $global:appcon.group.focus( 'Shelf+', $mod, $key )
 }
 function ttcmd_focus_tentative_library( $source, $mod, $key ){
     #.SYNOPSIS
     # Libraryに一時的フォーカス、その後、フォーカス
  
-    $global:appcon.group.tentative_focus( 'Library', $mod, $key )
+    $global:appcon.group.focus( 'Library+', $mod, $key )
 }
 function ttcmd_focus_tentative_index( $source, $mod, $key ){
     #.SYNOPSIS
     # Shelfに一時的フォーカス、その後、フォーカス
  
-    $global:appcon.group.tentative_focus( 'Index', $mod, $key )
+    $global:appcon.group.focus( 'Index+', $mod, $key )
 }
-function ttcmd_focus_tentative_cabinet( $source, $mod, $key ){ # tentativeではない
+function ttcmd_focus_cabinet( $source, $mod, $key ){
     #.SYNOPSIS
     # Cabinetに一時的フォーカス、その後、フォーカス
  
-    $global:appcon.group.focus( 'Cabinet' )
+    $global:appcon.group.focus( 'Cabinet', $mood, $key )
 }
 
 #endregion 
@@ -268,7 +268,7 @@ function ttcmd_panel_focus_workplace( $source, $mod, $key ){
     # ワークプレースにフォーカス
 
     if( $global:appcon._match( 'Focus.Application', '(Library|Index|Shelf|Cabinet)' ) ){
-        $global:appcon.group.focus('Workplace')
+        $global:appcon.group.focus( 'Workplace', $mood, $key )
     }
 
 }
@@ -290,7 +290,7 @@ function ttcmd_tool_focus_work_multi_revtgl( $source, $mod, $key ){
     # 複数Work形式に変更（逆順）
 
     if( $global:appcon._match( 'Focus.Application', '(Library|Index|Shelf|Cabinet)' ) ){
-        $global:appcon.group.focus($global:appcon._get('Focus.Desk'))
+        $global:appcon.group.focus( $global:appcon._get('Focus.Desk'), $mood, $key )
     }else{
         $global:appcon.view.style('Desk','revtgl')
     }
@@ -300,7 +300,7 @@ function ttcmd_tool_focus_work_multi_toggle( $source, $mod, $key ){
     # 複数Work形式に変更（正順）
 
     if( $global:appcon._match( 'Focus.Application', '(Library|Index|Shelf|Cabinet)' ) ){
-        $global:appcon.group.focus($global:appcon._get('Focus.Desk'))
+        $global:appcon.group.focus( $global:appcon._get('Focus.Desk'), $mood, $key )
     }else{
         $global:appcon.view.style('Desk','toggle')
     }
@@ -310,7 +310,7 @@ function ttcmd_tool_focus_work_single_revtgl( $source, $mod, $key ){
     # 単独Work形式で表示、その後、Workxを変更（逆順）
 
     if( $global:appcon._match( 'Focus.Application', '(Library|Index|Shelf|Cabinet)' ) ){
-        $global:appcon.group.focus($global:appcon._get('Focus.Desk'))
+        $global:appcon.group.focus( $global:appcon._get('Focus.Desk'), $mood, $key )
         $global:appcon.view.style('Work',$global:appcon._get('Focus.Desk'))
     }else{
         $global:appcon.view.style('Work','revtgl')
@@ -321,7 +321,7 @@ function ttcmd_tool_focus_work_single_toggle( $source, $mod, $key ){
     # 単独Work形式で表示、その後、Workxを変更（正順）
 
     if( $global:appcon._match( 'Focus.Application', '(Library|Index|Shelf|Cabinet)' ) ){
-        $global:appcon.group.focus($global:appcon._get('Focus.Desk'))
+        $global:appcon.group.focus( $global:appcon._get('Focus.Desk'), $mood, $key )
         $global:appcon.view.style('Work',$global:appcon._get('Focus.Desk'))
     }else{
         $global:appcon.view.style('Work','toggle')
@@ -332,9 +332,9 @@ function ttcmd_panel_focus_desk_and_work( $source, $mod, $key ){
     # Deskにフォーカス、その後、Workxにフォーカス
 
     if( $global:appcon._ne( 'Focus.Application', 'Desk' ) ){
-        $global:appcon.group.focus('Desk')
+        $global:appcon.group.focus( 'Desk', $mood, $key )
     }else{
-        $global:appcon.group.focus($global:appcon._get('Focus.Desk'))
+        $global:appcon.group.focus( $global:appcon._get('Focus.Desk'), $mood, $key )
     }
 }
 function ttcmd_panel_focus_shelf_revtgl( $source, $mod, $key ){
@@ -342,7 +342,7 @@ function ttcmd_panel_focus_shelf_revtgl( $source, $mod, $key ){
     # Shelfにフォーカス、その後、表示スタイルを変更（逆順）
 
     if( $global:appcon._ne( 'Focus.Panel', 'Shelf' ) ){
-        $global:appcon.group.focus('Shelf')
+        $global:appcon.group.focus( 'Shelf', $mood, $key )
     }else{
         $global:appcon.view.style( 'Shelf', 'revtgl' )
     }
@@ -352,7 +352,7 @@ function ttcmd_panel_focus_shelf_toggle( $source, $mod, $key ){
     # Shelfにフォーカス、その後、表示スタイルを変更（正順）
 
     if( $global:appcon._ne( 'Focus.Panel', 'Shelf' ) ){
-        $global:appcon.group.focus('Shelf')
+        $global:appcon.group.focus( 'Shelf', $mood, $key )
     }else{
         $global:appcon.view.style( 'Shelf', 'toggle' )
     }
@@ -362,7 +362,7 @@ function ttcmd_panel_focus_index_revtgl( $source, $mod, $key ){
     # Indexにフォーカス、その後、表示スタイルを変更（逆順）
 
     if( $global:appcon._ne( 'Focus.Panel', 'Index' ) ){
-        $global:appcon.group.focus('Index')
+        $global:appcon.group.focus( 'Index', $mood, $key )
     }else{
         $global:appcon.view.style( 'Index', 'revtgl' )
     }
@@ -372,7 +372,7 @@ function ttcmd_panel_focus_index_toggle( $source, $mod, $key ){
     # Indexにフォーカス、その後、表示スタイルを変更（正順）
 
     if( $global:appcon._ne( 'Focus.Panel', 'Index' ) ){
-        $global:appcon.group.focus('Index')
+        $global:appcon.group.focus( 'Index', $mood, $key )
     }else{
         $global:appcon.view.style( 'Index', 'toggle' )
     }
@@ -382,7 +382,7 @@ function ttcmd_panel_focus_library_revtgl( $source, $mod, $key ){
     # Libraryにフォーカス、その後、表示スタイルを変更（逆順）
 
     if( $global:appcon._ne( 'Focus.Panel', 'Library' ) ){
-        $global:appcon.group.focus('Library')
+        $global:appcon.group.focus( 'Library', $mood, $key )
     }else{
         $global:appcon.view.style( 'Library', 'revtgl' )
     }
@@ -392,7 +392,7 @@ function ttcmd_panel_focus_library_toggle( $source, $mod, $key ){
     # Libraryにフォーカス、その後、表示スタイルを変更（正順）
 
     if( $global:appcon._ne( 'Focus.Panel', 'Library' ) ){
-        $global:appcon.group.focus('Library')
+        $global:appcon.group.focus( 'Library', $mood, $key )
     }else{
         $global:appcon.view.style( 'Library', 'toggle' )
     }
