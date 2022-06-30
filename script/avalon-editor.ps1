@@ -1,4 +1,18 @@
-﻿$dllPath = Join-Path (Split-Path $myInvocation.MyCommand.path) "/../ICSharpCode.AvalonEdit.dll"
+﻿
+using namespace System
+using namespace System.Windows
+using namespace System.Windows.Input
+using namespace System.Windows.Media.TextFormatting
+using namespace System.Text.RegularExpressions
+using namespace System.Collections.Generic
+using namespace System.Diagnostics
+using namespace System.ComponentModel
+using namespace System.Drawing
+using namespace ICSharpCode.AvalonEdit.Document
+using namespace ICSharpCode.AvalonEdit.Folding
+using namespace ICSharpCode.AvalonEdit.Rendering
+
+$dllPath = Join-Path (Split-Path $myInvocation.MyCommand.path) "/../ICSharpCode.AvalonEdit.dll"
 $assem = [Reflection.Assembly]::LoadFile($dllPath)  
 
 
@@ -102,5 +116,6 @@ namespace AvalonEdit.Sample
 
 '@
 
-Add-Type -TypeDefinition $src -ReferencedAssemblies $assem, PresentationFramework, PresentationCore, WindowsBase, System.Xaml
+Add-Type -TypeDefinition $src -ReferencedAssemblies $assem, PresentationFramework, PresentationCore, WindowsBase, System.Xaml, 
+System.Text.RegularExpressions
 

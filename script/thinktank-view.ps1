@@ -244,7 +244,6 @@ class TTPanelManager {
         $this._panel.Add_SizeChanged( $global:TTPanel_SizeChanged )
         
     }
-
     [TTPanelManager] Resource( [string]$name ){
         $this._resource = $name
         return $this
@@ -350,6 +349,7 @@ class TTPanelManager {
                 ForEach( $item in $dg.Items ){
                     if( $item.($this._colname) -like $action ){
                         $dg.SelectedItem = $item
+                        $dg.ScrollIntoView($item)
                         break 
                     }
                 }
@@ -602,6 +602,9 @@ class TTCabinetManager : TTPanelManager {
     #endregion
 
     TTCabinetManager( [TTAppManager]$app ) : base ( "Cabinet", $app, $null ){
+
+        # [xml]$xaml = Get-Content ( $global:TTScriptDirPath + "\thinktank-cabinet.xaml" )
+        # $this._window = [System.Windows.Markup.XamlReader]::Load( (New-Object XmlNodeReader $xaml) )
 
         $this._window = [Markup.XamlReader]::Load( (New-Object XmlNodeReader ([xml]$this.xml) ) )
         $this._name = $this._window.Name
@@ -1302,6 +1305,9 @@ class TTPopupMenuManager {
     #endregion
 
     TTPopupMenuManager( [TTAppManager]$app ){
+        # [xml]$xaml = Get-Content ( $global:TTScriptDirPath + "\thinktank-popupmenu.xaml" )
+        # $this._window = [System.Windows.Markup.XamlReader]::Load( (New-Object XmlNodeReader $xaml) )
+
         $this._window = [Markup.XamlReader]::Load((New-Object XmlNodeReader ([xml]$this.xml)))
         $this._name = $this._window.Name
         $this._list = $this._window.FindName("PopupMenuItems")

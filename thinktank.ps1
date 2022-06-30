@@ -1,60 +1,5 @@
 ﻿
 
-#region　履歴
-<#
-実:  実装のみ
-確:  動作確認済み
-未:  未着手
-
-[2202/06/20 22:16]
-  Alt,Shift+S:（フォーカス＋表示スタイル変更）
-  Alt+S:（表示・消去トグル）　Alt+L/I/S/D/C    
-  フォーカス無しチラ見
-  Panelモード
-
-[2202/06/19 18:25]
-確: *.FocusはFocus eventで書き換える
-    *.Focus             値
-
-    Focus.Panel         Library/Index/Shelf/Desk/Cabinaet
-    Focus.Application   Focus.Panel + Focus.Tool
-    Focus.Workspace     Work(123)
-    Work(123).Tool      Editor/Browser/Grid
-    Focus.Tool          Editor(123)/Browser(123)/Grid(123)
-
-    未: ttcmd_tool_focus_work_single_toggleエラー
-未: ttcmd_panel_focus_desk_and_work: DeskとWorkが切り替わらない
-実: FloatPanel表示しても、"FloatPanel.*" のStatusが設定されない。
-    設定されてるけどDataGridのデータとして更新されていない感じ
-    おそらく、新規にStatus.Add()された後のCollection⇒DataGridのアイテム移行ができていない
-    [TTGroupController] reload() ⇒ ttcmd_panel_reload() を設置
-    
-[2202/06/16 7:54]
-確: FloatPanel表示直後にSortのAlertが出るのを消したい
-    [TTPanelManager]::DisplayAlert を設置。　[TTGroupController] resource内で一時的にAlert表示不可に設定
-
-確: TTGroupController :: [bool] float()
-    確: 表示前に現フォーカスを退避、表示後に戻す
-    確: 違う場所に戻る
-    確: 戻るが●が表示されない
-    　治ってるし、●も表示される。
-
-確: 起動直後にフォーカスがない
-    　治ってる。
-
-確: FloatPanel表示中はMainWindowは触れないようにしたい
-    TTFloatPanelManager :: [object[]] Show()
-    　Dispatcher.Invoke()でShowDialog()するとモードレスになってしまう。
-    　直接呼び出すように変更
-
-確: [TTFloatPanelManager] Title()
-    確: FloatPanel表示後textboxにフォーカス移動
-    確: FloatPanel表示直後に●表示されるが、すぐに消えてしまう。
-        [TTPanelManager] Alert()アラート表示～テキスト戻す、までに変更があれば、テキストは戻さない、ように変更
-
-#>
-#endregion###############################################################################################################
-
 
 
 
@@ -125,8 +70,8 @@ $global:TTBackupDirPath = "$($global:TTMemoDirPath)\backup"
 
 #region timer setup 
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-$global:TTTimerExpiredMessage = $true
-$global:TTTimerResistMessage = $true
+$global:TTTimerExpiredMessage = $false
+$global:TTTimerResistMessage = $false
 $global:TTTimerRunDirect = $false
 $global:tt_mutex = $false
 $global:tt_tasks = @{}

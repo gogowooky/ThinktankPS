@@ -473,7 +473,7 @@ class TTGroupController {
         $this.app._set( 'Index.Keyword',        '' )
         $this.app._set( 'Index.Sort.Dir',       'Descending' )
         $this.app._set( 'Index.Sort.Column',    'Name' )
-        $this.app._set( 'Index.Selected',       'Index.Selected' )
+        $this.app._set( 'Index.Selected',       'Application.Author.Name' )
 
         $this.app._set( 'Shelf.Resource',       'Memos' )
         $this.app._set( 'Shelf.Keyword',        '' )
@@ -485,7 +485,7 @@ class TTGroupController {
         $this.app._set( 'Cabinet.Keyword',        '' )
         $this.app._set( 'Cabinet.Sort.Dir',       'Descending' )
         $this.app._set( 'Cabinet.Sort.Column',    'UpdateDate' )
-        $this.app._set( 'Cabinet.Selected',       'thinktank' )
+        $this.app._set( 'Cabinet.Selected',       'ttcmd_focus_cabinet' )
 
         $this.app._set( 'Desk.Keyword', '' )
 
@@ -570,30 +570,6 @@ class TTGroupController {
         return $this
     }
 
-    # [TTGroupController] tentative_focus( $panel, $mod, $key ){
-
-    #     if( [TTTentativeKeyBindingMode]::Name -eq '' ){
-
-    #         $nopanel = ( $this.app.view.focusable( $panel ) -eq $false )
-    #         if( $nopanel ){ $this.app.view.style( $panel, 'Default' ) }
- 
-    #         [TTTentativeKeyBindingMode]::Start( $panel, $mod, $key )
-    #         [TTTentativeKeyBindingMode]::Add_OnExit({
-    #             if( $script:nopanel ){ $global:appcon.view.style( $script:panel, 'None' ) }
-    #         }.GetNewClosure() )
-
-    #     }elseif( [TTTentativeKeyBindingMode]::Name -eq $panel ){
-
-    #         [TTTentativeKeyBindingMode]::Initialize()
-    #         $global:appcon.group.focus($panel)
-
-    #     }
-    #     return $this
-    # }
-    # [TTGroupController] focus( [string]$panel ){
-    #     $global:AppMan.Focus( $panel )
-    #     return $this
-    # }
     [bool] invoke_action( [string]$panel ){
         $item = $global:AppMan.$panel.SelectedItem()
         return $item.InvokeAction()
@@ -630,13 +606,14 @@ class TTGroupController {
 
         $this.app._set( "$panel.Resource", $name )
         $this.caption( $panel, '' )
-        $this.keyword( $panel, $this.app._get("Panel.$panel.$name.Keyword") )
+        $this.keyword( $panel, $this.app._get("$panel.$name.Keyword") )
         $res = $global:TTResources.GetChild( $name )
         $global:AppMan.$panel.Items( $res.GetChildren(), $res.Child().GetDictionary(), $res.Child().GetDisplay().$panel.split(',') )
-        $sortc = $this.app._get("Panel.$panel.$name.Sort.Column")
-        $sortd = $this.app._get("Panel.$panel.$name.Sort.Dir")
+        $sortc = $this.app._get("$panel.$name.Sort.Column")
+        $sortd = $this.app._get("$panel.$name.Sort.Dir")
         $this.sort( $panel, $sortc, $sortd )
-        $selected = $this.app._get("Panel.$panel.$name.Selected")
+
+        $selected = $this.app._get("$panel.$name.Selected")
         $this.cursor( $panel, $selected )
 
         [TTPanelManager]::DisplayAlert = $displayalert
@@ -644,7 +621,7 @@ class TTGroupController {
         return $this
     }
     [TTGroupController] cursor( [string]$panel, [string]$to ){
-        $global:AppMan.$panel.Cursor( $to )
+        $global:AppMan.$panel.Column('index').Cursor( $to )
         $this.app._set( "$panel.Selected", $this.selected( $panel ) )
         return $this
     }

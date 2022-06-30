@@ -45,13 +45,13 @@ Cabinet         None            Down        ttcmd_panel_move_down
 Cabinet         Shift           Up          ttcmd_panel_move_first
 Cabinet         Shift           Down        ttcmd_panel_move_last
 Cabinet         Ctrl            D           ttcmd_panel_discard_selected
-Cabinet         Ctrl            C           ttcmd_panel_filter_clear
-Cabinet         Ctrl            R           ttcmd_panel_reload
 Cabinet         Alt             Escape      ttcmd_menu_cancel
 Cabinet         None            Escape      ttcmd_menu_cancel
 Cabinet         Alt             Return      ttcmd_menu_ok
 Cabinet         Alt             Space       ttcmd_menu_ok
 Cabinet         None            Return      ttcmd_menu_ok
+Cabinet         Alt             0           ttcmd_panel_reload
+Cabinet         Alt             K           ttcmd_panel_filter_clear
 '@,
     #Library
 @'
@@ -66,14 +66,14 @@ Library+    Alt         Right       ttcmd_application_border_inwindow_right
 Library+    Alt         L           ttcmd_focus_tentative_library
 Library+    Alt, Shift  Space       ttcmd_panel_action_invoke
 Library+    Alt         Space       ttcmd_panel_action_select
+Library+    Alt         0           ttcmd_panel_reload
+Library+    Alt         K           ttcmd_panel_filter_clear
 
 Library     None        Up          ttcmd_panel_move_up
 Library     None        Down        ttcmd_panel_move_down
 Library     Shift       Up          ttcmd_panel_move_first
 Library     Shift       Down        ttcmd_panel_move_last
 Library     Ctrl        D           ttcmd_panel_discard_selected
-Library     Ctrl        C           ttcmd_panel_filter_clear
-Library     Ctrl        R           ttcmd_panel_reload
 Library     None        F1          ttcmd_panel_sort_dsc_1stcolumn
 Library     Shift       F1          ttcmd_panel_sort_asc_1stcolumn
 Library     None        F2          ttcmd_panel_sort_dsc_2ndcolumn
@@ -102,14 +102,14 @@ Index+      Alt         Right       ttcmd_application_border_inwindow_right
 Index+      Alt         I           ttcmd_focus_tentative_index
 Index+      Alt, Shift  Space       ttcmd_panel_action_invoke
 Index+      Alt         Space       ttcmd_panel_action_select
+Index+      Alt         0           ttcmd_panel_reload
+Index+      Alt         K           ttcmd_panel_filter_clear
 
 Index       None        Up          ttcmd_panel_move_up
 Index       None        Down        ttcmd_panel_move_down
 Index       Shift       Up          ttcmd_panel_move_first
 Index       Shift       Down        ttcmd_panel_move_last
 Index       Ctrl        D           ttcmd_panel_discard_selected
-Index       Ctrl        C           ttcmd_panel_filter_clear
-Index       Ctrl        R           ttcmd_panel_reload
 Index       None        F1          ttcmd_panel_sort_dsc_1stcolumn
 Index       Shift       F1          ttcmd_panel_sort_asc_1stcolumn
 Index       None        F2          ttcmd_panel_sort_dsc_2ndcolumn
@@ -138,14 +138,14 @@ Shelf+      Alt         Right       ttcmd_application_border_inwpanel_right
 Shelf+      Alt         S           ttcmd_focus_tentative_shelf
 Shelf+      Alt, Shift  Space       ttcmd_panel_action_invoke
 Shelf+      Alt         Space       ttcmd_panel_action_select
+Shelf+      Alt         0           ttcmd_panel_reload
+Shelf+      Alt         K           ttcmd_panel_filter_clear
 
 Shelf       None        Up          ttcmd_panel_move_up
 Shelf       None        Down        ttcmd_panel_move_down
 Shelf       Shift       Up          ttcmd_panel_move_first
 Shelf       Shift       Down        ttcmd_panel_move_last
 Shelf       Ctrl        D           ttcmd_panel_discard_selected
-Shelf       Ctrl        C           ttcmd_panel_filter_clear
-Shelf       Ctrl        R           ttcmd_panel_reload
 Shelf       None        F1          ttcmd_panel_sort_dsc_1stcolumn
 Shelf       Shift       F1          ttcmd_panel_sort_asc_1stcolumn
 Shelf       None        F2          ttcmd_panel_sort_dsc_2ndcolumn
