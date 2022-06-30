@@ -799,8 +799,8 @@ class TTTentativeKeyBindingMode{
         }
         return $false
     }
-    static [bool] Started(){
-        return ([TTTentativeKeyBindingMode]::Name -eq '')
+    static [bool] IsNotActive(){
+        return ( [TTTentativeKeyBindingMode]::Name -eq '' )
     }
 }
 

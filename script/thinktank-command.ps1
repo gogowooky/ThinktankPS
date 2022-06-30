@@ -189,6 +189,10 @@ function ttcmd_application_border_inwpanel_right( $source, $mod, $key ){
 
 #endregion###############################################################################################################
 
+
+
+
+
 #region　Menu系共通 ( PopMenu, Cabinet ) Commands
 #########################################################################################################################
 function ttcmd_menu_cancel( $source, $mod, $key ){

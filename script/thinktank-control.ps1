@@ -532,14 +532,14 @@ class TTGroupController {
 
         switch -regex ( $panel ){
 
-            "\+(?<panel>Library|Index|Shelf)" { #### tentative focus
+            "(?<panel>Library|Index|Shelf)\+" { #### tentative focus
 
                 $ttp = $Matches.panel
 
-                if( $this.app._eq( 'Focus.Application', $ttp ) ){ #:::: on panel already
-                    return $this.focus( $ttp, $mod, $key )
+                if( $this.app._eq( 'Focus.Application', $ttp ) ){ #:::: on panel already → focus ↓
+                    return $this.focus( $ttp, $mod, $key )　
 
-                }elseif( [TTTentativeKeyBindingMode]::Started() ){ #::: not started
+                }elseif( [TTTentativeKeyBindingMode]::IsNotActive() ){ #::: not activated
 
                     $nopanel = ( $this.app.view.focusable( $ttp ) -eq $false )
                     if( $nopanel ){ $this.app.view.style( $ttp, 'Default' ) }
@@ -549,9 +549,9 @@ class TTGroupController {
                         if( $script:nopanel ){ $global:appcon.view.style( $script:ttp, 'None' ) }
                     }.GetNewClosure() )
 
-                }elseif( [TTTentativeKeyBindingMode]::Name -eq $ttp ){ #::: started
+                }elseif( [TTTentativeKeyBindingMode]::Name -eq $ttp ){ #::: started → focus ↓
                     [TTTentativeKeyBindingMode]::Initialize()
-                    $global:appcon.group.focus( $ttp )
+                    return $this.focus( $ttp, $mod, $key )
 
                 }
             }
