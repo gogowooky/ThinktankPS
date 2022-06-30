@@ -360,7 +360,7 @@ function ttcmd_tool_focus_work_multi_revtgl( $source, $mod, $key ){
     # 複数Work形式に変更（逆順）
 
     if( $global:appcon._match( 'Focus.Application', '(Library|Index|Shelf|Cabinet)' ) ){
-        $global:appcon.group.focus( $global:appcon._get('Focus.Desk'), $mood, $key )
+        $global:appcon.group.focus( $global:appcon._get('Current.Workspace'), $mood, $key )
     }else{
         $global:appcon.view.style('Desk','revtgl')
     }
@@ -370,7 +370,7 @@ function ttcmd_tool_focus_work_multi_toggle( $source, $mod, $key ){
     # 複数Work形式に変更（正順）
 
     if( $global:appcon._match( 'Focus.Application', '(Library|Index|Shelf|Cabinet)' ) ){
-        $global:appcon.group.focus( $global:appcon._get('Focus.Desk'), $mood, $key )
+        $global:appcon.group.focus( $global:appcon._get('Current.Workspace'), $mood, $key )
     }else{
         $global:appcon.view.style('Desk','toggle')
     }
@@ -380,8 +380,8 @@ function ttcmd_tool_focus_work_single_revtgl( $source, $mod, $key ){
     # 単独Work形式で表示、その後、Workxを変更（逆順）
 
     if( $global:appcon._match( 'Focus.Application', '(Library|Index|Shelf|Cabinet)' ) ){
-        $global:appcon.group.focus( $global:appcon._get('Focus.Desk'), $mood, $key )
-        $global:appcon.view.style('Work',$global:appcon._get('Focus.Desk'))
+        $global:appcon.group.focus( $global:appcon._get('Current.Workspace'), $mood, $key )
+        $global:appcon.view.style('Work',$global:appcon._get('Current.Workspace'))
     }else{
         $global:appcon.view.style('Work','revtgl')
     }
@@ -391,8 +391,8 @@ function ttcmd_tool_focus_work_single_toggle( $source, $mod, $key ){
     # 単独Work形式で表示、その後、Workxを変更（正順）
 
     if( $global:appcon._match( 'Focus.Application', '(Library|Index|Shelf|Cabinet)' ) ){
-        $global:appcon.group.focus( $global:appcon._get('Focus.Desk'), $mood, $key )
-        $global:appcon.view.style('Work',$global:appcon._get('Focus.Desk'))
+        $global:appcon.group.focus( $global:appcon._get('Current.Workspace'), $mood, $key )
+        $global:appcon.view.style('Work',$global:appcon._get('Current.Workspace'))
     }else{
         $global:appcon.view.style('Work','toggle')
     }
@@ -404,7 +404,7 @@ function ttcmd_panel_focus_desk_and_work( $source, $mod, $key ){
     if( $global:appcon._ne( 'Focus.Application', 'Desk' ) ){
         $global:appcon.group.focus( 'Desk', $mood, $key )
     }else{
-        $global:appcon.group.focus( $global:appcon._get('Focus.Desk'), $mood, $key )
+        $global:appcon.group.focus( $global:appcon._get('Current.Workspace'), $mood, $key )
     }
 }
 function ttcmd_panel_focus_shelf_revtgl( $source, $mod, $key ){

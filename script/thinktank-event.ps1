@@ -79,7 +79,7 @@ Library     None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Library     Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Library     None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Library     Shift       F6          ttcmd_panel_sort_asc_6thcolumn
-Library     Alt, Shift  Space       ttcmd_panel_action_select
+Library     Shift       Return      ttcmd_panel_action_invoke
 Library     None        Return      ttcmd_panel_action_select
 '@,
     #Index
@@ -115,7 +115,7 @@ Index       None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Index       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Index       None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Index       Shift       F6          ttcmd_panel_sort_asc_6thcolumn
-Index       Alt, Shift  Space       ttcmd_panel_action_select
+Index       Shift       Return      ttcmd_panel_action_invoke
 Index       None        Return      ttcmd_panel_action_select
 '@,
     #Shelf
@@ -151,7 +151,7 @@ Shelf       None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Shelf       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Shelf       None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Shelf       Shift       F6          ttcmd_panel_sort_asc_6thcolumn
-Shelf       Alt, Shift  Space       ttcmd_panel_action_select
+Shelf       Shift       Return      ttcmd_panel_action_invoke
 Shelf       None        Return      ttcmd_panel_action_select
 '@,
     #Misc
