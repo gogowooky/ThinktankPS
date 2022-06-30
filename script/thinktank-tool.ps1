@@ -799,7 +799,9 @@ class TTTentativeKeyBindingMode{
         }
         return $false
     }
-
+    static [bool] Started(){
+        return ([TTTentativeKeyBindingMode]::Name -eq '')
+    }
 }
 
 #endregion###############################################################################################################
