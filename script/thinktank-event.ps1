@@ -16,23 +16,16 @@ $global:TTEventKeys = @{}
     # Application
 @'
 Application     None            Escape      ttcmd_application_window_quit
-Application     Alt             L           ttcmd_focus_tentative_library
-Application     Alt             I           ttcmd_focus_tentative_index
-Application     Alt             S           ttcmd_focus_tentative_shelf
-Application     Alt             C           ttcmd_focus_cabinet
-
-!Application     Alt             Oem1        ttcmd_application_commands_execute
-!Application     Alt, Shift      L           ttcmd_panel_focus_library_revtgl
-!Application     Alt, Shift      I           ttcmd_panel_focus_index_revtgl
-!Application     Alt, Shift      S           ttcmd_panel_focus_shelf_revtgl
-!Application     Alt             D           ttcmd_panel_focus_desk_and_work
-!Application     Alt, Shift      D           ttcmd_tool_focus_work_single_toggle
-!Application     Alt             M           ttcmd_tool_focus_work_multi_toggle
-!Application     Alt、Shift      M           ttcmd_tool_focus_work_multi_revtgl
-!Application     Alt             W           ttcmd_tool_focus_app_multi_toggle
-!Application     Alt、Shift      W           ttcmd_tool_focus_app_multi_revtgl
-!Application     Control         Tab         ttcmd_desk_works_focus_current_norm
-!Application     Control, Shift  Tab         ttcmd_desk_works_focus_current_rev
+Application     Alt             S           ttcmd_panel_focus_shelf
+Application     Alt             L           ttcmd_panel_focus_library
+Application     Alt             I           ttcmd_panel_focus_index
+Application     Alt             C           ttcmd_panel_focus_cabinet
+Application     Alt             D           ttcmd_panel_focus_desk
+Application     Alt             W           ttcmd_panel_focus_workplace
+Application     Alt, Shift      S           ttcmd_panel_collapse_shelf
+Application     Alt, Shift      L           ttcmd_panel_collapse_library
+Application     Alt, Shift      I           ttcmd_panel_collapse_index
+Application     Alt, Shift      C           ttcmd_panel_collapse_cabinet
 '@,
     #$Cabinet
 @'
@@ -50,7 +43,7 @@ Cabinet         None            Escape      ttcmd_menu_cancel
 Cabinet         Alt             Return      ttcmd_menu_ok
 Cabinet         Alt             Space       ttcmd_menu_ok
 Cabinet         None            Return      ttcmd_menu_ok
-Cabinet         Alt             0           ttcmd_panel_reload
+Cabinet         Alt             D0          ttcmd_panel_reload
 Cabinet         Alt             K           ttcmd_panel_filter_clear
 '@,
     #Library
@@ -61,12 +54,12 @@ Library+    Alt, Shift  P           ttcmd_panel_move_first
 Library+    Alt, Shift  N           ttcmd_panel_move_last
 Library+    Alt         Up          ttcmd_application_border_inlpanel_up
 Library+    Alt         Down        ttcmd_application_border_inlpanel_down
-Library+    Alt         Left        ttcmd_application_border_inwindow_left
-Library+    Alt         Right       ttcmd_application_border_inwindow_right
-Library+    Alt         L           ttcmd_focus_tentative_library
+Library+    Alt         Left        ttcmd_application_border_inwpanel_left
+Library+    Alt         Right       ttcmd_application_border_inwpanel_right
+Library+    Alt         L           ttcmd_panel_focus_library
 Library+    Alt, Shift  Space       ttcmd_panel_action_invoke
 Library+    Alt         Space       ttcmd_panel_action_select
-Library+    Alt         0           ttcmd_panel_reload
+Library+    Alt         D0          ttcmd_panel_reload
 Library+    Alt         K           ttcmd_panel_filter_clear
 
 Library     None        Up          ttcmd_panel_move_up
@@ -97,12 +90,12 @@ Index+      Alt, Shift  P           ttcmd_panel_move_first
 Index+      Alt, Shift  N           ttcmd_panel_move_last
 Index+      Alt         Up          ttcmd_application_border_inlpanel_up
 Index+      Alt         Down        ttcmd_application_border_inlpanel_down
-Index+      Alt         Left        ttcmd_application_border_inwindow_left
-Index+      Alt         Right       ttcmd_application_border_inwindow_right
-Index+      Alt         I           ttcmd_focus_tentative_index
+Index+      Alt         Left        ttcmd_application_border_inwpanel_left
+Index+      Alt         Right       ttcmd_application_border_inwpanel_right
+Index+      Alt         I           ttcmd_panel_focus_index
 Index+      Alt, Shift  Space       ttcmd_panel_action_invoke
 Index+      Alt         Space       ttcmd_panel_action_select
-Index+      Alt         0           ttcmd_panel_reload
+Index+      Alt         D0          ttcmd_panel_reload
 Index+      Alt         K           ttcmd_panel_filter_clear
 
 Index       None        Up          ttcmd_panel_move_up
@@ -135,10 +128,10 @@ Shelf+      Alt         Up          ttcmd_application_border_inrpanel_up
 Shelf+      Alt         Down        ttcmd_application_border_inrpanel_down
 Shelf+      Alt         Left        ttcmd_application_border_inwpanel_left
 Shelf+      Alt         Right       ttcmd_application_border_inwpanel_right
-Shelf+      Alt         S           ttcmd_focus_tentative_shelf
+Shelf+      Alt         S           ttcmd_panel_focus_shelf
 Shelf+      Alt, Shift  Space       ttcmd_panel_action_invoke
 Shelf+      Alt         Space       ttcmd_panel_action_select
-Shelf+      Alt         0           ttcmd_panel_reload
+Shelf+      Alt         D0          ttcmd_panel_reload
 Shelf+      Alt         K           ttcmd_panel_filter_clear
 
 Shelf       None        Up          ttcmd_panel_move_up
@@ -166,8 +159,8 @@ Shelf       None        Return      ttcmd_panel_action_select
 xShelf       Shift       Return      ttcmd_shelf_activate_item
 xShelf       Alt         Up          ttcmd_application_border_inworkplace_up
 xShelf       Alt         Down        ttcmd_application_border_inworkplace_down
-xShelf       Alt         Left        ttcmd_application_border_inwindow_left
-xShelf       Alt         Right       ttcmd_application_border_inwindow_right
+xShelf       Alt         Left        ttcmd_application_border_inwpanel_left
+xShelf       Alt         Right       ttcmd_application_border_inwpanel_right
 xShelf       Alt         D1          ttcmd_shelf_selected_toeditor1
 xShelf       Alt         D2          ttcmd_shelf_selected_toeditor2
 xShelf       Alt         D3          ttcmd_shelf_selected_toeditor3
@@ -180,15 +173,17 @@ xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 '@,
     #Desk
 @'
-Desk        None        Down        ttcmd_editor_focus_currenteditor
-Desk        Alt         C           ttcmd_desk_clear
+Desk        Alt         N           ttcmd_panel_focus_workplace
+Desk        None        down        ttcmd_panel_focus_workplace
+Desk        Alt         K           ttcmd_panel_filter_clear
 Desk        Alt         Up          ttcmd_application_border_indesk_up
 Desk        Alt         Down        ttcmd_application_border_indesk_down
 Desk        Alt         Left        ttcmd_application_border_indesk_left
 Desk        Alt         Right       ttcmd_application_border_indesk_right
-Desk        Alt         M           ttcmd_desk_focus_menu
-Desk        Control     N           ttcmd_desk_works_focus_current_norm
-Desk        Control     F           ttcmd_application_textsearch
+
+'Desk        Alt         M           ttcmd_desk_focus_menu
+'Desk        Control     N           ttcmd_desk_works_focus_current_norm
+'Desk        Control     F           ttcmd_application_textsearch
 '@,
     #Editor
 @'
@@ -293,8 +288,6 @@ PopupMenu   None            Return      ttcmd_menu_ok
             try{ $global:TTKeyEvents[$_][$mod][$key] }catch{ $null }
         }.where{ $null -ne $_}[0]
     }
-
-    Write-Host "PreviewKeyDown tentative:$tttv, panel:$panel, mod:$mod, key:$key, command:$command"
 
     if( 0 -ne $command.length ){
         if( $global:appcon._istrue( "Config.KeyDownMessage" ) ){

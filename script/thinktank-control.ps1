@@ -456,7 +456,6 @@ class TTViewController {
 class TTGroupController {
     #region basic function
     [TTApplicationController] $app
-    [string] $previous_focused
 
     TTGroupController( [TTApplicationController] $_app){
         $this.app = $_app
@@ -485,7 +484,7 @@ class TTGroupController {
         $this.app._set( 'Cabinet.Keyword',        '' )
         $this.app._set( 'Cabinet.Sort.Dir',       'Descending' )
         $this.app._set( 'Cabinet.Sort.Column',    'UpdateDate' )
-        $this.app._set( 'Cabinet.Selected',       'ttcmd_focus_cabinet' )
+        $this.app._set( 'Cabinet.Selected',       'ttcmd_application_window_quit' )
 
         $this.app._set( 'Desk.Keyword', '' )
 
@@ -536,8 +535,8 @@ class TTGroupController {
 
                 $ttp = $Matches.panel
 
-                if( $this.app._eq( 'Focus.Application', $ttp ) ){ #:::: on panel already → focus ↓
-                    return $this.focus( $ttp, $mod, $key )　
+                if( $this.app._eq( 'Focus.Application', $ttp ) ){ #:::: on panel already → (focus)
+                    $this.focus( $ttp, $mod, $key)
 
                 }elseif( [TTTentativeKeyBindingMode]::IsNotActive() ){ #::: not activated
 
@@ -549,12 +548,13 @@ class TTGroupController {
                         if( $script:nopanel ){ $global:appcon.view.style( $script:ttp, 'None' ) }
                     }.GetNewClosure() )
 
-                }elseif( [TTTentativeKeyBindingMode]::Name -eq $ttp ){ #::: started → focus ↓
+                }elseif( [TTTentativeKeyBindingMode]::Name -eq $ttp ){ #::: started → focus
                     [TTTentativeKeyBindingMode]::Initialize()
-                    return $this.focus( $ttp, $mod, $key )
+                    $this.focus( $ttp, $mod, $key)
 
                 }
             }
+
             default { #### normal focus
 
                 if( $this.app._eq( 'Focus.Application', $panel ) ){ #::: on panel already
@@ -569,7 +569,6 @@ class TTGroupController {
 
         return $this
     }
-
     [bool] invoke_action( [string]$panel ){
         $item = $global:AppMan.$panel.SelectedItem()
         return $item.InvokeAction()

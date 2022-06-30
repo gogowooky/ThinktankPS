@@ -348,8 +348,8 @@ class TTPanelManager {
             default {
                 ForEach( $item in $dg.Items ){
                     if( $item.($this._colname) -like $action ){
-                        $dg.SelectedItem = $item
                         $dg.ScrollIntoView($item)
+                        $dg.SelectedItem = $item
                         break 
                     }
                 }
@@ -668,7 +668,7 @@ class TTDocumentManager{
     [string[]] $IDs = @('','','')
     [object[]] $Controls = @($null,$null,$null)
 
-    [int] $FocusedNumber
+    [int] $FocusedNumber = 1
     [string[]] $SelectedTools = @('','','') # Editor/Browser/Grid
     #endregion    
 

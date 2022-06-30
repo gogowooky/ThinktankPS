@@ -152,38 +152,64 @@ function ttcmd_application_border_inrpanel_up( $source, $mod, $key ){
     #.SYNOPSIS
     # 右パネル内境界を上へ移動
 
-    $script:appcon.view.border( 'Layout.Shelf.Height', "-1" )
+    $global:appcon.view.border( 'Layout.Shelf.Height', "-1" )
 }
 function ttcmd_application_border_inrpanel_down( $source, $mod, $key ){
     #.SYNOPSIS
     # 右パネル境界を下へ移動
 
-    $script:appcon.view.border( 'Layout.Shelf.Height', "+1" )
+    $global:appcon.view.border( 'Layout.Shelf.Height', "+1" )
 }
 function ttcmd_application_border_inlpanel_up( $source, $mod, $key ){
     #.SYNOPSIS
     # 左パネル内境界を上へ移動
 
-    $script:appcon.view.border( 'Layout.Library.Height', "-1" )
+    $global:appcon.view.border( 'Layout.Library.Height', "-1" )
 }
 function ttcmd_application_border_inlpanel_down( $source, $mod, $key ){
     #.SYNOPSIS
     # 左パネル境界を下へ移動
 
-    $script:appcon.view.border( 'Layout.Library.Height', "+1" )
+    $global:appcon.view.border( 'Layout.Library.Height', "+1" )
 }
 function ttcmd_application_border_inwpanel_left( $source, $mod, $key ){
     #.SYNOPSIS
     # Window内境界を左へ移動
 
-    $script:appcon.view.border( 'Layout.Library.Width', "-1" )
+    $global:appcon.view.border( 'Layout.Library.Width', "-1" )
 }
 function ttcmd_application_border_inwpanel_right( $source, $mod, $key ){
     #.SYNOPSIS
     # Window内境界を右へ移動
 
-    $script:appcon.view.border( 'Layout.Library.Width', "+1" )
+    $global:appcon.view.border( 'Layout.Library.Width', "+1" )
 }
+function ttcmd_application_border_indesk_up( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Desk内境界を上へ移動
+
+    $global:app.view.border( 'Layout.Work1.Height', "-1" )
+}
+function ttcmd_application_border_indesk_down( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Desk内境界を下へ移動
+
+    $global:app.view.border( 'Layout.Work1.Height', "+1" )
+
+}
+function ttcmd_application_border_indesk_left( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Desk内境界を左へ移動
+
+    $global:app.view.border( 'Layout.Work1.Width', "-1" )
+}
+function ttcmd_application_border_indesk_right( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Desk内境界を右へ移動
+
+    $global:app.view.border( 'Layout.Work1.Width', "+1" )
+}
+
 
 #endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -236,37 +262,77 @@ function ttcmd_menu_move_last( $source, $mod, $key ){
 
 #region　Panel系共通 ( Library, Index, Shelf, Desk, Cabinet ) Commands
 #########################################################################################################################
-#region tentative
-function ttcmd_focus_tentative_shelf( $source, $mod, $key ){
+#region focus
+function ttcmd_panel_focus_shelf( $source, $mod, $key ){
     #.SYNOPSIS
     # Shelfに一時的フォーカス、その後、フォーカス
  
     $global:appcon.group.focus( 'Shelf+', $mod, $key )
 }
-function ttcmd_focus_tentative_library( $source, $mod, $key ){
+function ttcmd_panel_focus_library( $source, $mod, $key ){
     #.SYNOPSIS
     # Libraryに一時的フォーカス、その後、フォーカス
  
     $global:appcon.group.focus( 'Library+', $mod, $key )
 }
-function ttcmd_focus_tentative_index( $source, $mod, $key ){
+function ttcmd_panel_focus_index( $source, $mod, $key ){
     #.SYNOPSIS
     # Shelfに一時的フォーカス、その後、フォーカス
  
     $global:appcon.group.focus( 'Index+', $mod, $key )
 }
-function ttcmd_focus_cabinet( $source, $mod, $key ){
+function ttcmd_panel_focus_cabinet( $source, $mod, $key ){
     #.SYNOPSIS
     # Cabinetに一時的フォーカス、その後、フォーカス
  
     $global:appcon.group.focus( 'Cabinet', $mood, $key )
 }
+function ttcmd_panel_collapse_shelf( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Shelfを非表示
 
-#endregion 
+    $global:appcon.view.style( 'Shelf', 'None' )
+    ttcmd_panel_focus_desk $source $mod $key
+}
+function ttcmd_panel_collapse_library( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Libraryを非表示
+
+    $global:appcon.view.style( 'Library', 'None' )
+    ttcmd_panel_focus_desk $source $mod $key
+}
+function ttcmd_panel_collapse_index( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Indexを非表示
+
+    $global:appcon.view.style( 'Index', 'None' )
+    ttcmd_panel_focus_desk $source $mod $key
+}
+function ttcmd_panel_collapse_cabinet( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Cabinetを非表示
+
+    $global:appcon.menu.close( $source, 'ok' )
+}
+function ttcmd_panel_focus_desk( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Deskにフォーカス
+
+    $global:appcon.group.focus( 'Desk', $mod, $key )
+}
+function ttcmd_panel_focus_workplace( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Workplaceにフォーカス
+
+    $global:appcon.group.focus( 'Workplace', $mod, $key )
+}
 
 
 
-#region focus
+
+
+
+
 function ttcmd_panel_focus_workplace( $source, $mod, $key ){
     #.SYNOPSIS
     # ワークプレースにフォーカス
@@ -659,31 +725,6 @@ function ttcmd_application_border_inworkplace_down( $source, $mod, $key ){
     # Workplace内境界を下へ移動
 
     $script:app.border( 'Layout.Shelf.Height', "+1" )
-}
-function ttcmd_application_border_indesk_up( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Desk内境界を上へ移動
-
-    $script:app.border( 'Layout.Work1.Height', "-1" )
-}
-function ttcmd_application_border_indesk_down( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Desk内境界を下へ移動
-
-    $script:app.border( 'Layout.Work1.Height', "+1" )
-
-}
-function ttcmd_application_border_indesk_left( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Desk内境界を左へ移動
-
-    $script:app.border( 'Layout.Work1.Width', "-1" )
-}
-function ttcmd_application_border_indesk_right( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Desk内境界を右へ移動
-
-    $script:app.border( 'Layout.Work1.Width', "+1" )
 }
 
 #endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
