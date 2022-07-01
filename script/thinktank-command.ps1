@@ -188,26 +188,26 @@ function ttcmd_application_border_indesk_up( $source, $mod, $key ){
     #.SYNOPSIS
     # Desk内境界を上へ移動
 
-    $global:app.view.border( 'Layout.Work1.Height', "-1" )
+    $global:appcon.view.border( 'Layout.Work1.Height', "-1" )
 }
 function ttcmd_application_border_indesk_down( $source, $mod, $key ){
     #.SYNOPSIS
     # Desk内境界を下へ移動
 
-    $global:app.view.border( 'Layout.Work1.Height', "+1" )
+    $global:appcon.view.border( 'Layout.Work1.Height', "+1" )
 
 }
 function ttcmd_application_border_indesk_left( $source, $mod, $key ){
     #.SYNOPSIS
     # Desk内境界を左へ移動
 
-    $global:app.view.border( 'Layout.Work1.Width', "-1" )
+    $global:appcon.view.border( 'Layout.Work1.Width', "-1" )
 }
 function ttcmd_application_border_indesk_right( $source, $mod, $key ){
     #.SYNOPSIS
     # Desk内境界を右へ移動
 
-    $global:app.view.border( 'Layout.Work1.Width', "+1" )
+    $global:appcon.view.border( 'Layout.Work1.Width', "+1" )
 }
 
 

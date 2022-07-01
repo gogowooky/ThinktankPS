@@ -223,8 +223,8 @@ class TTViewController {
         $this.app._set( 'Layout.Library.Width',     '15' )
         $this.app._set( 'Layout.Library.Height',    '25' )
         $this.app._set( 'Layout.Shelf.Height',      '25' )
-        $this.app._set( 'Layout.Work1.Width',       '100' )
-        $this.app._set( 'Layout.Work1.Height',      '100' )
+        $this.app._set( 'Layout.Work1.Width',       '70' )
+        $this.app._set( 'Layout.Work1.Height',      '70' )
         $this.app._set( 'Layout.Library.ExWidth',   '50' )
         $this.app._set( 'Layout.Shelf.ExHeight',    '75' )
         $this.app._set( 'Layout.Work1.ExHeight',    '80' )
@@ -235,6 +235,7 @@ class TTViewController {
         $this._shelf_h =     $this.app._get( 'Layout.Shelf.Height' )
         $this._work1_w =     $this.app._get( 'Layout.Work1.Width' )
         $this._work1_h =     $this.app._get( 'Layout.Work1.Height' )
+        
         $this._library_exw = $this.app._get( 'Layout.Library.ExWidth' )
         $this._shelf_exh =   $this.app._get( 'Layout.Shelf.ExHeight' )
         $this._work1_exw =   $this.app._get( 'Layout.Work1.ExHeight' )

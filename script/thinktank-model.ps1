@@ -88,7 +88,7 @@ class TTCollection : TTObject {
     hidden [ScriptBlock] $OnUpdate = $null
     hidden [ScriptBlock] $OnChange = $null
 
-    static [string] $MessageOnSaving = "False"
+    static [string] $MessageOnSaving = 'False'
 
     [string]$Description
     [string]$UpdateDate
@@ -189,7 +189,7 @@ class TTCollection : TTObject {
     }
     [void] SaveCache() {
         # 現データをファイルに保存する (空行, Format-List形式(自己プロパティ), 空行, CSV(子プロパティ))
-        if( [bool]([TTCollection]::MessageOnSaving) -eq 'True' ){       
+        if( [TTCollection]::MessageOnSaving -eq 'True' ){       
             [TTTool]::debug_message( $this, "saved >> $($this.GetFilename())" )
         }
         $this | Format-List | Out-File $this.GetFilename()

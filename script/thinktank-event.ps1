@@ -192,8 +192,8 @@ xEditor      None            Next            ttcmd_editor_scroll_tonextline
 xEditor      None            BrowserBack     ttcmd_editor_scroll_toprevline
 xEditor      None            BrowserForward  ttcmd_editor_scroll_tonextline
 xEditor      None            Return          ttcmd_editor_scroll_tonewline
-xEditor      Alt             T               ttcmd_editor_edit_insert_date $mod $skey
-xEditor      Alt             V               ttcmd_editor_edit_insert_clipboard $mod $skey
+xEditor      Alt             T               ttcmd_editor_edit_insert_date
+xEditor      Alt             V               ttcmd_editor_edit_insert_clipboard
 xEditor      Alt             C               ttcmd_editor_copy_tag_atcursor
 xEditor      Alt             D1              ttcmd_desk_works_focus_work1
 xEditor      Alt             D2              ttcmd_desk_works_focus_work2
@@ -290,9 +290,9 @@ PopupMenu   None            Return      ttcmd_menu_ok
     }
 
     if( 0 -ne $command.length ){
-        if( $global:appcon._istrue( "Config.KeyDownMessage" ) ){
+        # if( $global:appcon._istrue( "Config.KeyDownMessage" ) ){
             Write-Host "PreviewKeyDown tentative:$tttv, panel:$panel, mod:$mod, key:$key, command:$command"
-        }
+        # }
         switch ( Invoke-Expression "$command '$panel' '$mod' '$key'" ){
             'cancel' { $args[1].Handled = $false }
             default { $args[1].Handled = $true }
