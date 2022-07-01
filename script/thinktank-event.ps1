@@ -38,13 +38,14 @@ Cabinet         None            Down        ttcmd_panel_move_down
 Cabinet         Shift           Up          ttcmd_panel_move_first
 Cabinet         Shift           Down        ttcmd_panel_move_last
 Cabinet         Ctrl            D           ttcmd_panel_discard_selected
-Cabinet         Alt             Escape      ttcmd_menu_cancel
-Cabinet         None            Escape      ttcmd_menu_cancel
-Cabinet         Alt             Return      ttcmd_menu_ok
-Cabinet         Alt             Space       ttcmd_menu_ok
-Cabinet         None            Return      ttcmd_menu_ok
+Cabinet         Alt             Escape      ttcmd_panel_collapse_cabinet
+Cabinet         None            Escape      ttcmd_panel_collapse_cabinet
 Cabinet         Alt             D0          ttcmd_panel_reload
 Cabinet         Alt             K           ttcmd_panel_filter_clear
+Cabinet         Alt             Space       ttcmd_panel_action_select
+Cabinet         Alt, Shift      Space       ttcmd_panel_action_invoke
+Cabinet         None            Return      ttcmd_panel_action_select
+Cabinet         Shift           Return      ttcmd_panel_action_invoke
 '@,
     #Library
 @'

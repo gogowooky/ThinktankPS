@@ -219,7 +219,7 @@ function ttcmd_application_border_indesk_right( $source, $mod, $key ){
 
 
 
-#region　Menu系共通 ( PopMenu, Cabinet ) Commands
+#region　PopMenu Commands
 #########################################################################################################################
 function ttcmd_menu_cancel( $source, $mod, $key ){
     #.SYNOPSIS
