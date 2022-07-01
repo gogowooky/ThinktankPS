@@ -143,10 +143,10 @@ class TTApplicationController {
                 $this._set( "Focus.Application", $Matches.name )        
             }
             "(?<name>Work[123]).*" {
-                $this._set( 'Focus.Workspace', $Matches.name )
+                $this._set( 'Current.Workspace', $Matches.name )
             }
             "(?<name>(Editor|Browser|Grid)[123]).*" {
-                $this._set( 'Focus.Tool', $Matches.name )
+                $this._set( 'Current.Tool', $Matches.name )
                 $this._set( "Focus.Application", $Matches.name )
             }
         }
@@ -192,7 +192,6 @@ class TTApplicationController {
     #endregion
 
 }
-
 
 
 
@@ -633,7 +632,10 @@ class TTGroupController {
         return $this
     }
     [TTGroupController] extract( [string]$panel ){
-        $global:AppMan.$panel.Extract()
+        $pn = $panel
+        TTTimerResistEvent "$panel:extract" 2 0 {
+            $global:AppMan.$script:pn.Extract()
+        }.GetNewClosure()
         return $this
     }
     [string] selected( [string]$panel ){
@@ -690,39 +692,6 @@ class TTGroupController {
     #endregion 
 }
 
-class TTMenuController {
-    [TTApplicationController] $app
-
-    TTMenuController( [TTApplicationController] $_app ){
-        $this.app = $_app
-    }
-    [TTMenuController] default(){
-        $this.app._set( 'PopupMenu.Left',   '0' )
-        $this.app._set( 'PopupMenu.Top',    '0' )
-
-        return $this
-    }
-    [TTMenuController] initialize(){
-        $global:AppMan.PopupMenu.Left( $this.app._get('PopupMenu.Left') )
-        $global:AppMan.PopupMenu.Top( $this.app._get('PopupMenu.Top') )
-
-        return $this
-    }
-    [TTMenuController] close( [string]$name, [string]$action ){
-        switch( $action ){
-            'cancel' { $global:AppMan.$name.Hide( $false ) }
-            'ok' { $global:AppMan.$name.Hide( $true ) }
-        }
-        return $this
-    }
-    [TTMenuController] cursor( [string]$name, [string]$to ){
-        $global:AppMan.$name.Cursor( $to )
-        return $this
-    }
-
-
-}
-
 
 class TTToolsController {
     #region basic function
@@ -742,8 +711,8 @@ class TTToolsController {
         $this.app._set( 'Work1.Tool', 'Editor' )
         $this.app._set( 'Work2.Tool', 'Editor' )
         $this.app._set( 'Work3.Tool', 'Editor' )
-        $this.app._set( 'Focus.Workspace', 'Work1' )
-        $this.app._set( 'Focus.Tool', 'Editor1' )
+        $this.app._set( 'Current.Workspace', 'Work1' )
+        $this.app._set( 'Current.Tool', 'Editor1' )
 
         [void] $this.editor.default()
         [void] $this.browser.default()
@@ -776,7 +745,7 @@ class TTToolsController {
     #region event
     [bool] tool_on_gotfocus( $params ){ # Editor(123) / Browser(123) / Grid(123)
         $name = $params[0].Name
-        $global:appcon._set( 'Focus.Tool', $name )
+        $global:appcon._set( 'Current.Tool', $name )
         $global:appcon._set( "Focus.Application", $name )
 
         return $true
@@ -853,6 +822,40 @@ class TTGridController {
 
 }
 
+
+
+class TTMenuController {
+    [TTApplicationController] $app
+
+    TTMenuController( [TTApplicationController] $_app ){
+        $this.app = $_app
+    }
+    [TTMenuController] default(){
+        $this.app._set( 'PopupMenu.Left',   '0' )
+        $this.app._set( 'PopupMenu.Top',    '0' )
+
+        return $this
+    }
+    [TTMenuController] initialize(){
+        $global:AppMan.PopupMenu.Left( $this.app._get('PopupMenu.Left') )
+        $global:AppMan.PopupMenu.Top( $this.app._get('PopupMenu.Top') )
+
+        return $this
+    }
+    [TTMenuController] close( [string]$name, [string]$action ){
+        switch( $action ){
+            'cancel' { $global:AppMan.$name.Hide( $false ) }
+            'ok' { $global:AppMan.$name.Hide( $true ) }
+        }
+        return $this
+    }
+    [TTMenuController] cursor( [string]$name, [string]$to ){
+        $global:AppMan.$name.Cursor( $to )
+        return $this
+    }
+
+
+}
 
 
 <#

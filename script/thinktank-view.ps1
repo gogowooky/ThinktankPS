@@ -139,7 +139,7 @@ class TTAppManager {
                 return $this.Document.Focus( $Matches.num )
             }
             "Workplace" {
-                return $this.Document.Focus( $this.Document.FocusedNumber )
+                return $this.Document.Focus( $this.Document.CurrentNumber )
             }
             "(?<panel>Editor|Browser|Grid)Work(?<num>[123])" {
                 return $this.Document.SelectTool( $Matches.num, $Matches.panel ).Focus($Matches.num)
@@ -668,8 +668,8 @@ class TTDocumentManager{
     [string[]] $IDs = @('','','')
     [object[]] $Controls = @($null,$null,$null)
 
-    [int] $FocusedNumber = 1
-    [string[]] $SelectedTools = @('','','') # Editor/Browser/Grid
+    [int] $CurrentNumber = 1
+    [string[]] $CurrentTools = @('','','') # Editor/Browser/Grid
     #endregion    
 
     TTDocumentManager( [TTAppManager]$app ){
@@ -688,13 +688,16 @@ class TTDocumentManager{
 
     }
     [string] Focus( [int]$num ){ # 1..3
-        $this.FocusedNumber = $num
-        $toolman = $this.( $this.SelectedTools[$num-1] )
-        $toolman.Focus( $num )
-        return $toolman.Name
+        $this.SetCurrent( $num )
+        $this.( $this.CurrentTools[$num-1] ).Focus( $num )
+        return $this
+    }
+    [string] SetCurrent( [int]$num ){ # 1..3
+        $this.CurrentNumber = $num
+        return $this.( $this.CurrentTools[$num-1] ).Name
     }
     [TTDocumentManager] SelectTool( [int]$num, [string]$tool ){
-        $this.SelectedTools[$num-1] = $tool
+        $this.CurrentTools[$num-1] = $tool
 
         $this.Editor.Controls[$num-1].Visibility =  [Visibility]::Collapsed
         $this.Browser.Controls[$num-1].Visibility = [Visibility]::Collapsed
