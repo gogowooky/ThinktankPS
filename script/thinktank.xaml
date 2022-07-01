@@ -101,8 +101,8 @@
 
                 <Grid DockPanel.Dock="Top" HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*"/>
-                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="7*"/>
                     </Grid.ColumnDefinitions>
                     <Menu Name="ShelfSorting" FontFamily="Meiryo" FontSize="12" >
                         <MenuItem Header="thinktank" />
@@ -132,8 +132,8 @@
 
                 <Grid DockPanel.Dock="Top" HorizontalAlignment="Stretch" >
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*"/>
-                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="7*"/>
                     </Grid.ColumnDefinitions>
 
                     <Menu Name="DeskSorting" FontFamily="Meiryo" FontSize="12" >
