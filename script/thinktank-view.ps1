@@ -141,7 +141,7 @@ class TTAppManager {
             "Workplace" {
                 return $this.Document.Focus( $this.Document.CurrentNumber )
             }
-            "(?<panel>Editor|Browser|Grid)Work(?<num>[123])" {
+            "(?<panel>Editor|Browser|Grid)(?<num>[123])" {
                 return $this.Document.SelectTool( $Matches.num, $Matches.panel ).Focus($Matches.num)
             }
         }
@@ -239,8 +239,8 @@ class TTPanelManager {
         $this._textbox =    $app.FindName("$($this._name)Keyword")
         $this._menu =       $app.FindName("$($this._name)Sorting")
 
-        $this._panel.Add_GotFocus( $global:TTPanel_GotFocus )
-        $this._panel.Add_LostFocus( $global:TTPanel_LostFocus )
+        $this._panel.Add_GotFocus( $global:TTPanelTool_GotFocus )
+        $this._panel.Add_LostFocus( $global:TTPanelTool_LostFocus )
         $this._panel.Add_SizeChanged( $global:TTPanel_SizeChanged )
         
     }
@@ -516,9 +516,7 @@ class TTIndexManager : TTPanelManager {
         $this._datagrid.Add_GotFocus( $global:TTDataGrid_GotFocus )
         $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
         $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToExtract )
-
-
-        $this._datagrid.Add_PreviewMouseDown( $global:IndexItems_PreviewMouseDown )
+        $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
     }
 }
 class TTShelfManager : TTPanelManager {
@@ -529,16 +527,14 @@ class TTShelfManager : TTPanelManager {
         $this._datagrid.Add_GotFocus( $global:TTDataGrid_GotFocus )
         $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
         $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToExtract )
-
-
-        $this._datagrid.Add_PreviewMouseDown( $global:ShelfItems_PreviewMouseDown )
+        $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
     }
 
 }
 class TTDeskManager : TTPanelManager {
 
     TTDeskManager( [TTAppManager]$app ) : base ( "Desk", $app ){
-        $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToHighlight )
+        $this._textbox.Add_TextChanged( $global:TTDesk_TextChanged_ToHighlight )
 
         # $script:TextEditors_PreviewKeyDown
         # $script:TextEditors_TextChanged
@@ -615,8 +611,8 @@ class TTCabinetManager : TTPanelManager {
         $this._textbox =    $this._window.FindName("$($this._name)Keyword")
         $this._menu =       $this._window.FindName("$($this._name)Sorting")
 
-        $this._window.Add_GotFocus( $global:TTPanel_GotFocus )
-        $this._window.Add_LostFocus( $global:TTPanel_LostFocus )
+        $this._window.Add_GotFocus( $global:TTPanelTool_GotFocus )
+        $this._window.Add_LostFocus( $global:TTPanelTool_LostFocus )
         # $this._window.Add_Loaded({ $global:AppMan.Cabinet.Focus() })
         $this._window.Add_Closing({ $args[1].Cancel = $True })
         $this._window.Add_MouseLeftButtonDown({ $global:AppMan.Cabinet._window.DragMove() })
@@ -680,10 +676,6 @@ class TTDocumentManager{
 
         $this.IDs =         @( 'Work1', 'Work2', 'Work3' )
         $this.Controls =    @( $this.IDs.foreach{ $this.app.FindName($_) } )
-        $this.Controls.foreach{ 
-            $_.Add_GotFocus( $global:TTWork_GotFocus )
-            $_.Add_LostFocus( $global:TTWork_LostFocus )
-        }
         (1..3).foreach{ $this.SelectTool( $_, 'Editor' ) }
 
     }
@@ -727,8 +719,8 @@ class TTToolsManager { # abstract
     [TTToolsManager] Initialize(){              # if needed
         $this.Controls = @( $this.IDs.foreach{ $this.app.FindName($_) } )
         $this.Controls.foreach{ 
-            $_.Add_GotFocus( $global:TTTool_GotFocus )
-            $_.Add_LostFocus( $global:TTTool_LostFocus )
+            $_.Add_GotFocus( $global:TTPanelTool_GotFocus )
+            $_.Add_LostFocus( $global:TTPanelTool_LostFocus )
         }
         return $this
     }

@@ -135,32 +135,35 @@ class TTApplicationController {
     #endregion
 
     #region event
-    [bool] set_gotfocus_status( $params ){ # Library/Index/Shelf/Desk/Cabinet
+    [bool] set_gotfocus_status( $params ){ 
         switch -regex ( $params[0].Name ){
-            "(?<name>Library|Index|Shelf|Desk|Cabinet).*" {
+            "(?<name>Library|Index|Shelf|Desk|Cabinet)" { # Library/Index/Shelf/Desk/Cabinet
                 $this.group.mark( $Matches.name, $true )
-                $this._set( 'Focus.Panel', $Matches.name )
-                $this._set( "Focus.Application", $Matches.name )        
+                $this._set( 'Focus.Panel', $_ )
+                $this._set( "Focus.Application", $_ )        
             }
-            "(?<name>Work[123]).*" {
-                $this._set( 'Current.Workspace', $Matches.name )
-            }
-            "(?<name>(Editor|Browser|Grid)[123]).*" {
-                $this._set( 'Current.Tool', $Matches.name )
-                $this._set( "Focus.Application", $Matches.name )
+            "(?<name>(Editor|Browser|Grid))(?<num>[123])" { # Editor(123) / Browser(123) / Grid(123)
+                $this._set( 'Current.Workplace', "Work$($Matches.num)" )
+                $this._set( 'Current.Tool', $_ )
+                $this._set( 'Focus.Panel', 'Desk' )
+                $this._set( "Focus.Application", $_ )
             }
         }
 
+        [TTTool]::debug_message( $params[0].Name, "gotfocus" )
+
         return $true
     }
-    [bool] set_lostfocus_status( $params ){ # Library/Index/Shelf/Desk/Cabinet
+    [bool] set_lostfocus_status( $params ){ 
         switch -regex ( $params[0].Name ){
-            "(?<name>Library|Index|Shelf|Desk|Cabinet).*" {
+            "(?<name>Library|Index|Shelf|Desk|Cabinet).*" { # Library/Index/Shelf/Desk/Cabinet
                 $this.group.mark( $Matches.name, $false )
                 $this._set( 'Focus.Panel', '' )
                 $this._set( "Focus.Application", '' )
             }
         }
+
+        [TTTool]::debug_message( $params[0].Name, "focus" )
 
         return $true
     }
@@ -168,18 +171,18 @@ class TTApplicationController {
         $panel = $params[0].Name
         switch -wildcard ( $panel ){
             'Library*' {
-                TTTimerResistEvent "TTPanel_SizeChanged:Library" 2 0 {
+                TTTimerResistEvent "set_border_status:$_" 2 0 {
                     $global:appcon._set( 'Layout.Library.Width', [string]$global:AppMan.Border('Layout.Library.Width') )
                     $global:appcon._set( 'Layout.Library.Height', [string]$global:AppMan.Border('Layout.Library.Height') )
                 }    
             }
             'Shelf*' {
-                TTTimerResistEvent "TTPanel_SizeChanged:Shelf" 2 0 {
+                TTTimerResistEvent "set_border_status:$_" 2 0 {
                     $global:appcon._set( 'Layout.Shelf.Height', [string]$global:AppMan.Border('Layout.Shelf.Height') )
                 }    
             }
             'Work1*' {
-                TTTimerResistEvent "TTPanel_SizeChanged:Work1" 2 0 {
+                TTTimerResistEvent "set_border_status:$_" 2 0 {
                     $global:appcon._set( 'Layout.Work1.Width', [string]$global:AppMan.Border('Layout.Work1.Width') )
                     $global:appcon._set( 'Layout.Work1.Height', [string]$global:AppMan.Border('Layout.Work1.Height') )
                 }    
@@ -189,11 +192,18 @@ class TTApplicationController {
 
     }
 
+    [bool] on_status_onsave( $params ){ 
+        $collection = $params[0]
+        @( 'Library', 'Index', 'Shelf' ).where{
+            $global:appcon._get( "$_.Resource" ) -eq $collection.Name
+        }.foreach{
+            $global:appcon.group.refresh( $_ )   
+        }
+        return $true
+    }
     #endregion
 
 }
-
-
 
 class TTViewController {
     #region variants
@@ -235,7 +245,7 @@ class TTViewController {
         $this._shelf_h =     $this.app._get( 'Layout.Shelf.Height' )
         $this._work1_w =     $this.app._get( 'Layout.Work1.Width' )
         $this._work1_h =     $this.app._get( 'Layout.Work1.Height' )
-        
+
         $this._library_exw = $this.app._get( 'Layout.Library.ExWidth' )
         $this._shelf_exh =   $this.app._get( 'Layout.Shelf.ExHeight' )
         $this._work1_exw =   $this.app._get( 'Layout.Work1.ExHeight' )
@@ -488,7 +498,7 @@ class TTGroupController {
 
         $this.app._set( 'Desk.Keyword', '' )
 
-        $this.app._set( 'Focus.Panel',  'Library' )
+        $this.app._set( 'Focus.Application',  'Library' )
 
         return $this
     }
@@ -502,7 +512,7 @@ class TTGroupController {
         $this.caption( 'Desk', '' )
         $this.keyword( 'Desk', $this.app._get('Desk.Keyword') )
 
-        $this.focus( $this.app._get('Focus.Panel'), '', '' )
+        $this.focus( $this.app._get('Focus.Application'), '', '' )
 
         return $this
     }
@@ -554,7 +564,19 @@ class TTGroupController {
 
                 }
             }
+            "(?<panel>Editor|Browser|Grid)(?<num>[123])" { #### tool focus
+                $this.app.tools.tool( "Work$($Matches.num)", $Matches.panel )
+                $this.app.tools.focus( [int]($Matches.num) )
 
+            }
+            "Workplace" {  #### current workplace focus
+                $this.app.tools.focus( 0 )
+
+            }
+            "Work(?<num>[123])" { #### workplace focus
+                $this.app.tools.focus( [int]($Matches.num) )
+
+            }
             default { #### normal focus
 
                 if( $this.app._eq( 'Focus.Application', $panel ) ){ #::: on panel already
@@ -677,6 +699,7 @@ class TTGroupController {
         switch( $mouse.ChangedButton ){
             ([Input.MouseButton]::Left) {
                 if( $mouse.ClickCount -eq 2 ){
+                    [TTTool]::debug_message( $args[0].Name, "datagrid_on_previewmousedown" )
                     $mouse.Handled = $true
                 }
             }
@@ -690,10 +713,46 @@ class TTGroupController {
     
         return $true
     }
+    [bool] desk_textbox_on_textchanged( $params ){
+        $panel = ( $params[0].Name -replace "(Desk).*", '$1' )
+        $this.app._set( "$panel.Keyword", $this.keyword( $panel ) )
+   
+        # $script:app._set( 'Desk.Keyword', $script:desk._keyword.Text.Trim() )
+        # $script:Editors.foreach{
+        #     $editor = $_
+        #     $name = $editor.Name
+        #     $text = $script:desk._keyword.Text.Trim()
+        #     if( 0 -lt $script:DocMan.config.$name.hlrules.count ){
+        #         $script:DocMan.config.$name.hlrules.foreach{
+        #             $editor.SyntaxHighlighting.MainRuleSet.Rules.Remove( $_ )
+        #         }
+        #         $script:DocMan.config.$name.hlrules.clear()
+        #     }
+        #     $keywords = $text.split(",")
+        #     $keywords.foreach{
+        #         $keyword = $_
+        #         $select = "Select" + ($keywords.IndexOf($keyword)+1)
+        #         $color1 = $editor.SyntaxHighlighting.NamedHighlightingColors.where{ $_.Name -eq $select }[0]
+        
+        #         if( $keyword -ne "" ){
+        #             $rule = [ICSharpCode.AvalonEdit.Highlighting.HighlightingRule]::new()
+        #             $rule.Color = $color1
+        #             $keyword = $keyword -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'
+        #             $keyword = "(" + ($keyword -replace "[ 　\t]+", "|" ) + ")"
+        #             $rule.Regex = [Regex]::new( $keyword )
+    
+        #             $script:DocMan.config.$name.hlrules += $rule
+        #             $editor.SyntaxHighlighting.MainRuleSet.Rules.Insert( 0, $rule )
+        #         }
+    
+        #         $editor.TextArea.TextView.Redraw()
+        #     }
+        # }
+
+        return $this
+    }
     #endregion 
 }
-
-
 class TTToolsController {
     #region basic function
     [TTApplicationController] $app
@@ -712,7 +771,7 @@ class TTToolsController {
         $this.app._set( 'Work1.Tool', 'Editor' )
         $this.app._set( 'Work2.Tool', 'Editor' )
         $this.app._set( 'Work3.Tool', 'Editor' )
-        $this.app._set( 'Current.Workspace', 'Work1' )
+        $this.app._set( 'Current.Workspace', '0' )
         $this.app._set( 'Current.Tool', 'Editor1' )
 
         [void] $this.editor.default()
@@ -726,6 +785,8 @@ class TTToolsController {
         $this.tool( 'Work1', $this.app._get('Work1.Tool') )
         $this.tool( 'Work2', $this.app._get('Work2.Tool') )
         $this.tool( 'Work3', $this.app._get('Work3.Tool') )
+
+        $this.current( [int][string]($this.app._get('Current.Workspace')[-1]) )
 
         [void] $this.editor.initialize()
         [void] $this.browser.initialize()
@@ -741,24 +802,27 @@ class TTToolsController {
         $global:AppMan.Document.SelectTool( [int][string]$work[-1], $tool )
         return $this
     }
+    [TTToolsController] current( [int]$num ){
+        $this.app._set( "Current.Workspace", "Work$num" )
+        $global:AppMan.Document.SetCurrent( $num )
+        return $this
+    }
+    [TTToolsController] focus( [int]$num ){
+        if( $num -eq 0 ){
+            $num = $global:AppMan.Document.CurrentNumber
+
+        }else{
+            $this.app._set( "Current.Tool", "$($global:AppMan.Document.CurrentTools[$num-1])$num" )
+            $this.current( $num )
+        }
+        $global:AppMan.Document.Focus( $num )
+        return $this
+    }
     #endregion
-
-    #region event
-    [bool] tool_on_gotfocus( $params ){ # Editor(123) / Browser(123) / Grid(123)
-        $name = $params[0].Name
-        $global:appcon._set( 'Current.Tool', $name )
-        $global:appcon._set( "Focus.Application", $name )
-
-        return $true
-    }
-    [bool] tool_on_lostfocus( $params ){ # Editor(123) / Browser(123) / Grid(123)
-        return $true
-    }
-    #endregion 
-
 
 }
 class TTEditorController {
+    #region basic function
     [TTToolsController] $tools
     TTEditorController( [TTToolsController] $_tools ){
         $this.tools = $_tools
@@ -786,7 +850,71 @@ class TTEditorController {
         $global:AppMan.Document.EditorMan.focus( $no )
         return $this
     }
+    #endregion
 
+    #region event
+    [bool] on_textchanged( $params ){
+
+        $editor = $params[0]
+        $script:DocMan.Tool( $editor.Name ).UpdatexEditorFolding()
+        switch( $editor.Name ){
+            'xEditor1' { TTTimerResistEvent "TextxEditors1_TextChanged" 40 0 { $script:desk.tool('xEditor1').save() } }
+            'xEditor2' { TTTimerResistEvent "TextxEditors2_TextChanged" 40 0 { $script:desk.tool('xEditor2').save() } }
+            'xEditor3' { TTTimerResistEvent "TextxEditors3_TextChanged" 40 0 { $script:desk.tool('xEditor3').save() } }
+        }
+
+        return $true
+    }
+    [bool] on_focus( $params ){
+        $editor = $params[0]
+        $name = $editor.Name
+        $memo = $script:DocMan.config.$name.index
+        $line = $editor.Document.GetLineByNumber(1)
+        $title = $editor.Document.GetText( $line.Offset, $line.Length )
+
+        $script:desk.caption( "[$name] $memo : $title" )
+        $script:DocMan.current_editor = $editor
+        if( $script:shelf._collection.Name -eq "Memo" ){ $script:shelf.refresh() }
+        if( $script:index._collection.Name -eq "Memo" ){ $script:index.refresh() }
+
+        $script:shelf.cursor( $script:DocMan.config.$name.index )
+        $script:index.cursor( $script:DocMan.config.$name.index )
+
+        $script:app._set( 'Desk.CurrentxEditor', $editor.Name )
+        $script:app._set( 'Application.Focused', $editor.Name )
+
+        return $true
+
+    }
+    [bool] on_previewmousedown( $params ){
+        $editor   = $args[0]
+        $memoitem = $args[1]
+    
+        switch( $memoitem.ChangedButton ){
+            ([Input.MouseButton]::Left) {
+                if( $memoitem.ClickCount -eq 2 ){
+                    $pos = $editor.GetPositionFromPoint( $memoitem.GetPosition($editor) )
+                    [TTTagAction]::New( $editor ).invoke( $pos.Line, $pos.Column )
+                    $memoitem.Handled = $true
+                }
+            }
+        }
+
+        return $true
+    }
+    [bool] on_previewdrop( $params ){
+        $editor = $params[0]
+        $drag = $params[1]
+        Write-Host $drag   
+        # 要修正
+    
+        # ファイルのD&Dしか捕捉できない。→ $drag.Data.GetFileDropList()
+        # browserのlinkはurlテキストが貼り付けられてしまい、PreviewDropが発火しない
+            return $true
+    }
+
+
+    #endregion
 }
 class TTBrowserController {
     [TTToolsController] $tools
@@ -822,9 +950,6 @@ class TTGridController {
     }
 
 }
-
-
-
 class TTMenuController {
     [TTApplicationController] $app
 

@@ -37,7 +37,7 @@ Add-Type -AssemblyName PresentationFramework, System.Windows.Forms, System.Drawi
 
 #endregion###############################################################################################################
 
-#region system folder setup 
+#region system folder セットアップ 
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 $global:TTRootDirPath =     $PSScriptRoot
 $global:TTScriptDirPath =   $global:TTRootDirPath + "\script"
@@ -68,7 +68,7 @@ $global:TTBackupDirPath = "$($global:TTMemoDirPath)\backup"
 
 #endregion###############################################################################################################
 
-#region timer setup 
+#region timer セットアップ 
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 $global:TTTimerExpiredMessage = $false
 $global:TTTimerResistMessage = $false
@@ -116,6 +116,28 @@ function TTTimerResistEvent( [string]$name, [long]$countdown, [long]$rewind, [Sc
 }
 #endregion###############################################################################################################
 
+#region KeyEvents/EventKeys セットアップ 
+#'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+$global:TTKeyEvents = @{}
+$global:TTEventKeys = @{}
+
+$keybinds = ( @(  
+    $global:KeyBind_Application,    $global:KeyBind_Cabinet,    $global:KeyBind_Library, 
+    $global:KeyBind_Index,          $global:KeyBind_Shelf,      $global:KeyBind_Misc, 
+    $global:KeyBind_Desk,           $global:KeyBind_Editor,     $global:KeyBind_PopupMenu  ) -join "`n" )
+$keybinds.split("`n").foreach{
+    if( $_ -match "(?<mode>[^ ]+)\s{2,}(?<mod>[^ ]+( [^ ]+)?)\s{2,}(?<keyname>[^ ]+)\s{2,}(?<command>[^\s]+)\s*" ){
+        $global:TTKeyEvents[$Matches.mode] += @{}
+        $global:TTKeyEvents[$Matches.mode][$Matches.mod] += @{}
+        $global:TTKeyEvents[$Matches.mode][$Matches.mod][$Matches.keyname] = $Matches.command
+        $global:TTEventKeys[$Matches.command] += @()
+        $global:TTEventKeys[$Matches.command] += @( @{ Mode = $Matches.mode; Key = "[$($Matches.mod)]$($Matches.key)" } )
+    }
+}
+#endregion###############################################################################################################
+
+#region 本体
+#'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #　View
 $global:AppMan =        [TTAppManager]::new()
 
@@ -127,4 +149,6 @@ $global:datetag =       [TTTagFormat]::new()
 $global:appcon =        [TTApplicationController]::new()
 
 $global:AppMan.Show()
+
+#endregion###############################################################################################################
 
