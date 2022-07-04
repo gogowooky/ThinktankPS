@@ -568,11 +568,11 @@ class TTGroupController {
                 $this.app.tools.focus( [int]($Matches.num) )
 
             }
-            "Workplace" {                                   #### current workplace focus
+            "Workplace" {                                   #### current workplace focus → delegate to tools
                 $this.app.tools.focus( 0 )
 
             }
-            "Work(?<num>[123])" {                           #### workplace focus
+            "Work(?<num>[123])" {                           #### workplace focus → delegate to tools
                 $this.app.tools.focus( [int]($Matches.num) )
 
             }
@@ -807,12 +807,14 @@ class TTToolsController {
         return $this
     }
     [TTToolsController] focus( [int]$num ){
-        if( $num -eq 0 ){
-            $num = $global:AppMan.Document.CurrentNumber
-
-        }else{
-            $this.app._set( "Current.Tool", "$($global:AppMan.Document.CurrentTools[$num-1])$num" )
-            $this.current( $num )
+        switch($num){
+            0 { 
+                $num = $global:AppMan.Document.CurrentNumber
+            }
+            default {
+                $this.app._set( "Current.Tool", "$($global:AppMan.Document.CurrentTools[$num-1])$num" )
+                $this.current( $num )
+            }
         }
         $global:AppMan.Document.Focus( $num )
         return $this

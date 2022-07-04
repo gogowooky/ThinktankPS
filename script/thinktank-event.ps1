@@ -111,6 +111,7 @@ Index       Ctrl        D           ttcmd_panel_discard_selected
 Index       Shift       Return      ttcmd_panel_action_invoke
 Index       None        Return      ttcmd_panel_action_select
 '@
+
 $global:KeyBind_Shelf = @'
 Shelf+      Alt         P           ttcmd_panel_move_up
 Shelf+      Alt         N           ttcmd_panel_move_down
@@ -162,6 +163,7 @@ xIndex       Alt         D2          ttcmd_shelf_selected_toeditor2
 xIndex       Alt         D3          ttcmd_shelf_selected_toeditor3
 xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 '@
+
 $global:KeyBind_Desk = @'
 Desk        Alt         N           ttcmd_panel_focus_workplace
 Desk        None        down        ttcmd_panel_focus_workplace
@@ -175,6 +177,7 @@ Desk        Alt         Right       ttcmd_application_border_indesk_right
 'Desk        Control     N           ttcmd_desk_works_focus_current_norm
 'Desk        Control     F           ttcmd_application_textsearch
 '@
+
 $global:KeyBind_Editor = @'
 xEditor      None            PageUp          ttcmd_editor_scroll_toprevline
 xEditor      None            Next            ttcmd_editor_scroll_tonextline

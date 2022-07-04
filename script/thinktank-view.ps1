@@ -131,17 +131,17 @@ class TTAppManager {
 
         if( -not $this.Focusable( $target ) ){ return '' }
 
-        switch -regex ( $target ){
-            "(Library|Index|Shelf|Desk|Cabinet)" {
+        switch -regex ( $target ){      
+            "(Library|Index|Shelf|Desk|Cabinet)" {                          # Library|Index|Sheld|Desk|Cabninet
                 return $this.$target.Focus()
             }
-            "Work(?<num>[123])" {
+            "Work(?<num>[123])" {                                           # Work[123]
                 return $this.Document.Focus( $Matches.num )
             }
-            "Workplace" {
+            "Workplace" {                                                   # Workplace
                 return $this.Document.Focus( $this.Document.CurrentNumber )
             }
-            "(?<panel>Editor|Browser|Grid)(?<num>[123])" {
+            "(?<panel>Editor|Browser|Grid)(?<num>[123])" {                  # Editor[123]/Browser[123]/Grid[123]
                 return $this.Document.SelectTool( $Matches.num, $Matches.panel ).Focus($Matches.num)
             }
         }
@@ -689,7 +689,7 @@ class TTDocumentManager{
         return $this.( $this.CurrentTools[$num-1] ).Name
     }
     [TTDocumentManager] SelectTool( [int]$num, [string]$tool ){
-        $this.CurrentTools[$num-1] = $tool
+        $this.CurrentTools[$num-1] = $tool  # Editor/Browser/Grid
 
         $this.Editor.Controls[$num-1].Visibility =  [Visibility]::Collapsed
         $this.Browser.Controls[$num-1].Visibility = [Visibility]::Collapsed
