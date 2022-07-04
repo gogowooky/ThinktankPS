@@ -15,14 +15,14 @@ Application     Alt             S           ttcmd_panel_focus_shelf
 Application     Alt             L           ttcmd_panel_focus_library
 Application     Alt             I           ttcmd_panel_focus_index
 Application     Alt             C           ttcmd_panel_focus_cabinet
-Application     Alt             D           ttcmd_panel_focus_desk
-Application     Alt             W           ttcmd_panel_focus_workplace
+Application     Alt             D           ttcmd_panel_focus_deskwork
 Application     Alt, Shift      S           ttcmd_panel_collapse_shelf
 Application     Alt, Shift      L           ttcmd_panel_collapse_library
 Application     Alt, Shift      I           ttcmd_panel_collapse_index
 Application     Alt, Shift      C           ttcmd_panel_collapse_cabinet
+Application     Alt, Shift      D           ttcmd_panel_focus_work
 '@
-$global:KeyBind_Cabinet = @
+$global:KeyBind_Cabinet = @'
 Cabinet         Alt             P           ttcmd_panel_move_up
 Cabinet         Alt             N           ttcmd_panel_move_down
 Cabinet         Alt, Shift      P           ttcmd_panel_move_first

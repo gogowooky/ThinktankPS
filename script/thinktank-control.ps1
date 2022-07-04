@@ -139,14 +139,14 @@ class TTApplicationController {
         switch -regex ( $params[0].Name ){
             "(?<name>Library|Index|Shelf|Desk|Cabinet)" { # Library/Index/Shelf/Desk/Cabinet
                 $this.group.mark( $Matches.name, $true )
-                $this._set( 'Focus.Panel', $_ )
-                $this._set( "Focus.Application", $_ )        
+                $this._set( 'Focus.Panel', $Matches.name )
+                $this._set( "Focus.Application", $Matches.name )        
             }
             "(?<name>(Editor|Browser|Grid))(?<num>[123])" { # Editor(123) / Browser(123) / Grid(123)
                 $this._set( 'Current.Workplace', "Work$($Matches.num)" )
-                $this._set( 'Current.Tool', $_ )
+                $this._set( 'Current.Tool', $Matches[0] )
                 $this._set( 'Focus.Panel', 'Desk' )
-                $this._set( "Focus.Application", $_ )
+                $this._set( "Focus.Application", $Matches[0] )
             }
         }
 
@@ -770,7 +770,7 @@ class TTToolsController {
         $this.app._set( 'Work1.Tool', 'Editor' )
         $this.app._set( 'Work2.Tool', 'Editor' )
         $this.app._set( 'Work3.Tool', 'Editor' )
-        $this.app._set( 'Current.Workspace', '0' )
+        $this.app._set( 'Current.Workspace', 'Work1' )
         $this.app._set( 'Current.Tool', 'Editor1' )
 
         [void] $this.editor.default()

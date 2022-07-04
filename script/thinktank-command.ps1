@@ -314,19 +314,28 @@ function ttcmd_panel_collapse_cabinet( $source, $mod, $key ){
 
     $global:appcon.menu.close( $source, 'ok' )
 }
-function ttcmd_panel_focus_desk( $source, $mod, $key ){
+function ttcmd_panel_focus_deskwork( $source, $mod, $key ){
     #.SYNOPSIS
-    # Deskにフォーカス
+    # DeskとＷorkplaceを交互にフォーカス
 
-    $global:appcon.group.focus( 'Desk', $mod, $key )
+    switch( $global:appcon._get('Focus.Application') ){
+        'Desk'  { $global:appcon.group.focus( 'Workplace', $mod, $key ) }
+        default { $global:appcon.group.focus( 'Desk', $mod, $key ) }
+    }
+    
 }
-function ttcmd_panel_focus_workplace( $source, $mod, $key ){
+function ttcmd_panel_focus_work( $source, $mod, $key ){
     #.SYNOPSIS
-    # Workplaceにフォーカス
+    # ZenモードでＷorkplaceにフォーカス、その後Work1/2/3をトグル
 
+    $global:appcon.view.style( 'Group', 'Zen' )
     $global:appcon.group.focus( 'Workplace', $mod, $key )
-}
+    $work = $global:appcon._get('Focus.Workplace')
+    $global:appcon._set( 'Layout.Style.Work', $work )
+    $global:appcon.view.style( 'Work', 'toggle' )
+    $global:appcon.group.focus( $work, $mod, $key )
 
+}
 
 
 
