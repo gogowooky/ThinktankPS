@@ -22,7 +22,7 @@ Application     Alt, Shift      L           ttcmd_panel_collapse_library
 Application     Alt, Shift      I           ttcmd_panel_collapse_index
 Application     Alt, Shift      C           ttcmd_panel_collapse_cabinet
 '@
-$global:KeyBind_Cabinet = @'
+$global:KeyBind_Cabinet = @
 Cabinet         Alt             P           ttcmd_panel_move_up
 Cabinet         Alt             N           ttcmd_panel_move_down
 Cabinet         Alt, Shift      P           ttcmd_panel_move_first
@@ -60,7 +60,6 @@ Library     None        Up          ttcmd_panel_move_up
 Library     None        Down        ttcmd_panel_move_down
 Library     Shift       Up          ttcmd_panel_move_first
 Library     Shift       Down        ttcmd_panel_move_last
-Library     Ctrl        D           ttcmd_panel_discard_selected
 Library     None        F1          ttcmd_panel_sort_dsc_1stcolumn
 Library     Shift       F1          ttcmd_panel_sort_asc_1stcolumn
 Library     None        F2          ttcmd_panel_sort_dsc_2ndcolumn
@@ -73,6 +72,7 @@ Library     None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Library     Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Library     None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Library     Shift       F6          ttcmd_panel_sort_asc_6thcolumn
+Library     Ctrl        D           ttcmd_panel_discard_selected
 Library     Shift       Return      ttcmd_panel_action_invoke
 Library     None        Return      ttcmd_panel_action_select
 '@
@@ -95,7 +95,6 @@ Index       None        Up          ttcmd_panel_move_up
 Index       None        Down        ttcmd_panel_move_down
 Index       Shift       Up          ttcmd_panel_move_first
 Index       Shift       Down        ttcmd_panel_move_last
-Index       Ctrl        D           ttcmd_panel_discard_selected
 Index       None        F1          ttcmd_panel_sort_dsc_1stcolumn
 Index       Shift       F1          ttcmd_panel_sort_asc_1stcolumn
 Index       None        F2          ttcmd_panel_sort_dsc_2ndcolumn
@@ -108,6 +107,7 @@ Index       None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Index       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Index       None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Index       Shift       F6          ttcmd_panel_sort_asc_6thcolumn
+Index       Ctrl        D           ttcmd_panel_discard_selected
 Index       Shift       Return      ttcmd_panel_action_invoke
 Index       None        Return      ttcmd_panel_action_select
 '@
@@ -130,7 +130,6 @@ Shelf       None        Up          ttcmd_panel_move_up
 Shelf       None        Down        ttcmd_panel_move_down
 Shelf       Shift       Up          ttcmd_panel_move_first
 Shelf       Shift       Down        ttcmd_panel_move_last
-Shelf       Ctrl        D           ttcmd_panel_discard_selected
 Shelf       None        F1          ttcmd_panel_sort_dsc_1stcolumn
 Shelf       Shift       F1          ttcmd_panel_sort_asc_1stcolumn
 Shelf       None        F2          ttcmd_panel_sort_dsc_2ndcolumn
@@ -143,6 +142,7 @@ Shelf       None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Shelf       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Shelf       None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Shelf       Shift       F6          ttcmd_panel_sort_asc_6thcolumn
+Shelf       Ctrl        D           ttcmd_panel_discard_selected
 Shelf       Shift       Return      ttcmd_panel_action_invoke
 Shelf       None        Return      ttcmd_panel_action_select
 '@
@@ -247,6 +247,7 @@ PopupMenu   None            Return      ttcmd_menu_ok
 #region  View Events Binding
 
 [ScriptBlock] $global:TTPreviewKeyDown = { 
+
     $source =   [string]($args[0].Name) # ⇒ Application, Cabinet, PopupMenu
     $mod =      [string]($args[1].KeyboardDevice.Modifiers)
     $key =      if( $mod -in @('Alt','Alt, Shift') ){ [string]($args[1].SystemKey) }else{ [string]($args[1].Key) }

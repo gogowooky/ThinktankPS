@@ -331,18 +331,6 @@ function ttcmd_panel_focus_workplace( $source, $mod, $key ){
 
 
 
-
-
-function ttcmd_panel_focus_workplace( $source, $mod, $key ){
-    #.SYNOPSIS
-    # ワークプレースにフォーカス
-
-    if( $global:appcon._match( 'Focus.Application', '(Library|Index|Shelf|Cabinet)' ) ){
-        $global:appcon.group.focus( 'Workplace', $mood, $key )
-    }
-
-}
-
 function ttcmd_tool_focus_app_multi_revtgl( $source, $mod, $key ){
     #.SYNOPSIS
     # 全体styleを変更（逆順）

@@ -204,7 +204,6 @@ class TTApplicationController {
     #endregion
 
 }
-
 class TTViewController {
     #region variants
     [TTApplicationController] $app
@@ -541,7 +540,7 @@ class TTGroupController {
 
         switch -regex ( $panel ){
 
-            "(?<panel>Library|Index|Shelf)\+" { #### tentative focus
+            "(?<panel>Library|Index|Shelf)\+" {             #### tentative focus
 
                 $ttp = $Matches.panel
 
@@ -564,20 +563,20 @@ class TTGroupController {
 
                 }
             }
-            "(?<panel>Editor|Browser|Grid)(?<num>[123])" { #### tool focus
+            "(?<panel>Editor|Browser|Grid)(?<num>[123])" {  #### tool focus
                 $this.app.tools.tool( "Work$($Matches.num)", $Matches.panel )
                 $this.app.tools.focus( [int]($Matches.num) )
 
             }
-            "Workplace" {  #### current workplace focus
+            "Workplace" {                                   #### current workplace focus
                 $this.app.tools.focus( 0 )
 
             }
-            "Work(?<num>[123])" { #### workplace focus
+            "Work(?<num>[123])" {                           #### workplace focus
                 $this.app.tools.focus( [int]($Matches.num) )
 
             }
-            default { #### normal focus
+            default {                                       #### normal focus
 
                 if( $this.app._eq( 'Focus.Application', $panel ) ){ #::: on panel already
                     break;
