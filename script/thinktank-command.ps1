@@ -103,121 +103,11 @@ function ttact_open_url( $ttobj ){
 #endregion###############################################################################################################
 
 
-
 #region　Application Commands
 #########################################################################################################################
-#region　Application Window
-#''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-function ttcmd_application_window_quit( $source, $mod, $key ){
-    #.SYNOPSIS
-    # アプリケーションを終了する
-    
-    # param( $sender, $mod, $key )
-
-    switch( [MessageBox]::Show( "終了しますか", "Quit",'YesNo','Question') ){
-        'No' { return }
-    }
-    $global:appcon.view.window( 'State', 'Close' )
-}
-function ttcmd_application_window_full( $source, $mod, $key ){
-    #.SYNOPSIS
-    # アプリケーションを最大化する
-    
-    $global:appcon.view.window( 'State', 'Max' )
-}
-function ttcmd_application_window_icon( $source, $mod, $key ){
-    #.SYNOPSIS
-    # アプリケーションを最小化する
-
-    $global:appcon.view.window( 'State', 'Min' )
-}
-function ttcmd_application_window_free( $source, $mod, $key ){
-    #.SYNOPSIS
-    # アプリケーションを通常化する
-
-    $global:appcon.view.window( 'State', 'Normal' )
-}
-function ttcmd_application_window_turn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # アプリケーション表示を変更する
-
-    $global:appcon.view.window( 'State', 'toggle' )
-}
-
-#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-#region　Application Border
-#''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-function ttcmd_application_border_inrpanel_up( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 右パネル内境界を上へ移動
-
-    $global:appcon.view.border( 'Layout.Shelf.Height', "-1" )
-}
-function ttcmd_application_border_inrpanel_down( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 右パネル境界を下へ移動
-
-    $global:appcon.view.border( 'Layout.Shelf.Height', "+1" )
-}
-function ttcmd_application_border_inlpanel_up( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 左パネル内境界を上へ移動
-
-    $global:appcon.view.border( 'Layout.Library.Height', "-1" )
-}
-function ttcmd_application_border_inlpanel_down( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 左パネル境界を下へ移動
-
-    $global:appcon.view.border( 'Layout.Library.Height', "+1" )
-}
-function ttcmd_application_border_inwpanel_left( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Window内境界を左へ移動
-
-    $global:appcon.view.border( 'Layout.Library.Width', "-1" )
-}
-function ttcmd_application_border_inwpanel_right( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Window内境界を右へ移動
-
-    $global:appcon.view.border( 'Layout.Library.Width', "+1" )
-}
-function ttcmd_application_border_indesk_up( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Desk内境界を上へ移動
-
-    $global:appcon.view.border( 'Layout.Work1.Height', "-1" )
-}
-function ttcmd_application_border_indesk_down( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Desk内境界を下へ移動
-
-    $global:appcon.view.border( 'Layout.Work1.Height', "+1" )
-
-}
-function ttcmd_application_border_indesk_left( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Desk内境界を左へ移動
-
-    $global:appcon.view.border( 'Layout.Work1.Width', "-1" )
-}
-function ttcmd_application_border_indesk_right( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Desk内境界を右へ移動
-
-    $global:appcon.view.border( 'Layout.Work1.Width', "+1" )
-}
-
-
-#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+# border                                                                                                                 
 
 #endregion###############################################################################################################
-
-
-
-
 
 #region　PopMenu Commands
 #########################################################################################################################
@@ -263,82 +153,6 @@ function ttcmd_menu_move_last( $source, $mod, $key ){
 #region　Panel系共通 ( Library, Index, Shelf, Desk, Cabinet ) Commands
 #########################################################################################################################
 #region focus
-function ttcmd_panel_focus_shelf( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Shelfに一時的フォーカス、その後、フォーカス
- 
-    $global:appcon.group.focus( 'Shelf+', $mod, $key )
-}
-function ttcmd_panel_focus_library( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Libraryに一時的フォーカス、その後、フォーカス
- 
-    $global:appcon.group.focus( 'Library+', $mod, $key )
-}
-function ttcmd_panel_focus_index( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Shelfに一時的フォーカス、その後、フォーカス
- 
-    $global:appcon.group.focus( 'Index+', $mod, $key )
-}
-function ttcmd_panel_focus_cabinet( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Cabinetに一時的フォーカス、その後、フォーカス
- 
-    $global:appcon.group.focus( 'Cabinet', $mood, $key )
-}
-function ttcmd_panel_collapse_shelf( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Shelfを非表示
-
-    $global:appcon.view.style( 'Shelf', 'None' )
-    ttcmd_panel_focus_desk $source $mod $key
-}
-function ttcmd_panel_collapse_library( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Libraryを非表示
-
-    $global:appcon.view.style( 'Library', 'None' )
-    ttcmd_panel_focus_desk $source $mod $key
-}
-function ttcmd_panel_collapse_index( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Indexを非表示
-
-    $global:appcon.view.style( 'Index', 'None' )
-    ttcmd_panel_focus_desk $source $mod $key
-}
-function ttcmd_panel_collapse_cabinet( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Cabinetを非表示
-
-    $global:appcon.menu.close( $source, 'ok' )
-}
-function ttcmd_panel_focus_deskwork( $source, $mod, $key ){
-    #.SYNOPSIS
-    # DeskとＷorkplaceを交互にフォーカス
-
-    switch( $global:appcon._get('Focus.Application') ){
-        'Desk'  { $global:appcon.group.focus( 'Workplace', $mod, $key ) }
-        default { $global:appcon.group.focus( 'Desk', $mod, $key ) }
-    }
-    
-}
-function ttcmd_panel_focus_work( $source, $mod, $key ){
-    #.SYNOPSIS
-    # ZenモードでＷorkplaceにフォーカス、その後Work1/2/3をトグル
-
-    $global:appcon.view.style( 'Group', 'Zen' )
-    $global:appcon.group.focus( 'Workplace', $mod, $key )
-    $work = $global:appcon._get('Focus.Workplace')
-    $global:appcon._set( 'Layout.Style.Work', $work )
-    $global:appcon.view.style( 'Work', 'toggle' )
-    $global:appcon.group.focus( $work, $mod, $key )
-
-}
-
-
-
 
 function ttcmd_tool_focus_app_multi_revtgl( $source, $mod, $key ){
     #.SYNOPSIS
@@ -466,154 +280,14 @@ function ttcmd_panel_focus_library_toggle( $source, $mod, $key ){
 }
 #endregion
 
-#region misc
-function ttcmd_panel_reload( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルのデータを更新する
 
-    $global:appcon.group.reload( $source )
-}
-function ttcmd_panel_discard_selected( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 選択アイテムの関連リソースを削除する
 
-    $global:appcon.group.action( $source, 'SelectedItems', 'DiscardResources' )
-}
-function ttcmd_panel_action_select( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの選択アイテムを選択・実行する
-
-    $global:appcon.group.select_actions_then_invoke( $source )
-
-}
-function ttcmd_panel_action_invoke( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの選択アイテムを実行する
-
-    $global:appcon.group.invoke_action( $source )
-
-}
-function ttcmd_panel_filter_clear( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルのフィルターをクリアする
-
-    $global:appcon.group.keyword( $source, '' )
-}
-
-#endregion
-
-#region cursor
-function ttcmd_panel_move_up( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルのカーソルを上に移動
-
-    $global:appcon.group.cursor( $source, 'up' )
-}
-function ttcmd_panel_move_down( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルのカーソルを下に移動
-
-    $global:appcon.group.cursor( $source, 'down' )
-}
-function ttcmd_panel_move_first( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルのカーソルを先頭に移動
-
-    $global:appcon.group.cursor( $source, 'first' )
-}
-function ttcmd_panel_move_last( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルのカーソルを末尾に移動
-
-    $global:appcon.group.cursor( $source, 'last' )
-}
-
-#endregion
-
-#region sort
-function ttcmd_panel_sort_dsc_1stcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第１カラムで降順ソートする
-
-    $script:appcon.group.sort( $source, 1, 'Descending' )
-}
-function ttcmd_panel_sort_asc_1stcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第１カラムで昇順ソートする
-
-    $script:appcon.group.sort( $source, 1, 'Ascending' )
-}
-function ttcmd_panel_sort_dsc_2ndcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第２カラムで降順ソートする
-
-    $script:appcon.group.sort( $source, 2, 'Descending' )
-}
-function ttcmd_panel_sort_asc_2ndcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第２カラムで昇順ソートする
-
-    $script:appcon.group.sort( $source, 2, 'Ascending' )
-}
-function ttcmd_panel_sort_dsc_3rdcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第３カラムで降順ソートする
-
-    
-    $script:appcon.group.sort( $source, 3, 'Descending' )
-}
-function ttcmd_panel_sort_asc_3rdcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第３カラムで昇順ソートする
-
-    
-    $script:appcon.group.sort( $source, 3, 'Ascending' )
-}
-function ttcmd_panel_sort_dsc_4thcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第４カラムで降順ソートする
-
-    
-    $script:appcon.group.sort( $source, 4, 'Descending' )
-}
-function ttcmd_panel_sort_asc_4thcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第４カラムで昇順ソートする
-
-    
-    $script:appcon.group.sort( $source, 4, 'Ascending' )
-}
-function ttcmd_panel_sort_dsc_5thcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第５カラムで降順ソートする
-
-    
-    $script:appcon.group.sort( $source, 5, 'Descending' )
-}
-function ttcmd_panel_sort_asc_5thcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第５カラムで昇順ソートする
-
-    
-    $script:appcon.group.sort( $source, 5, 'Ascending' )
-}
-function ttcmd_panel_sort_dsc_6thcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第６カラムで降順ソートする
-
-    
-    $script:appcon.group.sort( $source, 6, 'Descending' )
-}
-function ttcmd_panel_sort_asc_6thcolumn( $source, $mod, $key ){
-    #.SYNOPSIS
-    # パネルの第６カラムで昇順ソートする
-
-    
-    $script:appcon.group.sort( $source, 6, 'Ascending' )
-}
-#endregion
 
 #endregion###############################################################################################################
+
+
+
+
 
 
 
@@ -1722,70 +1396,6 @@ function ttcmd_editor_select_toprevline( $source, $mod, $key ){
 
     $script:desk.tool('Editor').select_to( 'prevline', '' )
 }
-function ttcmd_editor_delete_tolineend( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルから行末までを削除する
-
-    $script:desk.tool('Editor').select_to( 'lineend', 'cut' )
-}
-function ttcmd_editor_delete_tolinestart( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルから行頭までを削除する
-
-    $script:desk.tool('Editor').select_to( 'linestart', 'cut' )
-}
-function ttcmd_editor_move_tolineend( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルを行末/文末へ移動する
-
-    $script:desk.tool( 'Editor' ).move_to( 'lineend+' )
-}
-function ttcmd_editor_move_tolinestart( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルを行頭/文頭へ移動する
-
-    $script:desk.tool( 'Editor' ).move_to( 'linestart+' )
-}
-function ttcmd_editor_move_toprevline( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルを前行へ移動する
-
-    $script:desk.tool( 'Editor' ).move_to( 'prevline' )
-}
-function ttcmd_editor_move_tonextline( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルを次行へ移動する
-
-    $script:desk.tool( 'Editor' ).move_to( 'nextline' )
-}
-function ttcmd_editor_move_rightchar( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルを右へ移動する
-
-    $script:desk.tool( 'Editor' ).move_to( 'rightchar' )
-}
-function ttcmd_editor_move_leftchar( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルを左へ移動する
-
-    $script:desk.tool( 'Editor' ).move_to( 'leftchar' )
-}
-function ttcmd_editor_move_toprevkeyword( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルを前のキーワードに移動する
-
-    if( $false -eq $script:desk.tool( 'Editor' ).move_to( 'prevkeyword' ) ){
-        ttcmd_editor_scroll_tonextline    
-    }
-}
-function ttcmd_editor_move_tonextkeyword( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルを次のキーワードに移動する
-
-    if( $false -eq $script:desk.tool( 'Editor' ).move_to( 'nextkeyword' ) ){
-        ttcmd_editor_scroll_roprevline
-    }
-}
 function ttcmd_editor_edit_delete( $source, $mod, $key ){
     #.SYNOPSIS
     # カーソルの右を削除する
@@ -1852,31 +1462,6 @@ function ttcmd_editor_outline_insert_section( $source, $mod, $key ){
 
 #region　Editor Outline
 #########################################################################################################################
-function ttcmd_editor_outline_moveto_next( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルを次ののセクションに移動する
-
-    $script:desk.tool( 'Editor' ).move_to( 'nextnode' )
-}
-function ttcmd_editor_outline_moveto_previous( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルを前のセクションへ移動する
-
-    $script:desk.tool( 'Editor' ).move_to( 'prevnode' )
-}
-function ttcmd_editor_outline_fold_section( $source, $mod, $key ){
-
-    #.SYNOPSIS
-    # セクションを折り畳む
-    
-    $script:desk.tool( 'Editor' ).node_to( 'close' )
-}
-function ttcmd_editor_outline_collapse_section( $source, $mod, $key ){
-    #.SYNOPSIS
-    # セクションを展開する
-
-    $script:desk.tool( 'Editor' ).node_to( 'open' )
-}
 function ttcmd_editor_outline_fold_allsection( $source, $mod, $key ){
     #.SYNOPSIS
     # 全セクションを折り畳む

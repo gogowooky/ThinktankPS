@@ -63,6 +63,7 @@ class TTApplicationController {
 
         return $this
     }
+
     #region ステータス管理
     [string] _get( $name ){
         return $this.status.Get( $name )
@@ -134,6 +135,10 @@ class TTApplicationController {
     }
     #endregion
 
+    #region キーバインド管理
+
+    #endregion
+
     #region event
     [bool] set_gotfocus_status( $params ){ 
         switch -regex ( $params[0].Name ){
@@ -148,9 +153,11 @@ class TTApplicationController {
                 $this._set( 'Focus.Panel', 'Desk' )
                 $this._set( "Focus.Application", $Matches[0] )
             }
+            default{ return $false }
         }
 
         [TTTool]::debug_message( $params[0].Name, "gotfocus" )
+
 
         return $true
     }
@@ -161,9 +168,10 @@ class TTApplicationController {
                 $this._set( 'Focus.Panel', '' )
                 $this._set( "Focus.Application", '' )
             }
+            default{ return $false }
         }
 
-        [TTTool]::debug_message( $params[0].Name, "focus" )
+        [TTTool]::debug_message( $params[0].Name, "lostfocus" )
 
         return $true
     }
@@ -191,7 +199,6 @@ class TTApplicationController {
         return $true
 
     }
-
     [bool] on_status_onsave( $params ){ 
         $collection = $params[0]
         @( 'Library', 'Index', 'Shelf' ).where{
@@ -205,7 +212,7 @@ class TTApplicationController {
 
 }
 class TTViewController {
-    #region variants
+    #region variants/ new/ default/ initialize
     [TTApplicationController] $app
 
     [string] $_library_w 
@@ -218,7 +225,6 @@ class TTViewController {
     [string] $_work1_exw
     [string] $_work1_exh
 
-    #endregion
     TTViewController( [TTApplicationController] $_app ){
         $this.app = $_app
     }
@@ -266,6 +272,9 @@ class TTViewController {
 
         return $this
     }
+    #endregion
+
+    #region style/ focusable/ window/ border    
     [TTViewController] style( [string] $name, [string] $value ){
         switch( $name ){
             'Group' { # Standard, Zen, toggle/revtgl
@@ -294,29 +303,22 @@ class TTViewController {
             }
             'Work' { # Work1, Work2, Work3, toggle/revtgl
                 $order = @( 'Work1', 'Work2', 'Work3' )
+                $work1 = @{}
                 switch( $value ){
-                    'Work1' {
-                        $global:AppMan.Border( 'Layout.Work1.Width', 100 )
-                        $global:AppMan.Border( 'Layout.Work1.Height', 100 )
-                        $this.app._set( 'Layout.Style.Work', $value )                
-                    }
-                    'Work2' {
-                        $global:AppMan.Border( 'Layout.Work1.Width', 0 )
-                        $global:AppMan.Border( 'Layout.Work1.Height', 100 )
-                        $this.app._set( 'Layout.Style.Work', $value )                
-                    }
-                    'Work3' {
-                        $global:AppMan.Border( 'Layout.Work1.Width', 0 )
-                        $global:AppMan.Border( 'Layout.Work1.Height', 0 )
-                        $this._app.set( 'Layout.Style.Work', $value )                
-                    }
-                    'toggle' {
-                        $this.style( $name, [TTTool]::toggle( $this.app._get('Layout.Style.Work'), $order ) )
-                    }
-                    'revtgl' {
-                        $this.style( $name, [TTTool]::revtgl( $this.app._get('Layout.Style.Work'), $order ) )
-                    }
+                    'Work1' { $work1 = @{ width = 100;  height = 100 } }
+                    'Work2' { $work1 = @{ width = 0;    height = 100 } }
+                    'Work3' { $work1 = @{ width = 0;    height = 0 } }
+                    'toggle' { return $this.style( 'Work', [TTTool]::toggle( $this.app._get('Layout.Style.Work'), $order ) ) }
+                    'revtgl' { return $this.style( 'Work', [TTTool]::revtgl( $this.app._get('Layout.Style.Work'), $order ) ) }
                 }
+                $global:AppMan.Border( 'Layout.Work1.Width', $work1.width )
+                $global:AppMan.Border( 'Layout.Work1.Height', $work1.height )
+                $this.app._set( 'Layout.Style.Work', $value )
+
+            }
+            'Work+Focus' { # Work1, Work2, Work3, toggle/revtgl
+                $this.style( 'Work', $value )
+                $this.app.group.focus('','',$this.app._get('Layout.Style.Work') )
 
             }
             'Desk' { # Work12, Work123, Work13, toggle/revtgl
@@ -461,9 +463,10 @@ class TTViewController {
         return $this
 
     }
+    #endregion
 }
 class TTGroupController {
-    #region basic function
+    #region variants/ new/ default/ initialize
     [TTApplicationController] $app
 
     TTGroupController( [TTApplicationController] $_app){
@@ -517,7 +520,8 @@ class TTGroupController {
     }
     #endregion
 
-    #region Library/Index/Shelf/Desk/Cabinet
+    #region mark/ caption/ keyword(io)/ focus/ invoke_action/ select_actions_then_invoke
+    # Library/Index/Shelf/Desk/Cabinet
     [TTGroupController] mark( [string]$panel, [bool]$sw ){
         $global:AppMan.$panel.Mark( $sw )
         if( $sw ){ $this.app._set( "Focus.Application", $panel ) }
@@ -532,7 +536,7 @@ class TTGroupController {
         $global:AppMan.$panel.Keyword( $text )
         $this.app._set( "$panel.Keyword", $text )
         return $this
-    }
+}
     [string] keyword( [string]$panel ){
         return $global:AppMan.$panel.Keyword()
     }
@@ -609,7 +613,8 @@ class TTGroupController {
 
     #endregion
 
-    #region Library/Index/Shelf/Cabinet
+    #region reload/ load/ cursor/ sort/ extract/ selected/ refresh 
+    #Library/Index/Shelf/Cabinet
     [TTGroupController] reload( $panel ){
         return $this.load( $panel, $this.app._get( "$panel.Resource" ) )
     }
@@ -670,7 +675,7 @@ class TTGroupController {
 
     #endregion
 
-    #region event
+    #region events
     [bool] datagrid_on_sorting( $params ){ # Library/Index/Shelf/Desk/Cabinet
         $panel = ( $params[0].Name -replace "(Library|Index|Shelf|Cabinet).*", '$1' )
         $e = $params[1]
@@ -753,7 +758,7 @@ class TTGroupController {
     #endregion 
 }
 class TTToolsController {
-    #region basic function
+    #region variants/ new/ default/ initialize
     [TTApplicationController] $app
     [TTEditorController] $editor
     [TTBrowserController] $browser
@@ -795,7 +800,7 @@ class TTToolsController {
     }
     #endregion
 
-    #region tools
+    #region tool/ current/ focus
     [TTToolsController] tool( [string]$work, [string]$tool ){
         $this.app._set( "$work.Tool", $tool )
         $global:AppMan.Document.SelectTool( [int][string]$work[-1], $tool )
@@ -810,6 +815,7 @@ class TTToolsController {
         switch($num){
             0 { 
                 $num = $global:AppMan.Document.CurrentNumber
+                break
             }
             default {
                 $this.app._set( "Current.Tool", "$($global:AppMan.Document.CurrentTools[$num-1])$num" )
@@ -823,16 +829,17 @@ class TTToolsController {
 
 }
 class TTEditorController {
-    #region basic function
+    #region variants/ new/ default/ initialize
     [TTToolsController] $tools
+
     TTEditorController( [TTToolsController] $_tools ){
         $this.tools = $_tools
     }
     [TTEditorController] default(){
 
-        $this.tools.app._set( 'Editor1.Index',    'thinktank' )
-        $this.tools.app._set( 'Editor2.Index',    'thinktank' )
-        $this.tools.app._set( 'Editor3.Index',    'thinktank' )
+        $this.tools.app._set( 'Editor1.Index', 'thinktank' )
+        $this.tools.app._set( 'Editor2.Index', 'thinktank' )
+        $this.tools.app._set( 'Editor3.Index', 'thinktank' )
 
         return $this
     }
@@ -842,31 +849,66 @@ class TTEditorController {
         $this.load( 3, $this.tools.app._get('Editor3.Index') )
         return $this
     }
+    #endregion
+
+    #region load/ focus
     [TTEditorController] load( [int]$no, [string]$index ){
         $global:AppMan.Document.Editor.Initialize( $no ).Load( $no, $index )
         return $this
     }
-
     [TTEditorController] focus( [int]$no ){
-        $global:AppMan.Document.EditorMan.focus( $no )
+        $global:AppMan.Document.SelectTool( $no, 'Editor' ).Focus( $no )
         return $this
     }
     #endregion
 
+    #region move_to, select_to, node_to
+    [bool] move_to( [string]$to ){
+        $no = $global:AppMan.Document.CurrentNumber
+        return $this.move_to( $no, $to )
+    }
+    [bool] move_to( [int]$no, [string]$to ){
+        return $global:AppMan.Document.Editor.MoveTo( $no, $to )
+    }
+    [bool] select_to( [string]$to, [string]$following_action ){
+        $no = $global:AppMan.Document.CurrentNumber
+        return $this.select_to( $no, $to, $following_action )
+    }
+    [bool] select_to( [int]$no, [string]$to, [string]$following_action ){
+        return $global:AppMan.Document.Editor.SelectTo( $no, $to, $following_action )
+    }
+    [bool] node_to( [string]$state ){
+        $no = $global:AppMan.Document.CurrentNumber
+        return $this.node_to( $no, $state )
+    }
+    [bool] node_to( [int]$no, [string]$state ){
+        # ファイルのD&Dしか捕捉できない。→ $drag.Data.GetFileDropList()
+        # browserのlinkはurlテキストが貼り付けられてしまい、PreviewDropが発火しない
+        return $global:AppMan.Document.Editor.NodeTo( $no, $state )
+    }
+
+    #endregion
+
+
     #region event
     [bool] on_textchanged( $params ){
+
+        return $true
 
         $editor = $params[0]
         $script:DocMan.Tool( $editor.Name ).UpdatexEditorFolding()
         switch( $editor.Name ){
-            'xEditor1' { TTTimerResistEvent "TextxEditors1_TextChanged" 40 0 { $script:desk.tool('xEditor1').save() } }
-            'xEditor2' { TTTimerResistEvent "TextxEditors2_TextChanged" 40 0 { $script:desk.tool('xEditor2').save() } }
-            'xEditor3' { TTTimerResistEvent "TextxEditors3_TextChanged" 40 0 { $script:desk.tool('xEditor3').save() } }
+            'xEditor1' { TTTimerResistEvent "TextxEditors1_TextChanged" 40 0 { $script:desk.tool('Editor1').save() } }
+            'xEditor2' { TTTimerResistEvent "TextxEditors2_TextChanged" 40 0 { $script:desk.tool('Editor2').save() } }
+            'xEditor3' { TTTimerResistEvent "TextxEditors3_TextChanged" 40 0 { $script:desk.tool('Editor3').save() } }
         }
 
         return $true
     }
     [bool] on_focus( $params ){
+
+        return $true
+
         $editor = $params[0]
         $name = $editor.Name
         $memo = $script:DocMan.config.$name.index
@@ -888,6 +930,9 @@ class TTEditorController {
 
     }
     [bool] on_previewmousedown( $params ){
+
+        return $true
+
         $editor   = $args[0]
         $memoitem = $args[1]
     
@@ -904,14 +949,14 @@ class TTEditorController {
         return $true
     }
     [bool] on_previewdrop( $params ){
+
+        return $true
+
         $editor = $params[0]
         $drag = $params[1]
         Write-Host $drag   
         # 要修正
     
-        # ファイルのD&Dしか捕捉できない。→ $drag.Data.GetFileDropList()
-        # browserのlinkはurlテキストが貼り付けられてしまい、PreviewDropが発火しない
-            return $true
     }
 
 
@@ -984,190 +1029,8 @@ class TTMenuController {
 
 }
 
-
-<#
-#region index, library, shelf, ListMenu / TTListPanel
+<# region 旧　index, library, shelf, ListMenu 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-class TTListPanel {
-
-    [TTListPanel] menu(){
-        if( $null -eq $this._sorting ){ return $this }
-
-        $this._sorting.Items.Clear()
-
-        if( $null -ne $this._group.menus ){
-            foreach( $menu in $this._group.menus ){
-                $items = $this._sorting.Items
-                $keys = $menu.keys.split(",")
-                foreach( $key in $keys ){
-                    if( 0 -eq $items.where{ $_.Header -eq $key }.count ){
-                        $item = [MenuItem]::New()
-                        $item.Header = $key
-                        if( $keys[-1] -eq $key ){ $item.Add_Click( $menu.value ) }
-                        $items.Add($item)
-                        $items = $item.Items
-
-                    }else{
-                        $items = $items.where{ $_.Header -eq $key }[0].Items
-                    }
-                }
-            }
-        }
-
-        return $this
-    }
-    [TTListPanel] focus(){ 
-        $this._keyword.Focus()
-        $script:app._set( 'Application.Focused', $this._name )
-        return $this
-    }
-    [TTListPanel] caption( $text ){
-        if( 0 -lt $text.length ){
-            $caption = ($this._caption.Content) -replace "^[●]?(.*)", "`$1"
-            $this._caption.Content = switch( $text ){
-                '*' { "●$caption"; break }
-                '-' { $caption; break }
-                default { "$($this._name) : $text" }
-            }
-        }
-        return $this
-    }
-    [TTListPanel] items( $items ){
-        $this._items.Items.SortDescriptions.Clear()
-        $this._items.ItemsSource = $null
-        $this._items.ItemsSource = $items
-
-        $dictionary = $this._dictionary
-        $bindings = $dictionary.Shelf.split(",")
-              
-        $this._items.Columns.Clear()
-        $bindings.foreach{
-            $col = [DataGridTextColumn]::New()
-            $col.Header = $dictionary[$_]
-            $col.Binding = [Data.Binding]::New($_)
-            if( $bindings.IndexOf($_) -eq $bindings.count - 1 ){ $col.Width = "*" }
-            $this._items.Columns.Add( $col )
-        }
-
-        $this._items.Items.Refresh()
-        return $this
-    }
-    [TTListPanel] replace( $items ){
-        return $this.cursor('preserve').items($items).cursor('restore')
-    }
-    [TTListPanel] reload(){
-        $this.search()
-        return $this
-    }
-    [TTListPanel] refresh(){
-        if( $null -ne $this._items ){
-            $this._items.Items.Refresh()
-        }
-        return $this
-    }
-    [TTListPanel] column( $column ){
-        try{ $num = [int]$column }catch{ $num = 0 }
-        if( 0 -lt $num ){
-            $this._column = $this._dictionary.Keys.where{ $this._dictionary[$_] -eq $this._items.columns[$num-1].Header }[0]
-        }else{
-            $this._column = $column
-        }
-        return $this
-    }
-    [TTListPanel] cursor( $action ){
-        $lv = $this._items
-        switch( $action ){
-            'up'    { $lv.SelectedIndex -= if( 0 -lt $lv.SelectedIndex ){ 1 }else{ 0 } }
-            'down'  { $lv.SelectedIndex += if( $lv.SelectedIndex -lt $lv.Items.Count - 1 ){ 1 }else{ 0 } }
-            'first' { $lv.SelectedIndex = 0 }
-            'last'  { $lv.SelectedIndex = $lv.Items.Count - 1 }
-            'up+'   { $lv.SelectedIndex -= if( 0 -le $lv.SelectedIndex ){ 1 }else{ -$lv.Items.Count } }
-            'down+' { $lv.SelectedIndex += if( $lv.SelectedIndex -lt $lv.Items.Count - 1 ){ 1 }else{ -$lv.Items.Count } }
-            'preserve'  {
-                if( $null -eq $lv.SelectedItem ){ break }
-                $this._item = $lv.SelectedItem }
-            'restore'   { 
-                if( $null -eq $this._item ){ break }
-                if( 0 -lt $lv.Items.where{ $_ -eq $this._item }.count ){
-                    $lv.SelectedItem = $this._item
-                }
-            }
-            default { $lv.SelectedItem = $this._group.GetChild( $action ) }
-        }
-        if( 0 -le $lv.SelectedIndex ){ $lv.ScrollIntoView( $lv.SelectedItem ) }
-        $this.status_reset( 'Index' )
-        return $this
-    }
-    [TTListPanel] sort( $direction ){
-        $this.cursor('preserve')
-
-        $lv = $this._items
-        $view = [System.Windows.Data.groupViewSource]::GetDefaultView( $lv.ItemsSource )
-        $direction  = switch( $direction ){
-            'toggle'    { if('Descending' -eq $view.SortDescriptions[0].Direction){ 'Ascending' }else{ 'Descending' }  }
-            'Ascending' { 'Ascending' }
-            default     { 'Descending' }
-        }
-        $view.SortDescriptions.Clear()
-        $sortDescription = New-Object System.ComponentModel.SortDescription( $this._column, $direction )
-        $view.SortDescriptions.Add( $sortDescription )
-
-        $this.cursor('restore')
-        $this.status_reset( 'Sort' )
-        return $this
-    }
-
-    [TTObject] item( $index ){
-        return $this._group.GetChild( $index )
-    }
-    [array]sort_params(){
-        $lv = $this._items
-        $view = [System.Windows.Data.groupViewSource]::GetDefaultView( $lv.ItemsSource )
-        return @( $view.SortDescriptions[0].Direction, $view.SortDescriptions[0].PropertyName )
-    }
-    [string]selected_index(){
-        return $this._items.SelectedItem.($this._dictionary.Index)
-    }
-    [TTListPanel] searh(){
-        $text = $this._keyword.Text
-        $dir, $col = $this.sort_params()
-        $this.cursor('preserve').items( $this._group.GetChildren( $text ) ).sort( $dir ).cursor('restore')
-        $this.status_set( 'Sort', $text )
-        return $this
-    }
-    [TTListPanel] search( $text ){
-        $this._keyword.Text = $text
-        return $this
-    }
-    [TTListPanel] nosearch(){
-        $this._keyword.Text = ''
-        return $this
-    }
-    [TTListPanel] status_set( $id, $text ){
-        switch( $id ){
-            'Sort' {
-                $dir, $col = $this.sort_params()
-                $script:app._set( "$($this._name).SortColumn", $col )
-                $script:app._set( "$($this._name).SortDir", $dir )
-            }
-            'Index' {
-                $script:app._set( "$($this._name).Index", $this.selected_index() )
-            }
-            'Keyword' {
-                $script:app._set( "$($this._name).Keyword", $text )
-            }
-        }
-        return $this
-    }
-    [TTListPanel] status_reset( $id ){ return $this.status_set( $id, "") }
-
-    [TTListPanel] delete_selected(){
-        $index = $this.selected_index()
-        $this._group.DeleteChild( $index )
-        return $this
-    }
-
-}
 class TTLibrary : TTListPanel {
     TTLibrary(){
         $this._name = "Library"
@@ -1377,10 +1240,9 @@ class TTListMenu : TTListPanel {
     }
 
 }
-
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-#region desk / TTDesk
+#>
+# region desk / TTDesk
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 class TTDesk{
     [string] $_name
@@ -1630,10 +1492,6 @@ class TTDesk{
         $script:DocMan.Tool( $this._tool ).Insert( $text )
         return $this
     }
-    [TTDesk] cursor( $action ){
-        $script:DocMan.Tool( $this._tool ).Cursor( $action )
-        return $this
-    }
     [bool] replace( $regex, $text ){
         return $script:DocMan.Tool( $this._tool ).Replace( $regex, $text )
     }
@@ -1668,8 +1526,8 @@ class TTDesk{
 }
 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-#region　ListMenu / TTListMenu
+#>
+<# region　ListMenu / TTListMenu
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 [xml]$script:ListMenuXaml = [xml]@"

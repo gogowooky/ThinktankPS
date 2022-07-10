@@ -5,7 +5,7 @@
 using namespace System.Windows.Documents
 using namespace System.Windows.Controls
 using namespace System.Windows
-
+using namespace System.Xml
 
 
 
@@ -239,8 +239,8 @@ class TTPanelManager {
         $this._textbox =    $app.FindName("$($this._name)Keyword")
         $this._menu =       $app.FindName("$($this._name)Sorting")
 
-        $this._panel.Add_GotFocus( $global:TTPanelTool_GotFocus )
-        $this._panel.Add_LostFocus( $global:TTPanelTool_LostFocus )
+        $this._textbox.Add_GotFocus( $global:TTPanelTool_GotFocus )
+        $this._textbox.Add_LostFocus( $global:TTPanelTool_LostFocus )
         $this._panel.Add_SizeChanged( $global:TTPanel_SizeChanged )
         
     }
@@ -296,6 +296,16 @@ class TTPanelManager {
     }
     [string]Keyword(){
         return $this._textbox.Text
+    }
+    [string[]]Keywords(){
+        $text = $this._textbox.Text.Trim().Split(',')[0]
+        if( $text -ne '' ){
+            $text = $text -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'
+            $text = $text -replace "[ 　\t]+", ' '
+            return $text.split(' ')   
+        }
+        return $null
+
     }
     [TTPanelManager] Sorting( [psobject[]]$menus ){
         # 【引数】 
@@ -528,6 +538,7 @@ class TTShelfManager : TTPanelManager {
         $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
         $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToExtract )
         $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
+
     }
 
 }
@@ -535,6 +546,7 @@ class TTDeskManager : TTPanelManager {
 
     TTDeskManager( [TTAppManager]$app ) : base ( "Desk", $app ){
         $this._textbox.Add_TextChanged( $global:TTDesk_TextChanged_ToHighlight )
+
 
         # $script:TextEditors_PreviewKeyDown
         # $script:TextEditors_TextChanged
@@ -679,14 +691,14 @@ class TTDocumentManager{
         (1..3).foreach{ $this.SelectTool( $_, 'Editor' ) }
 
     }
-    [string] Focus( [int]$num ){ # 1..3
+    [TTDocumentManager] Focus( [int]$num ){ # 1..3
         $this.SetCurrent( $num )
         $this.( $this.CurrentTools[$num-1] ).Focus( $num )
         return $this
     }
-    [string] SetCurrent( [int]$num ){ # 1..3
+    [TTDocumentManager] SetCurrent( [int]$num ){ # 1..3
         $this.CurrentNumber = $num
-        return $this.( $this.CurrentTools[$num-1] ).Name
+        return $this
     }
     [TTDocumentManager] SelectTool( [int]$num, [string]$tool ){
         $this.CurrentTools[$num-1] = $tool  # Editor/Browser/Grid
@@ -698,7 +710,6 @@ class TTDocumentManager{
 
         return $this
     }
-
 
 }
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -741,6 +752,7 @@ class TTEditorsManager : TTToolsManager{
     #region variants
     # static [ScriptBlock] $OnSave
     # static [ScriptBlock] $OnLoad
+    static [bool] $StayCursor = $false
 
     hidden [ICSharpCode.AvalonEdit.Document.TextDocument[]] $documents = @()
     [string[]] $Indices = @( "", "", "" )
@@ -750,10 +762,11 @@ class TTEditorsManager : TTToolsManager{
     [string[][]] $Histories= @( @(), @(), @() )
     [int[]] $HistoryPositions
     [string[]] $IDs = @( 'Editor1', 'Editor2', 'Editor3' )
-
+    [xml] $xshd
     #endregion
 
     TTEditorsManager( $docman ) : base( $docman ) {
+        $this.xshd = Get-Content "$script:TTScriptDirPath\thinktank.xshd"
     }
     [TTEditorsManager] Initialize(){               # if needed
         ([TTToolsManager]$this).Initialize()
@@ -763,15 +776,35 @@ class TTEditorsManager : TTToolsManager{
         return $this
     }
     [TTEditorsManager] Initialize( [int]$num ){
+        $editor = $this.Controls[$num-1]
         if( $null -ne $this.FoldManagers[$num-1] ){
             [ICSharpCode.AvalonEdit.Folding.FoldingManager]::Uninstall( $this.FoldManagers[$num-1] )
         }
-        $this.documents.where{ $_ -eq $this.Controls[$num-1].Document }.foreach{
+        $this.documents.where{
+            $_ -eq $editor.Document
+        }.foreach{
             $_.Text = ""
             $_.FileName = ""
         }
-        $this.Controls[$num-1].Document = $null
         $this.Indices[$num-1] = ""
+
+        $editor.Document = $null
+        $editor.Options.ShowTabs = $True
+        $editor.Options.IndentationSize = 6
+        $editor.Options.HighlightCurrentLine = $True
+        $editor.Options.EnableHyperlinks = $False
+        $editor.Options.EnableEmailHyperlinks = $False
+
+        $editor.SyntaxHighlighting = [ICSharpCode.AvalonEdit.Highlighting.Xshd.HighlightingLoader]::Load( 
+            [XmlReader](New-Object XmlNodeReader ([xml]$this.xshd)),
+            [ICSharpCode.AvalonEdit.Highlighting.HighlightingManager]::Instance
+        )
+        $editor.AllowDrop = $true
+
+        $editor.Add_TextChanged( $global:TextEditors_TextChanged )
+        $editor.Add_GotFocus( $global:TextEditors_GotFocus )
+        $editor.Add_PreviewMouseDown( $global:TextEditors_PreviewMouseDown )
+        $editor.Add_Drop( $global:TextEditors_PreviewDrop )
 
         return $this
     }
@@ -819,105 +852,42 @@ class TTEditorsManager : TTToolsManager{
 
         return $this
     }
-    [TTEditorsManager] Save( [int]$num ){
-        $editor = $this.Editors[$num]
-        $filepath = $editor.Document.FileName
-
-        if( (0 -lt $filepath.length) -and ( $editor.IsModified ) ){
-            if( $this.app._istrue( "Config.MemoSavedMessage" ) ){
-                $title = $editor.Text.split( "`r`n" )[0]
-                [TTTool]::debug_message( $editor.Name, "Save Memo $($this.Indices[$num]) : $title" )
-            }
-
-            $editor.Encoding = [System.Text.Encoding]::UTF8
-            $editor.Save( $filepath )
-            &[TTEditorsManager]::OnSave $this
-        }
-        return $this
-    }
-    [TTDocumentManager] Modified( [int]$num ){
-        $this.Editor[$num].IsModified = $True
-        return $this
-    }
-    [TTDocumentManager] SetWordWrap( [int]$num, $value ){
-        $this.Controls.WordWrap = $value
-        return $this
-    }
-    [void] UpdateFolding( [int]$num ){
-        if( $null -ne $this.FoldStrategies[$num] ){
-            $this.FoldStrategies[$num].UpdateFoldings( $this.FoldManager[$num], $this.Controls[$num].Document )
-        }
-    }
-    [TTToolsManager] ScrollTo( [int]$num, [string]$to ){            # should be override
-        $editor = $this.Controls[$num]
-        switch( $to ){
-            'nextline' { $editor.LineUp() }
-            'prevline' { $editor.LineDown() }
-        }
-        return $this
-    }
     [bool] MoveTo( [int]$num, [string]$to ){
-        $editor = $this.Controls[$num]
+        $editor = $this.Controls[$num-1]
         $curpos = $editor.CaretOffset
         $curlin = $editor.document.GetLineByOffset( $curpos )
+        $area = $editor.TextArea
+        $doc  = $editor.Document
 
-        $text = $script:desk._keyword.Text.Trim().Split(",")[0]           # テキストボックスの最初の , までをキーワード認識
-        $text = $text -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'  # 正規表現記号をエスケープ 
-        $text = $text -replace "[ 　\t]+", " "                          # 空白文字を半角に統一
-    
         :Handled switch( $to ){
-            'documentend'   { [EditingCommands]::MoveToDocumentEnd.Execute( $null, $editor.TextArea ) }
-            'documentstart' { [EditingCommands]::MoveToDocumentStart.Execute( $null, $editor.TextArea ) }
-            'lineend'   { [EditingCommands]::MoveToLineEnd.Execute( $null, $editor.TextArea ) }
-            'linestart' { [EditingCommands]::MoveToLineStart.Execute( $null, $editor.TextArea ) }
-            'rightchar' { [EditingCommands]::MoveRightByCharacter.Execute( $null, $editor.TextArea ) }
-            'leftchar'  { [EditingCommands]::MoveLeftByCharacter.Execute( $null, $editor.TextArea ) }
-
-            'lineend+' {
-                if ( $curpos -eq $editor.Document.GetLineByOffset( $curpos ).EndOffset ){
-                    [EditingCommands]::MoveToDocumentEnd.Execute( $null, $editor.TextArea )
-                }else{
-                    [EditingCommands]::MoveToLineEnd.Execute( $null, $editor.TextArea )
-                }  
-            }
+            'documentstart' { [EditingCommands]::MoveToDocumentStart.Execute( $null, $area ) }
+            'documentend'   { [EditingCommands]::MoveToDocumentEnd.Execute( $null, $area ) }
+            'linestart' { [EditingCommands]::MoveToLineStart.Execute( $null, $area ) }
+            'lineend'   { [EditingCommands]::MoveToLineEnd.Execute( $null, $area ) }
+            'leftchar'  { [EditingCommands]::MoveLeftByCharacter.Execute( $null, $area ) }
+            'rightchar' { [EditingCommands]::MoveRightByCharacter.Execute( $null, $area ) }
             'linestart+' {
-                if ( $curpos -eq $editor.Document.GetLineByOffset( $curpos ).Offset ){
-                    [EditingCommands]::MoveToDocumentStart.Execute( $null, $editor.TextArea )
-                }else{
-                    [EditingCommands]::MoveToLineStart.Execute( $null, $editor.TextArea )
-                }
+                $to = if ( $curpos -eq $doc.GetLineByOffset( $curpos ).Offset ){ 'documentstart' }else{ 'linestart' }
+                return $this.MoveTo( $num, $to )
             }
-            'nextline' {
-                [EditingCommands]::MoveDownByLine.Execute( $null, $editor.TextArea )
-                if( $script:app._get( "$($editor.name).StayCursor" ) -eq 'true' ){ $this.ScrollTo( 'nextline' ) }
+            'lineend+'  {
+                $to = if ( $curpos -eq $doc.GetLineByOffset( $curpos ).EndOffset ){ 'documentend' }else{ 'lineend' }
+                return $this.MoveTo( $num, $to )
             }
             'prevline' {
-                [EditingCommands]::MoveUpByLine.Execute( $null, $editor.TextArea )
-                if( $script:app._get( "$($editor.name).StayCursor" ) -eq 'true' ){ $this.ScrollTo( 'prevline' ) }
+                [EditingCommands]::MoveUpByLine.Execute( $null, $area )
+                if( [TTEditorsManager]::StayCursor ){ $this.ScrollTo( 'prevline' ) }
             }
-            'nextnode' {
-                $level = if( $editor.document.GetText( $curlin.Offset, 15 ) -match "(?<tag>^#+) .*"  ){ $Matches.tag.length }else{ 10 }
-                $curlin = $curlin.NextLine
-                while( $null -ne $curlin ){
-                    # scan document
-                    if( $editor.document.GetText( $curlin.Offset, 15 ) -match "^(?<tag>#{1,$level}) .*" ){
-                        if( ($level -eq $Matches.tag.length) -or ($level -eq 10) ){
-                            $editor.CaretOffset = $curlin.Offset
-                            $editor.ScrollToLine( $curlin.LineNumber )
-                            break
-                        }elseif( $Matches.tag.length -lt $level ){
-                            break
-                        }
-                    }
-                    $curlin = $curlin.NextLine
-                }
+            'nextline' {
+                [EditingCommands]::MoveDownByLine.Execute( $null, $area )
+                if( [TTEditorsManager]::StayCursor ){ $this.ScrollTo( 'nextline' ) }
             }
-            'prevnode' {
-                $level = if( $editor.document.GetText( $curlin.Offset, 15 ) -match "(?<tag>^#+) .*"  ){ $Matches.tag.length }else{ 10 }
+            'prevnode' { # 変更 220706
+                $level = if( $doc.GetText( $curlin.Offset, 15 ) -match "(?<tag>^#+) .*"  ){ $Matches.tag.length }else{ 10 }
                 $curlin = $curlin.PreviousLine
                 while( $null -ne $curlin ){
                     # scan document
-                    if( $editor.document.GetText( $curlin.Offset, 15 ) -match "^(?<tag>#{1,$level}) .*" ){
+                    if( $doc.GetText( $curlin.Offset, 15 ) -match "^(?<tag>#{1,$level}) .*" ){
                         if( ($level -eq $Matches.tag.length) -or ( $level -eq 10) ){
                             $editor.CaretOffset = $curlin.Offset
                             $editor.ScrollToLine( $curlin.LineNumber )
@@ -929,49 +899,66 @@ class TTEditorsManager : TTToolsManager{
                     $curlin = $curlin.PreviousLine
                 }
             }
-            'nextkeyword' {
-                if( "" -eq $text ){ return $false }
-                $pos = ( $text.split(" ").foreach{
-                    $editor.Document.IndexOf( $_, $editor.CaretOffset + 1, $editor.Text.Length - $editor.CaretOffset - 1, [System.StringComparison]::CurrentCultureIgnoreCase )
-                } | Measure-Object -Minimum ).Minimum
-            
-                if( $pos -ne -1 ){
-                    $editor.CaretOffset = $pos
-                    $editor.ScrollTo( $editor.TextArea.Caret.Line, $editor.TextArea.Caret.Column )
-                }else{
-                    return $false
-                }            
-            }
-            'prevkeyword' {
-                if( "" -eq $text ){ return $false }
-                $pos = ( $text.split(" ").foreach{
-                    $editor.Document.LastIndexOf( $_, 0, $editor.CaretOffset, [System.StringComparison]::CurrentCultureIgnoreCase )
-                } | Measure-Object -Maximum ).Maximum
-            
-                if( $pos -ne -1 ){
-                    $editor.CaretOffset = $pos
-                    $editor.ScrollTo( $editor.TextArea.Caret.Line, $editor.TextArea.Caret.Column )
-                }else{
-                    return $false
-                }
-            }
-            'nextkeywordnode' {
-                $lin = $curlin.NextLine 
-                while( $null -ne $lin ){
-                    $lintext = $editor.document.GetText( $lin.Offset, $lin.Length )
-                    if( $lintext[0] -eq '#' ){
-                        $pos = @( $text.split(" ").foreach{ $lintext.IndexOf( $_ ) }.where{ $_ -ne -1 } | Measure-Object -Max ).Maximum
-                        if( $null -ne $pos ){
-                            $editor.CaretOffset = $lin.Offset + $pos
-                            $editor.ScrollToLine( $lin.Offset + $pos )
-                            break :Handled
+            'nextnode' { # 変更 220706
+                $level = if( $doc.GetText( $curlin.Offset, 15 ) -match "(?<tag>^#+) .*"  ){ $Matches.tag.length }else{ 10 }
+                $curlin = $curlin.NextLine
+                while( $null -ne $curlin ){
+                    # scan document
+                    if( $doc.GetText( $curlin.Offset, 15 ) -match "^(?<tag>#{1,$level}) .*" ){
+                        if( ($level -eq $Matches.tag.length) -or ($level -eq 10) ){
+                            $editor.CaretOffset = $curlin.Offset
+                            $editor.ScrollToLine( $curlin.LineNumber )
+                            break
+                        }elseif( $Matches.tag.length -lt $level ){
+                            break
                         }
                     }
-                    $lin = $lin.NextLine 
+                    $curlin = $curlin.NextLine
                 }
-                return $false
+            }
+            'prevkeyword' { # 変更 220706
+                $keywords = $this.app.Desk.Keywords()
+                if( $null -eq $keywords ){
+                    $this.MoveTo( $num, 'prevnode' )
+
+                }else{
+                    $pos = ( $keywords.foreach{
+                        $editor.Document.LastIndexOf( $_, 0, $editor.CaretOffset, [System.StringComparison]::CurrentCultureIgnoreCase )
+                    } | Measure-Object -Maximum ).Maximum
+                
+                    if( $pos -ne -1 ){
+                        $editor.CaretOffset = $pos
+                        $editor.ScrollTo( $area.Caret.Line, $area.Caret.Column )
+
+                    }else{
+                        return $false
+                    }
+                }
+            }
+            'nextkeyword' { # 変更 220706
+                $keywords = $this.app.Desk.Keywords()
+                if( $null -eq $keywords ){
+                    $this.MoveTo( $num, 'nextnode' )
+
+                }else{
+                    $pos = ( $keywords.foreach{
+                        $editor.Document.IndexOf( $_, $editor.CaretOffset + 1, $editor.Text.Length - $editor.CaretOffset - 1, [System.StringComparison]::CurrentCultureIgnoreCase )
+                    } | Measure-Object -Minimum ).Minimum
+
+                    if( $pos -ne -1 ){
+                        $editor.CaretOffset = $pos
+                        $editor.ScrollTo( $area.Caret.Line, $area.Caret.Column )
+                        
+                    }else{
+                        return $false
+                    }
+                }
             }
             'prevkeywordnode' {
+                $text = $global:AppMan.Desk._textbox.Text.Trim().Split(",")[0]         # テキストボックスの最初の , までをキーワード認識
+                $text = $text -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'  # 正規表現記号をエスケープ 
+                $text = $text -replace "[ 　\t]+", " "                          # 空白文字を半角に統一
+
                 $lin = $curlin.PreviousLine 
                 while( $null -ne $lin ){
                     $lintext = $editor.document.GetText( $lin.Offset, $lin.Length )
@@ -984,6 +971,26 @@ class TTEditorsManager : TTToolsManager{
                         }
                     }
                     $lin = $lin.PreviousLine 
+                }
+                return $false
+            }
+            'nextkeywordnode' {
+                $text = $global:AppMan.Desk._textbox.Text.Trim().Split(",")[0]         # テキストボックスの最初の , までをキーワード認識
+                $text = $text -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'  # 正規表現記号をエスケープ 
+                $text = $text -replace "[ 　\t]+", " "                          # 空白文字を半角に統一
+
+                $lin = $curlin.NextLine 
+                while( $null -ne $lin ){
+                    $lintext = $editor.document.GetText( $lin.Offset, $lin.Length )
+                    if( $lintext[0] -eq '#' ){
+                        $pos = @( $text.split(" ").foreach{ $lintext.IndexOf( $_ ) }.where{ $_ -ne -1 } | Measure-Object -Max ).Maximum
+                        if( $null -ne $pos ){
+                            $editor.CaretOffset = $lin.Offset + $pos
+                            $editor.ScrollToLine( $lin.Offset + $pos )
+                            break :Handled
+                        }
+                    }
+                    $lin = $lin.NextLine 
                 }
                 return $false
             }
@@ -1004,9 +1011,89 @@ class TTEditorsManager : TTToolsManager{
         }
 
         return $true
+
     }
-    [TTDocumentManager] SelectTo( [int]$num, [string]$to, [string]$following_action ){
-        $editor = $this.Controls[$num]
+    [bool] NodeTo( [int]$num, [string]$state ){
+        $editor =   $this.Controls[$num-1]
+        $curpos =   $editor.CaretOffset
+        $curlin =   $editor.document.GetLineByOffset( $curpos )
+        $foldman =  $this.FoldManagers[$num-1]
+
+        switch( $state ){
+            'open_all'  { $foldman.AllFoldings.foreach{ $_.IsFolded = $false }; return $true }
+            'close_all' { $foldman.AllFoldings.foreach{ $_.IsFolded = $true }; return $true }
+        }
+
+        # check not node
+        if( -not ( $editor.document.GetText( $curlin.Offset, 10 ) -match "(?<tag>^#+) .*" ) ){ return $false }
+
+        $level = $Matches.tag.length       
+        $folding = $foldman.GetFoldingsAt( $curlin.EndOffset )[0]
+        # check not folding
+        if( $null -eq $folding ){ return $false }
+
+        switch( $state ){
+            'open' {
+                if( $folding.IsFolded -ne $False ){
+                    $folding.IsFolded = $False                  # open node
+                }else{
+                    $this.NodeTo( $num, 'open_children' )     # open all child nodes
+                }
+            }
+            'open_children' {
+                $open_already = $true
+                $endlin = $curlin.NextLine
+                while( $null -ne $endlin ){
+                    if( $editor.document.GetText( $endlin.Offset, 15 ) -match "^(?<tag>#{$level}) .*" ){ break }
+                    $endlin = $endlin.NextLine
+                }
+                if( $null -eq $endlin ){ $endlin = $editor.Document.Lines[-1] }
+                $foldman.AllFoldings.foreach{
+                    if( ($curlin.Offset -lt $_.StartOffset) -and ($_.StartOffset -lt $endlin.Offset) ){
+                        $_.IsFolded = $false                    # open all child nodes
+                        $open_already = $false
+                    } 
+                }
+                if( $open_already ){ 
+                    $this.NodeTo( $num, 'open_sibling' )      # open all sibling nodes
+                }
+            }
+            'open_sibling' {
+                $foldman.AllFoldings.foreach{
+                    $lin = $editor.document.GetLineByOffset( $_.StartOffset )
+                    if( $editor.document.GetText( $lin.Offset, 10 ) -match "^(?<tag>#{$level}) .*" ){
+                        $_.IsFolded = $False                    # open all sibling nodes
+                    }
+                }
+            }
+            'close' {
+                if( $folding.IsFolded -ne $True ){
+                    $folding.IsFolded = $True                   # close node
+                }else{
+                    $this.NodeTo( $num, 'close_sibling' )     # close all sibling nodes
+                }
+            }
+            'close_sibling' {
+                $foldman.AllFoldings.foreach{
+                    $lin = $editor.document.GetLineByOffset( $_.StartOffset )
+                    if( $editor.document.GetText( $lin.Offset, 10 ) -match "^(?<tag>#{$level}) .*" ){
+                        $_.IsFolded = $True                    # close all sibling nodes
+                    }
+                }
+            }
+            'close_children' {
+                $foldman.AllFoldings.foreach{
+                    if( ($curlin.Offset -lt $_.StartOffset) -and ($_.StartOffset -lt $curli.EndOffset) ){
+                        $_.IsFolded = $True                    # close all child nodes
+                    } 
+                }
+            }
+        }
+
+        return $true
+    }
+    [bool] SelectTo( [int]$num, [string]$to, [string]$following_action ){
+        $editor = $this.Controls[$num-1]
         $curpos  = $editor.CaretOffset
 
         switch( $to ){
@@ -1050,85 +1137,51 @@ class TTEditorsManager : TTToolsManager{
             default {}
         }
 
+        return $true
+
+    }
+
+
+
+    
+
+
+
+    [TTEditorsManager] Save( [int]$num ){
+        $editor = $this.Editors[$num]
+        $filepath = $editor.Document.FileName
+
+        if( (0 -lt $filepath.length) -and ( $editor.IsModified ) ){
+            if( $this.app._istrue( "Config.MemoSavedMessage" ) ){
+                $title = $editor.Text.split( "`r`n" )[0]
+                [TTTool]::debug_message( $editor.Name, "Save Memo $($this.Indices[$num]) : $title" )
+            }
+
+            $editor.Encoding = [System.Text.Encoding]::UTF8
+            $editor.Save( $filepath )
+            &[TTEditorsManager]::OnSave $this
+        }
         return $this
     }
-    [TTDocumentManager] NodeTo( [int]$num, [string]$state ){
+    [TTDocumentManager] Modified( [int]$num ){
+        $this.Editor[$num].IsModified = $True
+        return $this
+    }
+    [TTDocumentManager] SetWordWrap( [int]$num, $value ){
+        $this.Controls.WordWrap = $value
+        return $this
+    }
+    [void] UpdateFolding( [int]$num ){
+        if( $null -ne $this.FoldStrategies[$num] ){
+            $this.FoldStrategies[$num].UpdateFoldings( $this.FoldManager[$num], $this.Controls[$num].Document )
+        }
+    }
+    [TTToolsManager] ScrollTo( [int]$num, [string]$to ){            # should be override
         $editor = $this.Controls[$num]
-        $curpos = $editor.CaretOffset
-        $curlin = $editor.document.GetLineByOffset( $curpos )
-        $foldman = $this.config.($editor.Name).foldman
-
-        switch( $state ){
-            'open_all'  { $foldman.AllFoldings.foreach{ $_.IsFolded = $false }; return $this }
-            'close_all' { $foldman.AllFoldings.foreach{ $_.IsFolded = $true }; return $this }
+        switch( $to ){
+            'nextline' { $editor.LineUp() }
+            'prevline' { $editor.LineDown() }
         }
-
-        # check not node
-        if( -not ( $editor.document.GetText( $curlin.Offset, 10 ) -match "(?<tag>^#+) .*" ) ){ return $this }
-
-        $level = $Matches.tag.length       
-        $folding = $foldman.GetFoldingsAt( $curlin.EndOffset )[0]
-        # check not folding
-        if( $null -eq $folding ){ return $this }
-
-        switch( $state ){
-            'open' {
-                if( $folding.IsFolded -ne $False ){
-                    $folding.IsFolded = $False                  # open node
-                }else{
-                    $this.NodeTo( 'open_children' )     # open all child nodes
-                }
-            }
-            'open_children' {
-                $open_already = $true
-                $endlin = $curlin.NextLine
-                while( $null -ne $endlin ){
-                    if( $editor.document.GetText( $endlin.Offset, 15 ) -match "^(?<tag>#{$level}) .*" ){ break }
-                    $endlin = $endlin.NextLine
-                }
-                if( $null -eq $endlin ){ $endlin = $editor.Document.Lines[-1] }
-                $foldman.AllFoldings.foreach{
-                    if( ($curlin.Offset -lt $_.StartOffset) -and ($_.StartOffset -lt $endlin.Offset) ){
-                        $_.IsFolded = $false                    # open all child nodes
-                        $open_already = $false
-                    } 
-                }
-                if( $open_already ){ 
-                    $this.NodeTo( 'open_sibling' )      # open all sibling nodes
-                }
-            }
-            'open_sibling' {
-                $foldman.AllFoldings.foreach{
-                    $lin = $editor.document.GetLineByOffset( $_.StartOffset )
-                    if( $editor.document.GetText( $lin.Offset, 10 ) -match "^(?<tag>#{$level}) .*" ){
-                        $_.IsFolded = $False                    # open all sibling nodes
-                    }
-                }
-            }
-            'close' {
-                if( $folding.IsFolded -ne $True ){
-                    $folding.IsFolded = $True                   # close node
-                }else{
-                    $this.NodeTo( 'close_sibling' )     # close all sibling nodes
-                }
-            }
-            'close_sibling' {
-                $foldman.AllFoldings.foreach{
-                    $lin = $editor.document.GetLineByOffset( $_.StartOffset )
-                    if( $editor.document.GetText( $lin.Offset, 10 ) -match "^(?<tag>#{$level}) .*" ){
-                        $_.IsFolded = $True                    # close all sibling nodes
-                    }
-                }
-            }
-            'close_children' {
-                $foldman.AllFoldings.foreach{
-                    if( ($curlin.Offset -lt $_.StartOffset) -and ($_.StartOffset -lt $curli.EndOffset) ){
-                        $_.IsFolded = $True                    # close all child nodes
-                    } 
-                }
-            }
-        }
-
         return $this
     }
     [TTDocumentManager] Insert( [int]$num, [string]$text ){

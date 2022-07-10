@@ -32,6 +32,10 @@ Add-Type -AssemblyName PresentationFramework, System.Windows.Forms, System.Drawi
 . .\script\thinktank-view.ps1           #  .NET Framework（UI出力）
 . .\script\thinktank-model.ps1          #　データ管理クラス
 . .\script\thinktank-control.ps1        #　データ-UI連携
+
+. .\script\thinktank-view-bind.ps1      #　.NET Framwork eventとcontrol, Key Eventとcommandをbinding
+
+
 . .\script\thinktank-event.ps1          #  .NET Framework（UI入力）
 . .\script\thinktank-command.ps1        #　コマンド
 
@@ -116,25 +120,8 @@ function TTTimerResistEvent( [string]$name, [long]$countdown, [long]$rewind, [Sc
 }
 #endregion###############################################################################################################
 
-#region KeyEvents/EventKeys セットアップ 
-#'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-$global:TTKeyEvents = @{}
-$global:TTEventKeys = @{}
+KeyBindingSetup
 
-$keybinds = ( @(  
-    $global:KeyBind_Application,    $global:KeyBind_Cabinet,    $global:KeyBind_Library, 
-    $global:KeyBind_Index,          $global:KeyBind_Shelf,      $global:KeyBind_Misc, 
-    $global:KeyBind_Desk,           $global:KeyBind_Editor,     $global:KeyBind_PopupMenu  ) -join "`n" )
-$keybinds.split("`n").foreach{
-    if( $_ -match "(?<mode>[^ ]+)\s{2,}(?<mod>[^ ]+( [^ ]+)?)\s{2,}(?<keyname>[^ ]+)\s{2,}(?<command>[^\s]+)\s*" ){
-        $global:TTKeyEvents[$Matches.mode] += @{}
-        $global:TTKeyEvents[$Matches.mode][$Matches.mod] += @{}
-        $global:TTKeyEvents[$Matches.mode][$Matches.mod][$Matches.keyname] = $Matches.command
-        $global:TTEventKeys[$Matches.command] += @()
-        $global:TTEventKeys[$Matches.command] += @( @{ Mode = $Matches.mode; Key = "[$($Matches.mod)]$($Matches.key)" } )
-    }
-}
-#endregion###############################################################################################################
 
 #region 本体
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
