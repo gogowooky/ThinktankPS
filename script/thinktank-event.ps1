@@ -49,6 +49,17 @@ xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 [ScriptBlock] $global:TextEditors_PreviewDrop =        { $global:appcon.tools.editor.on_previewdrop( $args ) }
 
 
+[ScriptBlock] $global:TTPanel_OnGotFocus    # Focus.Panel
+[ScriptBlock] $global:TTPanel_LostFocus
+[ScriptBlock] $global:TTTextBox_GotFocus  # Focus.Application
+[ScriptBlock] $global:TTTextBox_LostFocus
+[ScriptBlock] $global:TTTool_GotFocus     # Focus.Application
+[ScriptBlock] $global:TTTool_LostFocus
+[ScriptBlock] $global:TTMenu_GotFocus     # menu制御
+[ScriptBlock] $global:TTMenu_LostFocus
+[ScriptBlock] $global:TTWindow_GotFocus   # application制御
+[ScriptBlock] $global:TTWindow_LostFocus
+
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
