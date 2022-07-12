@@ -107,7 +107,7 @@ Application     Alt, Shift      S           ttcmd_panel_collapse_shelf
 Application     Alt, Shift      L           ttcmd_panel_collapse_library
 Application     Alt, Shift      I           ttcmd_panel_collapse_index
 Application     Alt, Shift      C           ttcmd_panel_collapse_cabinet
-Application     Alt, SHift      W           ttcmd_panel_focus_work_revtgl
+Application     Alt, Shift      W           ttcmd_panel_focus_work_toggle
 '@
 function ttcmd_application_noop( $source, $mod, $key ){
     #.SYNOPSIS
@@ -195,9 +195,11 @@ function ttcmd_panel_focus_work_toggle( $source, $mod, $key ){
     #.SYNOPSIS
     # Ｗorkplaceにフォーカス、その後Work1/2/3をトグル
 
+    $toggle = if( $mod.Contains('Shift') ){ 'revtgl' }else{ 'toggle' }
+
     switch -regex ( $global:appcon._get('Focus.Application') ){
-        "(?<panel>[^123]+)(?<num>[123])" {
-            $global:appcon.view.style( 'Work+Focus', 'toggle' )
+        "(Editor|Browser|Grid)[123]" {
+            $global:appcon.view.style( 'Work+Focus', $toggle )
        
         }
         default{
@@ -207,42 +209,27 @@ function ttcmd_panel_focus_work_toggle( $source, $mod, $key ){
     }
 
 }
-function ttcmd_panel_focus_work_revtgl( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Ｗorkplaceにフォーカス、その後Work1/2/3を反転トグル
 
-    switch -regex ( $global:appcon._get('Focus.Application') ){
-        "(?<panel>[^123]+)(?<num>[123])" {
-            $global:appcon.view.style( 'Work+Focus', 'revtgl' )
-       
-        }
-        default{
-            $global:appcon.group.focus( 'Workplace', $mod, $key )
-
-        }
-    }
-
-}
 function ttcmd_panel_collapse_shelf( $source, $mod, $key ){
     #.SYNOPSIS
     # Shelfを非表示
 
     $global:appcon.view.style( 'Shelf', 'None' )
-    ttcmd_panel_focus_desk $source $mod $key
+    $global:appcon.group.focus( 'Workplace', $mod, $key )
 }
 function ttcmd_panel_collapse_library( $source, $mod, $key ){
     #.SYNOPSIS
     # Libraryを非表示
 
     $global:appcon.view.style( 'Library', 'None' )
-    ttcmd_panel_focus_desk $source $mod $key
+    $global:appcon.group.focus( 'Workplace', $mod, $key )
 }
 function ttcmd_panel_collapse_index( $source, $mod, $key ){
     #.SYNOPSIS
     # Indexを非表示
 
     $global:appcon.view.style( 'Index', 'None' )
-    ttcmd_panel_focus_desk $source $mod $key
+    $global:appcon.group.focus( 'Workplace', $mod, $key )
 }
 function ttcmd_panel_collapse_cabinet( $source, $mod, $key ){
     #.SYNOPSIS

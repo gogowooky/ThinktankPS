@@ -31,7 +31,7 @@ xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 #region  View Events Binding
 [ScriptBlock] $global:TTWindowLoaded =  { $args[1].Handled = $global:appcon.initialize_application() }
 
-[ScriptBlock] $global:TTPanel_SizeChanged = { $global:appcon.set_border_status( $args ) }
+[ScriptBlock] $global:TTPanel_SizeChanged = { $global:appcon.event_set_border( $args ) }
 [ScriptBlock] $global:TTPanel_GotFocus =    { $args[1].Handled = $global:appcon.event_set_focus_panel( $args ) }
 [ScriptBlock] $global:TTPanel_LostFocus =   { $args[1].Handled = $global:appcon.event_terminate_tentative_and_popup( $args ) }
 [ScriptBlock] $global:TTTextBox_GotFocus =  { $args[1].Handled = $global:appcon.event_set_focus_application( $args ) }
@@ -108,7 +108,7 @@ xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 #endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 #region　Model Events Binding
-[ScriptBlock] $global:TTStatus_OnSave = {  $global:appcon.on_status_onsave( $args ) } 
+[ScriptBlock] $global:TTStatus_OnSave = {  $global:appcon.event_save_status( $args ) } 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 

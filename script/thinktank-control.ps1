@@ -135,9 +135,6 @@ class TTApplicationController {
     }
     #endregion
 
-    #region キーバインド管理
-
-    #endregion
 
     #region event
     [bool] event_set_focus_panel( $params ){ 
@@ -163,37 +160,46 @@ class TTApplicationController {
     [bool] event_set_focus_application( $params ){ 
 
         [TTTool]::debug_message( $params[0].Name, "event_set_focus_application" )
-
+        switch -regex ($this._get('Focus.Application')){
+            "(Library|Index|Shelf|Desk)" {
+                $global:AppMan.$_.Mark($false)
+            }
+            "(Editor|Browser|Grid)[123]" {
+                $global:AppMan.Desk.Mark($false)
+            }
+        }
         switch -regex ( $params[0].Name ){
             "(?<name>Library|Index|Shelf|Desk)" {
                 $this._set( 'Focus.Application', $Matches.name )
+                $global:AppMan.($this._get('Focus.Application')).Mark($true)
+
             }
             "(?<name>Editor|Browser|Grid)(?<num>[123])" {
                 $this._set( 'Current.Workplace', "Work$($Matches.num)" )
                 $this._set( 'Current.Tool', $Matches.name )
                 $this._set( 'Focus.Application', $Matches[0] )
+                $global:AppMan.Desk.Mark( "◎$($Matches[0])" )
+
             }
         }
         return $true
     }
-
-
-    [bool] set_border_status( $params ){ 
+    [bool] event_set_border( $params ){ 
         $panel = $params[0].Name
         switch -wildcard ( $panel ){
             'Library*' {
-                TTTimerResistEvent "set_border_status:$_" 2 0 {
+                TTTimerResistEvent "event_set_border:$_" 2 0 {
                     $global:appcon._set( 'Layout.Library.Width', [string]$global:AppMan.Border('Layout.Library.Width') )
                     $global:appcon._set( 'Layout.Library.Height', [string]$global:AppMan.Border('Layout.Library.Height') )
                 }    
             }
             'Shelf*' {
-                TTTimerResistEvent "set_border_status:$_" 2 0 {
+                TTTimerResistEvent "event_set_border:$_" 2 0 {
                     $global:appcon._set( 'Layout.Shelf.Height', [string]$global:AppMan.Border('Layout.Shelf.Height') )
                 }    
             }
             'Work1*' {
-                TTTimerResistEvent "set_border_status:$_" 2 0 {
+                TTTimerResistEvent "event_set_border:$_" 2 0 {
                     $global:appcon._set( 'Layout.Work1.Width', [string]$global:AppMan.Border('Layout.Work1.Width') )
                     $global:appcon._set( 'Layout.Work1.Height', [string]$global:AppMan.Border('Layout.Work1.Height') )
                 }    
@@ -202,7 +208,7 @@ class TTApplicationController {
         return $true
 
     }
-    [bool] on_status_onsave( $params ){ 
+    [bool] event_save_status( $params ){ 
         $collection = $params[0]
         @( 'Library', 'Index', 'Shelf' ).where{
             $global:appcon._get( "$_.Resource" ) -eq $collection.Name
@@ -321,7 +327,7 @@ class TTViewController {
             }
             'Work+Focus' { # Work1, Work2, Work3, toggle/revtgl
                 $this.style( 'Work', $value )
-                $this.app.group.focus('','',$this.app._get('Layout.Style.Work') )
+                $this.app.group.focus($this.app._get('Layout.Style.Work'),'','')
 
             }
             'Desk' { # Work12, Work123, Work13, toggle/revtgl
@@ -545,54 +551,31 @@ class TTGroupController {
     }
     [TTGroupController] focus( $panel, $mod, $key ){
 
-        switch -regex ( $panel ){
+        if( $panel -match "(?<panel>Library|Index|Shelf)\+" ){                      #### tentative focus
 
-            "(?<panel>Library|Index|Shelf)\+" {             #### tentative focus
+            $tentative_panel = $Matches.panel
 
-                $ttp = $Matches.panel
+            if( $this.app._ne( 'Focus.Application', $tentative_panel ) ){
 
-                if( $this.app._eq( 'Focus.Application', $ttp ) ){ #:::: on panel already → (focus)
-                    $this.focus( $ttp, $mod, $key)
-
-                }elseif( [TTTentativeKeyBindingMode]::IsNotActive() ){ #::: not activated
-
-                    $nopanel = ( $this.app.view.focusable( $ttp ) -eq $false )
-                    if( $nopanel ){ $this.app.view.style( $ttp, 'Default' ) }
-         
-                    [TTTentativeKeyBindingMode]::Start( $ttp, $mod, $key )
+                if( [TTTentativeKeyBindingMode]::IsNotActive() ){                   #:::: to go tentative mode
+                    $nopanel = ( $this.app.view.focusable( $tentative_panel ) -eq $false )
+                    if( $nopanel ){ $this.app.view.style( $tentative_panel, 'Default' ) }
+            
+                    [TTTentativeKeyBindingMode]::Start( $tentative_panel, $mod, $key )
                     [TTTentativeKeyBindingMode]::Add_OnExit({
                         if( $script:nopanel ){ $global:appcon.view.style( $script:ttp, 'None' ) }
                     }.GetNewClosure() )
 
-                }elseif( [TTTentativeKeyBindingMode]::Name -eq $ttp ){ #::: started → focus
+                }elseif( [TTTentativeKeyBindingMode]::Name -ne $tentative_panel ){  #:::: to cancel tentative mode
                     [TTTentativeKeyBindingMode]::Initialize()
-                    $this.focus( $ttp, $mod, $key)
 
                 }
-                break
             }
-            "(?<panel>Editor|Browser|Grid)(?<num>[123])" {  #### tool focus
-                $this.app.tools.tool( "Work$($Matches.num)", $Matches.panel )
-                $this.app.tools.focus( [int]($Matches.num) )
-                break
-            }
-            "Workplace" {                                   #### current workplace focus → delegate to tools
-                $this.app.tools.focus( 0 )
-                break
-            }
-            "Work(?<num>[123])" {                           #### workplace focus → delegate to tools
-                $this.app.tools.focus( [int]($Matches.num) )
-                break
-            }
-            default {                                       #### normal focus
 
-                if( $this.app._eq( 'Focus.Application', $panel ) ){ #::: on panel already
-                    break;
+        }else{                                                                      #### normal focus
+            if( $this.app._ne( 'Focus.Application', $panel ) ){
+                $global:AppMan.Focus( $panel )
 
-                }else{
-                    $global:AppMan.Focus( $panel )
-
-                }
             }
         }
 

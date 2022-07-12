@@ -130,17 +130,15 @@ class TTAppManager {
     }
     [string] Focus( [string] $target ){
 
-        if( -not $this.Focusable( $target ) ){ return '' }
-
         switch -regex ( $target ){      
             "(Library|Index|Shelf|Desk|Cabinet)" {                          # Library|Index|Sheld|Desk|Cabninet
                 return $this.$target.Focus()
             }
             "Work(?<num>[123])" {                                           # Work[123]
-                return $this.Document.Focus( $Matches.num )
+                return $this.Document.Focus( [int]($Matches.num) )
             }
             "Workplace" {                                                   # Workplace
-                return $this.Document.Focus( $this.Document.CurrentNumber )
+                return $this.Document.Focus( [int]($this.Document.CurrentNumber) )
             }
             "(?<panel>Editor|Browser|Grid)(?<num>[123])" {                  # Editor[123]/Browser[123]/Grid[123]
                 return $this.Document.SelectTool( $Matches.num, $Matches.panel ).Focus($Matches.num)
@@ -170,6 +168,7 @@ class TTAppManager {
     }
     [bool] Focusable( [string]$id ){
         switch -wildcard ( $id ){
+            'Workplace' { return $true }
             'Cabinet'   { return $true }
             'Library'   { return ( $this.Border('Layout.Library.Width') -ne 0 -and   $this.Border('Layout.Library.Height') -ne 0 ) }
             'Index'     { return ( $this.Border('Layout.Library.Width') -ne 0 -and   $this.Border('Layout.Library.Height') -ne 100 ) }
@@ -258,6 +257,11 @@ class TTPanelManager {
     [TTPanelManager] Mark( [bool]$sw ){
         $this._header = if( $sw ){ '●' }else{ '' }
         $this._label.Content = "$($this._header)$($this._name): $($this._caption)"
+        return $this
+    }
+    [TTPanelManager] Mark( [string]$header ){
+        $this._header = $header
+        $this._label.Content = "$($this._header): $($this._caption)"
         return $this
     }
     [TTPanelManager] Caption( [string]$caption ){
