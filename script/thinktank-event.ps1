@@ -31,13 +31,23 @@ xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 #region  View Events Binding
 [ScriptBlock] $global:TTWindowLoaded =  { $args[1].Handled = $global:appcon.initialize_application() }
 
-[ScriptBlock] $global:TTPanelTool_GotFocus =    { $args[1].Handled = $global:appcon.set_gotfocus_status( $args ) }
-[ScriptBlock] $global:TTPanelTool_LostFocus =   { $args[1].Handled = $global:appcon.set_lostfocus_status( $args ) }
+[ScriptBlock] $global:TTPanel_SizeChanged = { $global:appcon.set_border_status( $args ) }
+[ScriptBlock] $global:TTPanel_GotFocus =    { $args[1].Handled = $global:appcon.event_set_focus_panel( $args ) }
+[ScriptBlock] $global:TTPanel_LostFocus =   { $args[1].Handled = $global:appcon.event_terminate_tentative_and_popup( $args ) }
+[ScriptBlock] $global:TTTextBox_GotFocus =  { $args[1].Handled = $global:appcon.event_set_focus_application( $args ) }
+[ScriptBlock] $global:TTTextBox_LostFocus = { $args[1].Handled = $global:appcon.event_terminate_tentative_and_popup( $args ) }
+
+[ScriptBlock] $global:TTTool_GotFocus =     { $args[1].Handled = $global:appcon.event_set_focus_application( $args ) }
+[ScriptBlock] $global:TTTool_LostFocus =    { $args[1].Handled = $global:appcon.event_terminate_tentative_and_popup( $args ) }
+
+
+
+# [ScriptBlock] $global:TTPanelTool_GotFocus =    { $args[1].Handled = $global:appcon.set_gotfocus_status( $args ) }
+# [ScriptBlock] $global:TTPanelTool_LostFocus =   { $args[1].Handled = $global:appcon.set_lostfocus_status( $args ) }
 
 [ScriptBlock] $global:TTPanel_TextChanged_ToExtract =   { $global:appcon.group.textbox_on_textchanged( $args ) }
 [ScriptBlock] $global:TTDesk_TextChanged_ToHighlight =  { $global:appcon.group.desk_textbox_on_textchanged( $args ) }
 
-[ScriptBlock] $global:TTPanel_SizeChanged =         { $global:appcon.set_border_status( $args ) }
 [ScriptBlock] $global:TTDataGrid_Sorting =          { $global:appcon.group.datagrid_on_sorting( $args ) }
 [ScriptBlock] $global:TTDataGrid_SelectionChanged = { $global:appcon.group.datagrid_on_selectionchanged( $args ) }
 [ScriptBlock] $global:TTDataGrid_GotFocus =         { $global:appcon.group.datagrid_on_gotfocus( $args ) }
@@ -49,16 +59,10 @@ xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 [ScriptBlock] $global:TextEditors_PreviewDrop =        { $global:appcon.tools.editor.on_previewdrop( $args ) }
 
 
-[ScriptBlock] $global:TTPanel_OnGotFocus    # Focus.Panel
-[ScriptBlock] $global:TTPanel_LostFocus
-[ScriptBlock] $global:TTTextBox_GotFocus  # Focus.Application
-[ScriptBlock] $global:TTTextBox_LostFocus
-[ScriptBlock] $global:TTTool_GotFocus     # Focus.Application
-[ScriptBlock] $global:TTTool_LostFocus
-[ScriptBlock] $global:TTMenu_GotFocus     # menu制御
-[ScriptBlock] $global:TTMenu_LostFocus
-[ScriptBlock] $global:TTWindow_GotFocus   # application制御
-[ScriptBlock] $global:TTWindow_LostFocus
+[ScriptBlock] $global:TTMenu_GotFocus = {}     # menu制御
+[ScriptBlock] $global:TTMenu_LostFocus = {}
+[ScriptBlock] $global:TTWindow_GotFocus = {}   # application制御
+[ScriptBlock] $global:TTWindow_LostFocus = {}
 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 

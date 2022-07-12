@@ -140,41 +140,44 @@ class TTApplicationController {
     #endregion
 
     #region event
-    [bool] set_gotfocus_status( $params ){ 
+    [bool] event_set_focus_panel( $params ){ 
+
+        [TTTool]::debug_message( $params[0].Name, "event_set_focus_panel" )
+
         switch -regex ( $params[0].Name ){
-            "(?<name>Library|Index|Shelf|Desk|Cabinet)" { # Library/Index/Shelf/Desk/Cabinet
-                $this.group.mark( $Matches.name, $true )
+            "(?<name>Library|Index|Shelf|Desk)" {
                 $this._set( 'Focus.Panel', $Matches.name )
-                $this._set( "Focus.Application", $Matches.name )        
             }
-            "(?<name>(Editor|Browser|Grid))(?<num>[123])" { # Editor(123) / Browser(123) / Grid(123)
-                $this._set( 'Current.Workplace', "Work$($Matches.num)" )
-                $this._set( 'Current.Tool', $Matches[0] )
-                $this._set( 'Focus.Panel', 'Desk' )
-                $this._set( "Focus.Application", $Matches[0] )
-            }
-            default{ return $false }
         }
-
-        [TTTool]::debug_message( $params[0].Name, "gotfocus" )
-
-
         return $true
     }
-    [bool] set_lostfocus_status( $params ){ 
+    [bool] event_terminate_tentative_and_popup( $params ){
+
+        [TTTool]::debug_message( $params[0].Name, "event_terminate_tentative_and_popup" )
+
+        if( [TTTentativeKeyBindingMode]::Check( $params[1].Key ) ){
+            ttcmd_menu_cancel 'PopupMenu' '' ''
+        }
+        return $true
+    }
+    [bool] event_set_focus_application( $params ){ 
+
+        [TTTool]::debug_message( $params[0].Name, "event_set_focus_application" )
+
         switch -regex ( $params[0].Name ){
-            "(?<name>Library|Index|Shelf|Desk|Cabinet).*" { # Library/Index/Shelf/Desk/Cabinet
-                $this.group.mark( $Matches.name, $false )
-                $this._set( 'Focus.Panel', '' )
-                $this._set( "Focus.Application", '' )
+            "(?<name>Library|Index|Shelf|Desk)" {
+                $this._set( 'Focus.Application', $Matches.name )
             }
-            default{ return $false }
+            "(?<name>Editor|Browser|Grid)(?<num>[123])" {
+                $this._set( 'Current.Workplace', "Work$($Matches.num)" )
+                $this._set( 'Current.Tool', $Matches.name )
+                $this._set( 'Focus.Application', $Matches[0] )
+            }
         }
-
-        [TTTool]::debug_message( $params[0].Name, "lostfocus" )
-
         return $true
     }
+
+
     [bool] set_border_status( $params ){ 
         $panel = $params[0].Name
         switch -wildcard ( $panel ){
@@ -566,19 +569,20 @@ class TTGroupController {
                     $this.focus( $ttp, $mod, $key)
 
                 }
+                break
             }
             "(?<panel>Editor|Browser|Grid)(?<num>[123])" {  #### tool focus
                 $this.app.tools.tool( "Work$($Matches.num)", $Matches.panel )
                 $this.app.tools.focus( [int]($Matches.num) )
-
+                break
             }
             "Workplace" {                                   #### current workplace focus → delegate to tools
                 $this.app.tools.focus( 0 )
-
+                break
             }
             "Work(?<num>[123])" {                           #### workplace focus → delegate to tools
                 $this.app.tools.focus( [int]($Matches.num) )
-
+                break
             }
             default {                                       #### normal focus
 

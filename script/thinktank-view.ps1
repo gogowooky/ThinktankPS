@@ -35,6 +35,7 @@ class TTAppManager {
         $this._window = [System.Windows.Markup.XamlReader]::Load( (New-Object XmlNodeReader $xaml) )
 
         $this._window.Add_Loaded( $global:TTWindowLoaded )
+
         $this._window.Add_PreviewKeyDown( $global:TTPreviewKeyDown )
         $this._window.Add_PreviewKeyUp( $global:TTPreviewKeyUp )
 
@@ -239,9 +240,12 @@ class TTPanelManager {
         $this._textbox =    $app.FindName("$($this._name)Keyword")
         $this._menu =       $app.FindName("$($this._name)Sorting")
 
-        $this._textbox.Add_GotFocus( $global:TTPanelTool_GotFocus )
-        $this._textbox.Add_LostFocus( $global:TTPanelTool_LostFocus )
         $this._panel.Add_SizeChanged( $global:TTPanel_SizeChanged )
+        $this._panel.Add_GotFocus( $global:TTPanel_GotFocus )
+        $this._panel.Add_LostFocus( $global:TTPanel_LostFocus )
+
+        $this._textbox.Add_GotFocus( $global:TTTextBox_GotFocus )
+        $this._textbox.Add_LostFocus( $global:TTTextBox_LostFocus )
         
     }
     [TTPanelManager] Resource( [string]$name ){
@@ -623,8 +627,6 @@ class TTCabinetManager : TTPanelManager {
         $this._textbox =    $this._window.FindName("$($this._name)Keyword")
         $this._menu =       $this._window.FindName("$($this._name)Sorting")
 
-        $this._window.Add_GotFocus( $global:TTPanelTool_GotFocus )
-        $this._window.Add_LostFocus( $global:TTPanelTool_LostFocus )
         # $this._window.Add_Loaded({ $global:AppMan.Cabinet.Focus() })
         $this._window.Add_Closing({ $args[1].Cancel = $True })
         $this._window.Add_MouseLeftButtonDown({ $global:AppMan.Cabinet._window.DragMove() })
@@ -730,8 +732,8 @@ class TTToolsManager { # abstract
     [TTToolsManager] Initialize(){              # if needed
         $this.Controls = @( $this.IDs.foreach{ $this.app.FindName($_) } )
         $this.Controls.foreach{ 
-            $_.Add_GotFocus( $global:TTPanelTool_GotFocus )
-            $_.Add_LostFocus( $global:TTPanelTool_LostFocus )
+            $_.Add_GotFocus( $global:TTTool_GotFocus )
+            $_.Add_LostFocus( $global:TTTool_LostFocus )
         }
         return $this
     }
