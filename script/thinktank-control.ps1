@@ -333,7 +333,7 @@ class TTViewController {
                         'toggle' { $work = [TTTool]::toggle( $work, $focusable_tools ) }
                         'revtgl' { $work = [TTTool]::revtgl( $work, $focusable_tools ) }
                     }
-                    $this.app.group.focus($work,'','')
+                    $this.app.group.focus( $work, '', '' )
 
                 }else{
                     $this.style( 'Work', $value )
