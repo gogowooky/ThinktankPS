@@ -10,11 +10,8 @@
 - Deskから他のPanelにFocusいこうできない
 - Panel非表示時にtentative表示すると、脱mode後に再非表示されない
 # 謎
-[220712]
-- Alt+DでDeskからWorkplaceにFocusするときに、Editorが2度 focusされる謎
-
-[220713]
-- EditorからPanelにマウスでFocus移動するとエラー終了される謎
+- Alt+DでDeskからWorkplaceにFocusするときに、Editorが2度 focusされる謎 [220712]
+- EditorからPanelにマウスでFocus移動するとエラー終了される謎 [220713]
 
 # 修正済
 
