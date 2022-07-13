@@ -31,15 +31,22 @@ xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 #region  View Events Binding
 [ScriptBlock] $global:TTWindowLoaded =  { $args[1].Handled = $global:appcon.initialize_application() }
 
-[ScriptBlock] $global:TTPanel_SizeChanged = { $global:appcon.event_set_border( $args ) }
 [ScriptBlock] $global:TTPanel_GotFocus =    { $args[1].Handled = $global:appcon.event_set_focus_panel( $args ) }
-[ScriptBlock] $global:TTPanel_LostFocus =   { $args[1].Handled = $global:appcon.event_terminate_tentative_and_popup( $args ) }
 [ScriptBlock] $global:TTTextBox_GotFocus =  { $args[1].Handled = $global:appcon.event_set_focus_application( $args ) }
-[ScriptBlock] $global:TTTextBox_LostFocus = { $args[1].Handled = $global:appcon.event_terminate_tentative_and_popup( $args ) }
-
 [ScriptBlock] $global:TTTool_GotFocus =     { $args[1].Handled = $global:appcon.event_set_focus_application( $args ) }
-[ScriptBlock] $global:TTTool_LostFocus =    { $args[1].Handled = $global:appcon.event_terminate_tentative_and_popup( $args ) }
+[ScriptBlock] $global:TTDataGrid_GotFocus = { $args[1].Handled = $global:appcon.event_refocus( $args ) }
 
+[ScriptBlock] $global:TTWindow_PreviewKeyDown = $global:TTPreviewKeyDown
+[ScriptBlock] $global:TTPanel_PreviewKeyDown =  {}
+[ScriptBlock] $global:TTTool_PreviewKeyDown =   {}
+
+[ScriptBlock] $global:TTWindow_PreviewKeyUp =   $global:TTPreviewKeyUp
+[ScriptBlock] $global:TTPanel_PreviewKeyUp =    $global:TTPreviewKeyUp
+[ScriptBlock] $global:TTTool_PreviewKeyUp =     $global:TTPreviewKeyUp
+
+
+
+[ScriptBlock] $global:TTPanel_SizeChanged = { $global:appcon.event_set_border( $args ) }
 
 
 # [ScriptBlock] $global:TTPanelTool_GotFocus =    { $args[1].Handled = $global:appcon.set_gotfocus_status( $args ) }
@@ -50,8 +57,8 @@ xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 
 [ScriptBlock] $global:TTDataGrid_Sorting =          { $global:appcon.group.datagrid_on_sorting( $args ) }
 [ScriptBlock] $global:TTDataGrid_SelectionChanged = { $global:appcon.group.datagrid_on_selectionchanged( $args ) }
-[ScriptBlock] $global:TTDataGrid_GotFocus =         { $global:appcon.group.datagrid_on_gotfocus( $args ) }
 [ScriptBlock] $global:TTDataGrid_PreviewMouseDown = { $global:appcon.group.datagrid_on_previewmousedown( $args ) }
+
 
 [ScriptBlock] $global:TextEditors_TextChanged =        { $global:appcon.tools.editor.on_textchanged( $args ) }
 [ScriptBlock] $global:TextEditors_GotFocus =           { $global:appcon.tools.editor.on_focus( $args ) }

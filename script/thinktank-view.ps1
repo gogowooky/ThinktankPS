@@ -11,7 +11,7 @@ using namespace System.Xml
 
 
 class TTAppManager {
-    #region variables
+    #region variables/ new
     [System.Windows.Window]$_window
     [Grid] $_grid_window_lr
     [Grid] $_grid_lpanel_ul
@@ -27,7 +27,6 @@ class TTAppManager {
     [TTDeskManager] $Desk
     [TTDocumentManager] $Document
 
-    #endregion
 
     TTAppManager(){
 
@@ -36,8 +35,8 @@ class TTAppManager {
 
         $this._window.Add_Loaded( $global:TTWindowLoaded )
 
-        $this._window.Add_PreviewKeyDown( $global:TTPreviewKeyDown )
-        $this._window.Add_PreviewKeyUp( $global:TTPreviewKeyUp )
+        $this._window.Add_PreviewKeyDown( $global:TTWindow_PreviewKeyDown )
+        $this._window.Add_PreviewKeyUp( $global:TTWindow_PreviewKeyUp )
 
         $this._grid_window_lr = $this.FindName('GridWindowLR')
         $this._grid_lpanel_ul = $this.FindName('GridLPanelUL')
@@ -54,12 +53,20 @@ class TTAppManager {
         $this.Document =    [TTDocumentManager]::new( $this )
 
     }
+
+    #endregion
+
+    #region FindName/ Show
     [object] FindName( [string]$name ){
         return $this._window.FindName( $name )
     }
     [void] Show(){
         $this._window.ShowDialog()
     }
+
+    #endregion
+
+    #region Window(io)/ Focus/ Focasable/ Dialog  
     [void] Window( [string]$state ){ 
         switch( $state ){
             'Max'    { $this._window.WindowState = [System.Windows.WindowState]::Maximized }
@@ -77,6 +84,70 @@ class TTAppManager {
         }
         return $ret
     }
+    [string] Focus( [string] $target ){
+
+        switch -regex ( $target ){      
+            "(Library|Index|Shelf|Desk|Cabinet)" {                          # Library|Index|Sheld|Desk|Cabninet
+                return $this.$target.Focus()
+            }
+            "Workplace" {                                                   # Workplace
+                return $this.Document.Focus( $this.Document.CurrentNumber )
+            }
+            "Work(?<num>[123])" {                                           # Work[123]
+                return $this.Document.Focus( [int]($Matches.num) )
+            }
+            "(?<panel>Editor|Browser|Grid)(?<num>[123])" {                  # Editor[123]/Browser[123]/Grid[123]
+                return $this.Document.SelectTool( $Matches.num, $Matches.panel ).Focus($Matches.num)
+            }
+        }
+
+        <#
+        if( $target -match "(?<panel>[^\d]+)(?<num>\d)?" ){
+            $panel = $Matches.panel
+            $num = [int]($Matches.num)
+
+            if( 0 -eq $num ){               # Library/Index/Shelf/Desk
+                return $this.$panel.Focus() 
+
+            }else{                          # xxxx1/xxxx2/xxxx3
+                $this.Desk.Focus() 
+                if( $panel -eq 'Work' ){    # Work*
+                    return $this.Document.Focus($num)
+                }else{                      #Editor*/Browser*/Grid*
+                    return $this.Document.SelectTool($num,$panel).Focus($num)
+                }
+            }
+        }
+        #>
+
+        return ''
+    }
+    [bool] Focusable( [string]$id ){
+        switch -wildcard ( $id ){
+            'Workplace' { return $true }
+            'Cabinet'   { return $true }
+            'Library'   { return ( $this.Border('Layout.Library.Width') -ne 0 -and   $this.Border('Layout.Library.Height') -ne 0 ) }
+            'Index'     { return ( $this.Border('Layout.Library.Width') -ne 0 -and   $this.Border('Layout.Library.Height') -ne 100 ) }
+            'Shelf'     { return ( $this.Border('Layout.Library.Width') -ne 100 -and $this.Border('Layout.Shelf.Height') -ne '0' ) }
+            'Desk'      { return ( $this.Border('Layout.Library.Width') -ne 100 -and $this.Border('Layout.Shelf.Height') -ne 100 ) }
+            '*1'    { return ( $this.Focusable('Desk') -and $this.Border('Layout.Work1.Height') -ne 0 -and $this.Border('Layout.Work1.Width') -ne 0 ) }
+            '*2'    { return ( $this.Focusable('Desk') -and $this.Border('Layout.Work1.Height') -ne 0 -and $this.Border('Layout.Work1.Width') -ne 100 ) }
+            '*3'    { return ( $this.Focusable('Desk') -and $this.Border('Layout.Work1.Height') -ne 100 ) }
+        }
+        return $false
+    }
+    [void] Dialog( $id ){
+        switch( $id ){
+            'site'      { [TTTool]::message( "Githubへのリンク", "Thinktank" ) }
+            'version'   { [TTTool]::message( "Thinktankのバージョン", "Thinktank" ) }
+            'shortcut'  { [TTTool]::message( "ショートカットキーの一覧", "Thinktank" ) }
+            'help'      { [TTTool]::message( "使い方を表示する", "Thinktank" ) }
+            'about'     { [TTTool]::message( "このアプリは何なのかについて表示する", "Thinktank" ) }
+        }
+    }
+    #endregion
+
+    #region Border(io)/ Top(io)/ Left(io)/ Title(io)
     [void] Border( [string]$name, [int]$percent ){ 
         switch( $name ){
             'Layout.Library.Width' {
@@ -128,58 +199,6 @@ class TTAppManager {
         }
         return [int]( $a / ( $a + $b ) * 100 )
     }
-    [string] Focus( [string] $target ){
-
-        switch -regex ( $target ){      
-            "(Library|Index|Shelf|Desk|Cabinet)" {                          # Library|Index|Sheld|Desk|Cabninet
-                return $this.$target.Focus()
-            }
-            "Work(?<num>[123])" {                                           # Work[123]
-                return $this.Document.Focus( [int]($Matches.num) )
-            }
-            "Workplace" {                                                   # Workplace
-                return $this.Document.Focus( [int]($this.Document.CurrentNumber) )
-            }
-            "(?<panel>Editor|Browser|Grid)(?<num>[123])" {                  # Editor[123]/Browser[123]/Grid[123]
-                return $this.Document.SelectTool( $Matches.num, $Matches.panel ).Focus($Matches.num)
-            }
-        }
-
-        <#
-        if( $target -match "(?<panel>[^\d]+)(?<num>\d)?" ){
-            $panel = $Matches.panel
-            $num = [int]($Matches.num)
-
-            if( 0 -eq $num ){               # Library/Index/Shelf/Desk
-                return $this.$panel.Focus() 
-
-            }else{                          # xxxx1/xxxx2/xxxx3
-                $this.Desk.Focus() 
-                if( $panel -eq 'Work' ){    # Work*
-                    return $this.Document.Focus($num)
-                }else{                      #Editor*/Browser*/Grid*
-                    return $this.Document.SelectTool($num,$panel).Focus($num)
-                }
-            }
-        }
-        #>
-
-        return ''
-    }
-    [bool] Focusable( [string]$id ){
-        switch -wildcard ( $id ){
-            'Workplace' { return $true }
-            'Cabinet'   { return $true }
-            'Library'   { return ( $this.Border('Layout.Library.Width') -ne 0 -and   $this.Border('Layout.Library.Height') -ne 0 ) }
-            'Index'     { return ( $this.Border('Layout.Library.Width') -ne 0 -and   $this.Border('Layout.Library.Height') -ne 100 ) }
-            'Shelf'     { return ( $this.Border('Layout.Library.Width') -ne 100 -and $this.Border('Layout.Shelf.Height') -ne '0' ) }
-            'Desk'      { return ( $this.Border('Layout.Library.Width') -ne 100 -and $this.Border('Layout.Shelf.Height') -ne 100 ) }
-            '*1'    { return ( $this.Focusable('Desk') -and $this.Border('Layout.Work1.Height') -ne 0 -and $this.Border('Layout.Work1.Width') -ne 0 ) }
-            '*2'    { return ( $this.Focusable('Desk') -and $this.Border('Layout.Work1.Height') -ne 0 -and $this.Border('Layout.Work1.Width') -ne 100 ) }
-            '*3'    { return ( $this.Focusable('Desk') -and $this.Border('Layout.Work1.Height') -ne 100 ) }
-        }
-        return $false
-    }
     [void] Top( [int] $num ){ $this._window.Top = $num }
     [int]  Top(){ return $this._window.Top }
     [void] Left( [int] $num ){ $this._window.Left = $num }
@@ -187,22 +206,14 @@ class TTAppManager {
     [void]   Title( $text ){ $this._window.Title = $text }
     [string] Title(){ return $this._window.Title }
 
-    [void] Dialog( $id ){
-        switch( $id ){
-            'site'      { [TTTool]::message( "Githubへのリンク", "Thinktank" ) }
-            'version'   { [TTTool]::message( "Thinktankのバージョン", "Thinktank" ) }
-            'shortcut'  { [TTTool]::message( "ショートカットキーの一覧", "Thinktank" ) }
-            'help'      { [TTTool]::message( "使い方を表示する", "Thinktank" ) }
-            'about'     { [TTTool]::message( "このアプリは何なのかについて表示する", "Thinktank" ) }
-        }
-    }
 
+    #endregion
 }
 
 #region TTPanelManager (TTLibraryManager, TTIndexManager, TTShellManager, TTDeskManager, TTCabinaetManager )
 class TTPanelManager {
 
-    #region variables
+    #region variables/ new
     static [bool] $DisplayAlert = $true
     [string] $_name
     [TTAppManager] $_app
@@ -211,7 +222,7 @@ class TTPanelManager {
     [TextBox] $_textbox
     [Menu] $_menu
     [DockPanel] $_panel
-    [string] $_resource
+    # [string] $_resource
 
     [psobject[]] $_items
     [hashtable] $_dictionary
@@ -222,8 +233,6 @@ class TTPanelManager {
     [object] $_preserved
     [string] $_caption
     [string] $_header
-
-    #endregion
 
     TTPanelManager( $name, [TTAppManager]$app, $ex ){ # Cabinet用
         $this._name =       $name
@@ -241,37 +250,23 @@ class TTPanelManager {
 
         $this._panel.Add_SizeChanged( $global:TTPanel_SizeChanged )
         $this._panel.Add_GotFocus( $global:TTPanel_GotFocus )
-        $this._panel.Add_LostFocus( $global:TTPanel_LostFocus )
 
         $this._textbox.Add_GotFocus( $global:TTTextBox_GotFocus )
-        $this._textbox.Add_LostFocus( $global:TTTextBox_LostFocus )
+        $this._textbox.Add_PreviewKeyDown( $global:TTPanel_PreviewKeyDown )
+        $this._textbox.Add_PreviewKeyUp( $global:TTPanel_PreviewKeyUp )
         
     }
-    [TTPanelManager] Resource( [string]$name ){
-        $this._resource = $name
-        return $this
-    }
-    [string] Resource(){
-        return $this._resource
-    }
-    [TTPanelManager] Mark( [bool]$sw ){
-        $this._header = if( $sw ){ '●' }else{ '' }
-        $this._label.Content = "$($this._header)$($this._name): $($this._caption)"
-        return $this
-    }
-    [TTPanelManager] Mark( [string]$header ){
-        $this._header = $header
-        $this._label.Content = "$($this._header): $($this._caption)"
-        return $this
-    }
-    [TTPanelManager] Caption( [string]$caption ){
-        $this._caption = $caption
-        $this._label.Content = "$($this._header)$($this._name): $($this._caption)"
-        return $this
-    }
-    [string] Caption(){
-        return $this._caption
-    }
+
+    #endregion
+
+    #region Resource(io)/ Items/ SelecteItems/ SelectedItem/ GetItems/ SelectedIndex/ Refresh
+    # [TTPanelManager] Resource( [string]$name ){
+    #     $this._resource = $name
+    #     return $this
+    # }
+    # [string] Resource(){
+    #     return $this._resource
+    # }
     [TTPanelManager] Items( [psobject[]]$items, [hashtable]$dictionary, [string[]]$order ){
         # 【引数】 
         # items : @( @{ Name = ""; Value = "" } )
@@ -297,6 +292,52 @@ class TTPanelManager {
 
         return $this
 
+    }
+    [object[]] SelectedItems(){
+        return $this._datagrid.SelectedItems
+    }
+    [object] SelectedItem(){
+        return $this._datagrid.SelectedItem
+    }
+    [object[]] GetItems( [string]$keyword ){
+        $items = @()
+        switch( $keyword ){
+            'SelectedItems' {
+                $items = $this._datagrid.SelectedItems
+            }
+            'AllItems' {
+                $items = [System.Windows.Data.CollectionViewSource]::GetDefaultView( $this._datagrid.ItemsSource )
+            }  
+            default {
+                $items = $this._datagrid.Items.where{ $_.($this._colname) -like $keyword }
+            }
+        }
+        return $items
+
+    }
+    [string] SelectedIndex(){
+        return $this._datagrid.SelectedItem.($this._index) 
+    }
+    [TTPanelManager] Refresh(){
+        $this._datagrid.Items.refresh()
+        return $this
+    }
+
+    #endregion
+
+    #region FocusMark/ Caption(io)/ Keyword(io)/ Keywords/ Sorting
+    [TTPanelManager] FocusMark( [string]$header ){
+        $this._header = $header
+        $this._label.Content = "$($this._header)$($this._name): $($this._caption)"
+        return $this
+    }
+    [TTPanelManager] Caption( [string]$caption ){
+        $this._caption = $caption
+        $this._label.Content = "$($this._header)$($this._name): $($this._caption)"
+        return $this
+    }
+    [string] Caption(){
+        return $this._caption
     }
     [TTPanelManager] Keyword( [string]$keyword ){
         $this._textbox.Text = $keyword
@@ -343,6 +384,10 @@ class TTPanelManager {
         return $this
 
     }
+    
+    #endregion
+
+    #region Cursor/ Column(io)/ Sort(io)/ Select/ Focus/ Extract/ Add/ Delete/ Alert
     [TTPanelManager] Cursor( [string]$action ){
         $dg = $this._datagrid
 
@@ -437,31 +482,6 @@ class TTPanelManager {
         $this._textbox.Focus()
         return $this._name
     }
-    [object[]] SelectedItems(){
-        return $this._datagrid.SelectedItems
-    }
-    [object] SelectedItem(){
-        return $this._datagrid.SelectedItem
-    }
-    [object[]] GetItems( [string]$keyword ){
-        $items = @()
-        switch( $keyword ){
-            'SelectedItems' {
-                $items = $this._datagrid.SelectedItems
-            }
-            'AllItems' {
-                $items = [System.Windows.Data.CollectionViewSource]::GetDefaultView( $this._datagrid.ItemsSource )
-            }  
-            default {
-                $items = $this._datagrid.Items.where{ $_.($this._colname) -like $keyword }
-            }
-        }
-        return $items
-
-    }
-    [string] SelectedIndex(){
-        return $this._datagrid.SelectedItem.($this._index) 
-    }
     [TTPanelManager] Extract(){
         return $this.Extract( $this._textbox.Text )
     }
@@ -488,10 +508,6 @@ class TTPanelManager {
         }
         return $this
     }
-    [TTPanelManager] Refresh(){
-        $this._datagrid.Items.refresh()
-        return $this
-    }
     [TTPanelManager] Add( [object]$item ){ # none
         return $this
     }
@@ -514,6 +530,7 @@ class TTPanelManager {
         return $this
     }
 
+    #endregion
 }
 
 class TTLibraryManager : TTPanelManager {
@@ -566,7 +583,7 @@ class TTDeskManager : TTPanelManager {
 }
 class TTCabinetManager : TTPanelManager {
 
-    #region variables
+    #region variables/ new
     [System.Windows.Window]$_window
     [object[]] $_selected
 
@@ -615,7 +632,6 @@ class TTCabinetManager : TTPanelManager {
         </Border>
     </Window>
 "@
-    #endregion
 
     TTCabinetManager( [TTAppManager]$app ) : base ( "Cabinet", $app, $null ){
 
@@ -635,8 +651,8 @@ class TTCabinetManager : TTPanelManager {
         $this._window.Add_Closing({ $args[1].Cancel = $True })
         $this._window.Add_MouseLeftButtonDown({ $global:AppMan.Cabinet._window.DragMove() })
         $this._window.Add_MouseDoubleClick({ $global:AppMan.Cabinet.Hide($true); $args[1].Handled=$True })
-        $this._window.Add_PreviewKeyDown( $global:TTPreviewKeyDown )
-        $this._window.Add_PreviewKeyUp( $global:TTPreviewKeyUp )
+        $this._window.Add_PreviewKeyDown( $global:TTWindow_PreviewKeyDown )
+        $this._window.Add_PreviewKeyUp( $global:TTWindow_PreviewKeyUp )
 
         $this._datagrid.Add_Sorting( $global:TTDataGrid_Sorting )
         $this._datagrid.Add_SelectionChanged( $global:TTDataGrid_SelectionChanged )
@@ -645,6 +661,10 @@ class TTCabinetManager : TTPanelManager {
         $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToExtract )
 
     }
+
+    #endregion
+
+    #region Title/ Show/ Hide/ Focus
     [TTCabinetManager] Title( $text ){
         $this.Caption( $text )
         return $this
@@ -667,14 +687,15 @@ class TTCabinetManager : TTPanelManager {
         return $this.Show()
     }
 
+    #endregion
 }
-#endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#endregion
 
 
 #region　TTDocumentManager
 class TTDocumentManager{
 
-    #region variants
+    #region variants/ new
     [TTAppManager] $app
     [TTEditorsManager] $Editor
     [TTBrowsersManager] $Browser
@@ -684,7 +705,6 @@ class TTDocumentManager{
 
     [int] $CurrentNumber = 1
     [string[]] $CurrentTools = @('','','') # Editor/Browser/Grid
-    #endregion    
 
     TTDocumentManager( [TTAppManager]$app ){
         $this.app = $app
@@ -697,6 +717,10 @@ class TTDocumentManager{
         (1..3).foreach{ $this.SelectTool( $_, 'Editor' ) }
 
     }
+
+    #endregion    
+
+    #region Focus/ SetCurrent/ SelectTool
     [TTDocumentManager] Focus( [int]$num ){ # 1..3
         $this.SetCurrent( $num )
         $this.( $this.CurrentTools[$num-1] ).Focus( $num )
@@ -717,8 +741,10 @@ class TTDocumentManager{
         return $this
     }
 
+    #endregion
 }
-#endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#endregion
+
 
 #region　TTToolsManager / TTEditorsManager / TTBrowsersManager / TTGridsManager
 class TTToolsManager { # abstract
@@ -737,7 +763,8 @@ class TTToolsManager { # abstract
         $this.Controls = @( $this.IDs.foreach{ $this.app.FindName($_) } )
         $this.Controls.foreach{ 
             $_.Add_GotFocus( $global:TTTool_GotFocus )
-            $_.Add_LostFocus( $global:TTTool_LostFocus )
+            $_.Add_PreviewKeyDown( $global:TTTool_PreviewKeyDown )
+            $_.Add_PreviewKeyUp( $global:TTTool_PreviewKeyUp )
         }
         return $this
     }
@@ -755,7 +782,7 @@ class TTToolsManager { # abstract
 
 class TTEditorsManager : TTToolsManager{
 
-    #region variants
+    #region variants/ new/ Initialize/ Initialize()/ 
     # static [ScriptBlock] $OnSave
     # static [ScriptBlock] $OnLoad
     static [bool] $StayCursor = $false
@@ -769,7 +796,6 @@ class TTEditorsManager : TTToolsManager{
     [int[]] $HistoryPositions
     [string[]] $IDs = @( 'Editor1', 'Editor2', 'Editor3' )
     [xml] $xshd
-    #endregion
 
     TTEditorsManager( $docman ) : base( $docman ) {
         $this.xshd = Get-Content "$script:TTScriptDirPath\thinktank.xshd"
@@ -814,6 +840,10 @@ class TTEditorsManager : TTToolsManager{
 
         return $this
     }
+
+    #endregion
+
+    #region Load/ MoveTo/ NodeTo/ SelectTo
     [TTEditorsManager] Load( [int]$num, [string]$index ){
         $editor =   $this.Controls[$num-1]
         $filepath = [TTTool]::index_to_filepath( $index )
@@ -1147,12 +1177,9 @@ class TTEditorsManager : TTToolsManager{
 
     }
 
+    #endregion
 
-
-    
-
-
-
+    #region no mod
     [TTEditorsManager] Save( [int]$num ){
         $editor = $this.Editors[$num]
         $filepath = $editor.Document.FileName
@@ -1262,6 +1289,7 @@ class TTEditorsManager : TTToolsManager{
         return ( $this.offset -eq $editor.CaretOffset )
     }
 
+    #endregion
 }
 
 class TTBrowsersManager : TTToolsManager{
@@ -1314,13 +1342,13 @@ class TTGridsManager : TTToolsManager{
     }
     
 }
-#endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#endregion
 
 
 
 #region TTPopupMenuManager
 class TTPopupMenuManager {
-    #region variables
+    #region variables/ new
     [string] $_name
     [TTAppManager] $_app
     [System.Windows.Window] $_window
@@ -1356,7 +1384,6 @@ class TTPopupMenuManager {
         </Border>
     </Window>
 "@
-    #endregion
 
     TTPopupMenuManager( [TTAppManager]$app ){
         # [xml]$xaml = Get-Content ( $global:TTScriptDirPath + "\thinktank-popupmenu.xaml" )
@@ -1369,14 +1396,18 @@ class TTPopupMenuManager {
         $this._window.Add_Closing({ $args[1].Cancel = $True })
         $this._window.Add_MouseLeftButtonDown({ $global:AppMan.PopupMenu._window.DragMove() })
         $this._window.Add_MouseDoubleClick({ $global:AppMan.PopupMenu.Hide($true); $args[1].Handled=$True })
-        $this._window.Add_PreviewKeyDown( $global:TTPreviewKeyDown )
-        $this._window.Add_PreviewKeyUp( $global:TTPreviewKeyUp )
+        $this._window.Add_PreviewKeyDown( $global:TTWindow_PreviewKeyDown )
+        $this._window.Add_PreviewKeyUp( $global:TTWindow_PreviewKeyUp )
         
         $style = [Style]::new()
         $style.Setters.Add( [Setter]::new( [Controls.GridViewColumnHeader]::VisibilityProperty, [Visibility]::Collapsed ) )
         $this._list.view.ColumnHeaderContainerStyle = $style
 
     }
+
+    #endregion
+    
+    #region  Caption/ Cursor/ Items/ Hide/ Show/ Tio(io)/ Left(io)
     [TTPopupMenuManager] Caption( $text ){
         $this._window.FindName("$($this._name)Caption").Content = $text
         return $this
@@ -1434,9 +1465,10 @@ class TTPopupMenuManager {
     [void] Left( [int] $num ){ $this._window.Left = $num }
     [int]  Left(){ return $this._window.Left }
 
+    #endregion
 }
 
-#endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#endregion
 
 
 

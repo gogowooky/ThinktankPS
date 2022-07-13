@@ -90,6 +90,20 @@ function KeyBindingSetup(){
 
 
 
+#region debug, development
+#########################################################################################################################
+function ttcmd_application_noop( $source, $mod, $key ){
+    #.SYNOPSIS
+    # ダミーコマンド
+    $tttv = [TTTentativeKeyBindingMode]::Name
+    $panel =    $global:appcon._get('Focus.Application')
+
+    Write-Host "ttcmd_application_noop source:$source, tentative:$tttv, panel:$panel, mod:$mod, key:$key, command:$command"
+    return
+}
+#endregion###############################################################################################################
+
+
 
 
 
@@ -109,15 +123,6 @@ Application     Alt, Shift      I           ttcmd_panel_collapse_index
 Application     Alt, Shift      C           ttcmd_panel_collapse_cabinet
 Application     Alt, Shift      W           ttcmd_panel_focus_work_toggle
 '@
-function ttcmd_application_noop( $source, $mod, $key ){
-    #.SYNOPSIS
-    # ダミーコマンド
-    $tttv = [TTTentativeKeyBindingMode]::Name
-    $panel =    $global:appcon._get('Focus.Application')
-
-    Write-Host "ttcmd_application_noop source:$source, tentative:$tttv, panel:$panel, mod:$mod, key:$key, command:$command"
-    return
-}
 #region application_window
 function ttcmd_application_window_quit( $source, $mod, $key ){
     #.SYNOPSIS
@@ -199,13 +204,13 @@ function ttcmd_panel_focus_work_toggle( $source, $mod, $key ){
 
     switch -regex ( $global:appcon._get('Focus.Application') ){
         "(Editor|Browser|Grid)[123]" {
-            $global:appcon.view.style( 'Work+Focus', $toggle )
+            $global:appcon.view.style( 'Focus+Work', $toggle )
        
         }
         default{
             $global:appcon.group.focus( 'Workplace', $mod, $key )
 
-        }
+        } 
     }
 
 }
@@ -549,12 +554,26 @@ Desk        Alt         Down        ttcmd_application_border_indesk_down
 Desk        Alt         Left        ttcmd_application_border_indesk_left
 Desk        Alt         Right       ttcmd_application_border_indesk_right
 Desk        Alt         K           ttcmd_panel_filter_clear
-
+Desk        Alt         Z           ttcmd_application_border_zen_desk
+Desk        Alt, Shift  Z           ttcmd_application_border_zen_workplace
 
 'Desk        Alt         M           ttcmd_desk_focus_menu
 'Desk        Control     N           ttcmd_desk_works_focus_current_norm
 'Desk        Control     F           ttcmd_application_textsearch
 '@
+
+#region _panel_style_
+function ttcmd_application_border_zen_desk( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Desk zenモードをトグル
+}
+
+function ttcmd_application_border_zen_workplace( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Workplace zenモードをトグル
+    
+}
+#endregion
 
 #region _application_border_indesk_
 function ttcmd_application_border_indesk_up( $source, $mod, $key ){

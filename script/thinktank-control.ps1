@@ -7,14 +7,13 @@ using namespace System.Xml
 
 
 class TTApplicationController {
-    #region variants
+    #region variants/ new/ default/ initialize_application
     [TTMenuController] $menu
     [TTViewController] $view
     [TTGroupController] $group
     [TTToolsController] $tools
     [TTStatus] $status
     [TTConfigs] $configs
-    #endregion
 
     TTApplicationController(){
         $this.menu = [TTMenuController]::New( $this )
@@ -64,7 +63,9 @@ class TTApplicationController {
         return $this
     }
 
-    #region ステータス管理
+    #endregion
+
+    #region status
     [string] _get( $name ){
         return $this.status.Get( $name )
     }
@@ -135,7 +136,6 @@ class TTApplicationController {
     }
     #endregion
 
-
     #region event
     [bool] event_set_focus_panel( $params ){ 
 
@@ -148,42 +148,41 @@ class TTApplicationController {
         }
         return $true
     }
-    [bool] event_terminate_tentative_and_popup( $params ){
-
-        [TTTool]::debug_message( $params[0].Name, "event_terminate_tentative_and_popup" )
-
-        if( [TTTentativeKeyBindingMode]::Check( $params[1].Key ) ){
-            ttcmd_menu_cancel 'PopupMenu' '' ''
-        }
-        return $true
-    }
     [bool] event_set_focus_application( $params ){ 
 
         [TTTool]::debug_message( $params[0].Name, "event_set_focus_application" )
+
         switch -regex ($this._get('Focus.Application')){
             "(Library|Index|Shelf|Desk)" {
-                $global:AppMan.$_.Mark($false)
+                $global:AppMan.$_.FocusMark('')
             }
             "(Editor|Browser|Grid)[123]" {
-                $global:AppMan.Desk.Mark($false)
+                $global:AppMan.Desk.FocusMark('')
             }
         }
         switch -regex ( $params[0].Name ){
             "(?<name>Library|Index|Shelf|Desk)" {
                 $this._set( 'Focus.Application', $Matches.name )
-                $global:AppMan.($this._get('Focus.Application')).Mark($true)
+                $global:AppMan.($this._get('Focus.Application')).FocusMark('●')
 
             }
             "(?<name>Editor|Browser|Grid)(?<num>[123])" {
                 $this._set( 'Current.Workplace', "Work$($Matches.num)" )
                 $this._set( 'Current.Tool', $Matches.name )
                 $this._set( 'Focus.Application', $Matches[0] )
-                $global:AppMan.Desk.Mark( "◎$($Matches[0])" )
+                $global:AppMan.Desk.FocusMark("●|$($_[0])$($_[-1])|")
+                $global:AppMan.Document.CurrentNumber = [int]($Matches.num)
 
             }
         }
         return $true
     }
+    [bool] event_refocus( $params ){ # Library/Index/Shelf/Desk/Cabinet
+        $panel = ( $params[0].Name -replace "(Library|Index|Shelf|Cabinet).*", '$1' )
+        $this.focus( $panel, '', '' )
+        return $true
+    }
+
     [bool] event_set_border( $params ){ 
         $panel = $params[0].Name
         switch -wildcard ( $panel ){
@@ -323,11 +322,23 @@ class TTViewController {
                 $global:AppMan.Border( 'Layout.Work1.Width', $work1.width )
                 $global:AppMan.Border( 'Layout.Work1.Height', $work1.height )
                 $this.app._set( 'Layout.Style.Work', $value )
+                $this.app.group.focus( $value, '', '' )
 
             }
-            'Work+Focus' { # Work1, Work2, Work3, toggle/revtgl
-                $this.style( 'Work', $value )
-                $this.app.group.focus($this.app._get('Layout.Style.Work'),'','')
+            'Focus+Work' { # Workplace≧2 → focusWork, Workplace=1 → Work+Focus
+                $focusable_tools = @( 'Work1', 'Work2', 'Work3' ).where{ $global:AppMan.Focusable($_) }
+                if( 1 -lt $focusable_tools.count ){
+                    $work = $this.app._get('Current.Workplace')
+                    switch( $value ){
+                        'toggle' { $work = [TTTool]::toggle( $work, $focusable_tools ) }
+                        'revtgl' { $work = [TTTool]::revtgl( $work, $focusable_tools ) }
+                    }
+                    $this.app.group.focus($work,'','')
+
+                }else{
+                    $this.style( 'Work', $value )
+
+                }
 
             }
             'Desk' { # Work12, Work123, Work13, toggle/revtgl
@@ -529,14 +540,8 @@ class TTGroupController {
     }
     #endregion
 
-    #region mark/ caption/ keyword(io)/ focus/ invoke_action/ select_actions_then_invoke
+    #region caption/ keyword(io)/ focus/ invoke_action/ select_actions_then_invoke
     # Library/Index/Shelf/Desk/Cabinet
-    [TTGroupController] mark( [string]$panel, [bool]$sw ){
-        $global:AppMan.$panel.Mark( $sw )
-        if( $sw ){ $this.app._set( "Focus.Application", $panel ) }
-
-        return $this
-    }
     [TTGroupController] caption( [string]$panel, [string]$text ){
         $global:AppMan.$panel.Caption( $text )
         return $this
@@ -573,10 +578,14 @@ class TTGroupController {
             }
 
         }else{                                                                      #### normal focus
-            if( $this.app._ne( 'Focus.Application', $panel ) ){
-                $global:AppMan.Focus( $panel )
+            $global:AppMan.Focus( $panel )
+            # if( $panel -eq 'Workplace' ){
+            #     $global:AppMan.Focus( $this.app._get('Current.Workplace') )
 
-            }
+            # }elseif( $this.app._ne( 'Focus.Application', $panel ) ){
+            #     $global:AppMan.Focus( $panel )
+
+            # }
         }
 
         return $this
@@ -678,11 +687,6 @@ class TTGroupController {
         $this.app._set( "$panel.Selected", $index )
         $this.caption( $panel, $index )
 
-        return $true
-    }
-    [bool] datagrid_on_gotfocus( $params ){ # Library/Index/Shelf/Desk/Cabinet
-        $panel = ( $params[0].Name -replace "(Library|Index|Shelf|Cabinet).*", '$1' )
-        $this.focus( $panel, '', '' )
         return $true
     }
     [bool] datagrid_on_previewmousedown( $params ){
@@ -950,6 +954,7 @@ class TTEditorController {
     #endregion
 }
 class TTBrowserController {
+    #region variants/ new/ default/ initialize
     [TTToolsController] $tools
     TTBrowserController( [TTToolsController] $_tools ){
         $this.tools = $_tools
@@ -964,9 +969,10 @@ class TTBrowserController {
 
         return $this
     }
-
+    #endregion
 }
 class TTGridController {
+    #region variants/ new/ default/ initialize
     [TTToolsController] $tools
     TTGridController( [TTToolsController] $_tools ){
         $this.tools = $_tools
@@ -981,9 +987,10 @@ class TTGridController {
 
         return $this
     }
-
+    #endregion
 }
 class TTMenuController {
+    #region variants/ new/ default/ initialize
     [TTApplicationController] $app
 
     TTMenuController( [TTApplicationController] $_app ){
@@ -1001,6 +1008,9 @@ class TTMenuController {
 
         return $this
     }
+    #endregion
+
+    #region close/cursor
     [TTMenuController] close( [string]$name, [string]$action ){
         switch( $action ){
             'cancel' { $global:AppMan.$name.Hide( $false ) }
@@ -1012,7 +1022,7 @@ class TTMenuController {
         $global:AppMan.$name.Cursor( $to )
         return $this
     }
-
+    #endregion
 
 }
 

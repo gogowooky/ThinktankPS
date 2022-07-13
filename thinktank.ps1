@@ -122,7 +122,6 @@ function TTTimerResistEvent( [string]$name, [long]$countdown, [long]$rewind, [Sc
 
 KeyBindingSetup
 
-
 #region 本体
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #　View
@@ -134,6 +133,7 @@ $global:TTResources =   [TTResources]::new().Initialize()
 #　Control
 $global:datetag =       [TTTagFormat]::new()
 $global:appcon =        [TTApplicationController]::new()
+
 
 $global:AppMan.Show()
 
