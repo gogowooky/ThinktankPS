@@ -117,11 +117,13 @@ Application     Alt             I           ttcmd_panel_focus_index
 Application     Alt             C           ttcmd_panel_focus_cabinet
 Application     Alt             D           ttcmd_panel_focus_deskwork
 Application     Alt             W           ttcmd_panel_focus_work_toggle
+Application     Alt             Z           ttcmd_panel_collapse_multi_panel
 Application     Alt, Shift      S           ttcmd_panel_collapse_shelf
 Application     Alt, Shift      L           ttcmd_panel_collapse_library
 Application     Alt, Shift      I           ttcmd_panel_collapse_index
 Application     Alt, Shift      C           ttcmd_panel_collapse_cabinet
 Application     Alt, Shift      W           ttcmd_panel_focus_work_toggle
+Application     Alt, Shift      Z           ttcmd_panel_collapse_multi_work
 '@
 #region application_window
 function ttcmd_application_window_quit( $source, $mod, $key ){
@@ -219,22 +221,28 @@ function ttcmd_panel_collapse_shelf( $source, $mod, $key ){
     #.SYNOPSIS
     # Shelfを非表示
 
+    if( $global:appcon._eq( 'Focus.Application', 'Shelf' ) ){
+        $global:appcon.group.focus( 'Workplace', $mod, $key )
+    }
     $global:appcon.view.style( 'Shelf', 'None' )
-    $global:appcon.group.focus( 'Workplace', $mod, $key )
 }
 function ttcmd_panel_collapse_library( $source, $mod, $key ){
     #.SYNOPSIS
     # Libraryを非表示
 
+    if( $global:appcon._eq( 'Focus.Application', 'Library' ) ){
+        $global:appcon.group.focus( 'Workplace', $mod, $key )
+    }
     $global:appcon.view.style( 'Library', 'None' )
-    $global:appcon.group.focus( 'Workplace', $mod, $key )
 }
 function ttcmd_panel_collapse_index( $source, $mod, $key ){
     #.SYNOPSIS
     # Indexを非表示
 
+    if( $global:appcon._eq( 'Focus.Application', 'Index' ) ){
+        $global:appcon.group.focus( 'Workplace', $mod, $key )
+    }
     $global:appcon.view.style( 'Index', 'None' )
-    $global:appcon.group.focus( 'Workplace', $mod, $key )
 }
 function ttcmd_panel_collapse_cabinet( $source, $mod, $key ){
     #.SYNOPSIS
@@ -243,6 +251,21 @@ function ttcmd_panel_collapse_cabinet( $source, $mod, $key ){
     $global:appcon.menu.close( $source, 'ok' )
 }
 
+function ttcmd_panel_collapse_multi_panel( $source, $mod, $key ){
+    #.SYNOPSIS
+    # PanelのDeskのみ/すべてをトグル表示
+
+    # Deskのみ表示か判断
+    # 現borderをstatusに保存
+    # Dek
+    return 
+}
+function ttcmd_panel_collapse_multi_work( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Workplace単独/マルチをトグル表示
+
+    return
+}
 #endregion
 
 #endregion###############################################################################################################
@@ -554,26 +577,12 @@ Desk        Alt         Down        ttcmd_application_border_indesk_down
 Desk        Alt         Left        ttcmd_application_border_indesk_left
 Desk        Alt         Right       ttcmd_application_border_indesk_right
 Desk        Alt         K           ttcmd_panel_filter_clear
-Desk        Alt         Z           ttcmd_application_border_zen_desk
-Desk        Alt, Shift  Z           ttcmd_application_border_zen_workplace
 
 'Desk        Alt         M           ttcmd_desk_focus_menu
 'Desk        Control     N           ttcmd_desk_works_focus_current_norm
 'Desk        Control     F           ttcmd_application_textsearch
 '@
 
-#region _panel_style_
-function ttcmd_application_border_zen_desk( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Desk zenモードをトグル
-}
-
-function ttcmd_application_border_zen_workplace( $source, $mod, $key ){
-    #.SYNOPSIS
-    # Workplace zenモードをトグル
-    
-}
-#endregion
 
 #region _application_border_indesk_
 function ttcmd_application_border_indesk_up( $source, $mod, $key ){
