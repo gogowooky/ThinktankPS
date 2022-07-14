@@ -223,16 +223,6 @@ class TTViewController {
     #region variants/ new/ default/ initialize
     [TTApplicationController] $app
 
-    [string] $_library_w 
-    [string] $_library_h
-    [string] $_shelf_h
-    [string] $_work1_w
-    [string] $_work1_h
-    [string] $_library_exw
-    [string] $_shelf_exh
-    [string] $_work1_exw
-    [string] $_work1_exh
-
     TTViewController( [TTApplicationController] $_app ){
         $this.app = $_app
     }
@@ -252,17 +242,6 @@ class TTViewController {
         $this.app._set( 'Layout.Shelf.ExHeight',    '75' )
         $this.app._set( 'Layout.Work1.ExHeight',    '80' )
         $this.app._set( 'Layout.Work1.ExWidth',     '20' )
-
-        $this._library_w =   $this.app._get( 'Layout.Library.Width' )
-        $this._library_h =   $this.app._get( 'Layout.Library.Height' )
-        $this._shelf_h =     $this.app._get( 'Layout.Shelf.Height' )
-        $this._work1_w =     $this.app._get( 'Layout.Work1.Width' )
-        $this._work1_h =     $this.app._get( 'Layout.Work1.Height' )
-
-        $this._library_exw = $this.app._get( 'Layout.Library.ExWidth' )
-        $this._shelf_exh =   $this.app._get( 'Layout.Shelf.ExHeight' )
-        $this._work1_exw =   $this.app._get( 'Layout.Work1.ExHeight' )
-        $this._work1_exh =   $this.app._get( 'Layout.Work1.ExWidth' )
     
         return $this
     }
@@ -289,16 +268,22 @@ class TTViewController {
                 $order = @( 'Standard', 'Zen' )
                 switch( $value ){
                     'Standard' {
-                        $global:AppMan.Border( 'Layout.Library.Width', $this._library_w )
-                        $global:AppMan.Border( 'Layout.Library.Height', $this._library_h )
-                        $global:AppMan.Border( 'Layout.Shelf.Height', $this._shelf_h )
+                        $library_w = $this.app._get('Layout.Library.Width')
+                        $library_h = $this.app._get('Layout.Library.Height')
+                        $shelf_h = $this.app._get('Layout.Shelf.Height')
+                        $global:AppMan.Border( 'Layout.Library.Width', $library_w )
+                        $global:AppMan.Border( 'Layout.Library.Height', $library_h )
+                        $global:AppMan.Border( 'Layout.Shelf.Height', $shelf_h )
                         $this.app._set( 'Layout.Style.Group', $value )
                     }
                     'Zen' {
+                        $this.app._set( 'Layout.Library.Width', $global:AppMan.Border('Layout.Library.Width') )
+                        $this.app._set( 'Layout.Library.Height', $global:AppMan.Border('Layout.Library.Height') )
+                        $this.app._set( 'Layout.Shelf.Height', $global:AppMan.Border('Layout.Shelf.Height') )
                         $global:AppMan.Border( 'Layout.Library.Width', 0 )
-                        $global:AppMan.Border( 'Layout.Library.Height', $this._library_h )
                         $global:AppMan.Border( 'Layout.Shelf.Height', 0 )
                         $this.app._set( 'Layout.Style.Group', $value )
+                        $this.app.group.focus( $this.app._get('Current.Workplace'), '', '' )
                     }
                     'toggle' {
                         $this.style( $name, [TTTool]::toggle( $this.app._get('Layout.Style.Group'), $order ) )
@@ -344,6 +329,11 @@ class TTViewController {
             'Desk' { # Work12, Work123, Work13, toggle/revtgl
                 $order = @( 'Work12', 'Work123', 'Work13' )
                 switch( $value ){
+                    'Alone' {
+                        $work = $this.app._get('Current.Workplace')
+                        $this.style( 'Work', $work )
+                        $this.app.group.focus( $work, '', '' )
+                    }
                     'Work12' {
                         $global:AppMan.Border( 'Layout.Work1.Width', $this._work1_w )
                         $global:AppMan.Border( 'Layout.Work1.Height', 100 )

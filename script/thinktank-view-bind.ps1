@@ -255,16 +255,29 @@ function ttcmd_panel_collapse_multi_panel( $source, $mod, $key ){
     #.SYNOPSIS
     # PanelのDeskのみ/すべてをトグル表示
 
-    # Deskのみ表示か判断
-    # 現borderをstatusに保存
-    # Dek
-    return 
+    $panel = @( 'Library', 'Index', 'Shelf', 'Desk' ).where{ $global:appcon.view.forcusable($_) }
+
+    if( ($panel.count -eq 1) -and ($panel[0] -eq 'Desk') ){
+        $global:appcon.view.style( 'Group', 'Standard' )
+
+    }else{
+        $global:appcon.view.style( 'Group', 'Zen' )
+
+    }
 }
 function ttcmd_panel_collapse_multi_work( $source, $mod, $key ){
     #.SYNOPSIS
     # Workplace単独/マルチをトグル表示
 
-    return
+    $tool = @( 'Work1', 'Work2', 'Work3' ).where{ $global:appcon.view.forcusable($_) }
+
+    if( $tool.count -eq 1 ){
+        $global:appcon.view.style( 'Group', 'Standard' )
+
+    }else{
+        $global:appcon.view.style( 'Desk', 'Alone' ) 
+
+    }
 }
 #endregion
 

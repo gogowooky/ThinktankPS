@@ -1,8 +1,8 @@
 # ThinktankPS2
 
 # 未処理
-- ttcmd_application_border_zen_desk*　中身つくってない
-- ttcmd_application_border_zen_workplace　中身つくってない
+- ttcmd_panel_collapse_multi_panel　中身つくってない
+- ttcmd_panel_collapse_multi_work　中身つくってない
 - Configs表示の更新（Panel.Focusが表示されない）
 # 不具合
 - Editorから他のPanelにAlt+XでFocusに移行できない
