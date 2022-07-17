@@ -3,13 +3,17 @@
 # TOGO
 ## 未処理
 - Configs表示の更新（Panel.Focusが表示されない）
+
 ## 不具合
 - Panel非表示時にtentative表示すると、脱mode後に再非表示されない
 - StatusでCurrent.Workspace/Toolが正しく表示されない　→設定ミス or 表示エラー
+
 ## 謎
 - Alt+DでDeskからWorkplaceにFocusするときに、Editorが2度 focusされる謎 [220712]
+
 ## 要件等
 - [TTEditorController]saveでMemosのcacheをupdateするかどうかについて
+
 # KNOWLEDGE
 ## 注意点
 - KeyEventにクラスインスタンス関数を使うのは不吉
@@ -25,7 +29,7 @@
 
 
 ## 対応済・修正済
-- Viewクラスのイベント(TTEditorsManager::OnSave/OnLoad)を定義して動作を確認
+- ~~Viewクラスのイベント(TTEditorsManager::OnSave/OnLoad)を定義して動作を確認~~
 - Editor focus時にDesk captionにindexとtitleを表示
 - AppMan.Document.Editor.MoveTo()の'nextkeyword'/'prevkeyword'で検索語をselect
 - Editorから他のPanelにAlt+XでFocusに移行できない　→修正
