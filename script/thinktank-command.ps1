@@ -11,6 +11,7 @@ function ttact_noop( $ttobj ){
     # 何もしない
 
     [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_noop" )
+
 }
 function ttact_select_file( $ttobj ){
     #.SYNOPSIS
@@ -64,8 +65,9 @@ function ttact_display_in_cabinet( $ttobj ){
 function ttact_open_memo( $ttobj ){
     #.SYNOPSIS
     # メモを開く
-
+    
     [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_memo" )
+    $global:appcon.tools.editor.load( $ttobj.MemoID )
 }
 function ttact_copy_url_toclipboard( $ttobj ){
     #.SYNOPSIS
@@ -101,6 +103,8 @@ function ttact_open_url( $ttobj ){
 #endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 #endregion###############################################################################################################
+
+
 
 
 #region　Application Commands

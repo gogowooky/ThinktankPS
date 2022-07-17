@@ -1101,7 +1101,7 @@ class TTExternalLinks: TTCollection {
 
 #endregion###############################################################################################################
 
-#region　TTMemo / TTMemo    s
+#region　TTMemo / TTMemos
 #########################################################################################################################
 class TTMemo : TTObject {
 
@@ -1268,7 +1268,6 @@ class TTEditing : TTObject {
         $this.WordWrap = ""
         $this.Foldings = ""
     }
-
     [hashtable] GetDictionary() {
         return @{
             MemoID      = "メモID"
@@ -1279,7 +1278,6 @@ class TTEditing : TTObject {
             Index       = "MemoID"
         }
     }
-
     [string] GetFilename(){         # should be override
         return "$global:TTMemoDirPath\$($this.MemoID).txt" 
     }
@@ -1309,9 +1307,7 @@ class TTEditing : TTObject {
 class TTEditings: TTCollection {
 
     #region Object itself
-
     hidden [string] $ChildType = "TTEditing"
-
     TTEditings() {                  # should be override
         $this.Name          = "Editings"
         $this.Description   = "編集状態"
@@ -1326,8 +1322,8 @@ class TTEditings: TTCollection {
         $item = [TTEditing]::new()
         $item.MemoID = ( $editor.Document.FileName -replace '.+[\\/](?<memoid>[\w\-]+)\..{2,5}', '${memoid}' )
         $item.Offset = ( $editor.CaretOffset )
-        $item.Foldings = @( $config.foldman.AllFoldings.where{ $_.IsFolded }.foreach{ $_.StartOffset } ) -join ","
         $item.WordWrap = $editor.WordWrap
+        $item.Foldings = @( $config.foldman.AllFoldings.where{ $_.IsFolded }.foreach{ $_.StartOffset } ) -join ","
         $item.UpdateDate = ( Get-Date -Format "yyyy-MM-dd-HHmmss")
         $this.children[$item.MemoID] = $item
 

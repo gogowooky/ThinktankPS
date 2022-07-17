@@ -350,25 +350,20 @@ class TTTagAction{
     [int] $_offset
 
     [psobject[]] $_tags = @(
-        @{  
-            tag     = 'tag'    
+        @{  tag     = 'tag'    
             regex   = "\[(?<tag>$($global:TTSearchs.GetActionTagsRegex())):(?<param>[^\[\]]+)\]" }, 
-        @{  
-            tag     = 'date'
+        @{  tag     = 'date'
             regex   = "(\[[0-9]{4}\-[0-9]{2}\-[0-9]{2}\])" },
-        @{  
-            tag     = 'event'
+        @{  tag     = 'event'
             regex   = '(\[(?<date>[0-9]{4}\-[0-9]{2}\-[0-9]{2}):(?<tag>\w+)(?<alert>:\d+[dmy])?\])' },
-        @{  
-            tag     = 'check'
+        @{  tag     = 'check'
             regex   = '(\[[ox_]\])' },
-        @{  
-            tag     = 'url'
+        @{  tag     = 'url'
             regex   = "((https?://[^　 \[\],;<>\`"\']+)|(`"https?://[^\[\],;<>\`"\']+)`")" },
-        @{  
-            tag     = 'path'
+        @{  tag     = 'path'
             regex   = '(([a-zA-Z]:\\[\w\\\-\.]*|"[a-zA-Z]:\\[\w\\\-\.].*")|(\\\\[\w\\\-\.]*|"\\\\[\w\\\-\.].*"))' }
     )
+    
     TTTagAction( $tool ){
         switch( $tool.GetType().Name ){
             'Editor' { $this._editor = $tool }

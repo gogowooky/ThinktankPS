@@ -3,6 +3,10 @@
 # TOGO
 ## 未処理
 - Configs表示の更新（Panel.Focusが表示されない）
+- Editor Load時にTTMemo[] flagへ読込済みEditorを設定
+- Shelf設定時にTTResources[] flagへ読込済みPanelを設定
+- Index設定時にTTResources[] flagへ読込済みPanelを設定
+- Cabinet設定時にTTResources[] flagへ読込済みPanelを設定
 
 ## 不具合
 - Panel非表示時にtentative表示すると、脱mode後に再非表示されない
@@ -16,7 +20,7 @@
 
 # KNOWLEDGE
 ## 注意点
-- KeyEventにクラスインスタンス関数を使うのは不吉
+- KeyEventにクラスインスタンス関数を使うのは不吉 
 
 ## アイデア
 - カーソル位置固定モード（文字入力によるカーソル位置変更時に、Panel内縦座標はスクロールで維持する）
@@ -29,7 +33,12 @@
 
 
 ## 対応済・修正済
-- ~~Viewクラスのイベント(TTEditorsManager::OnSave/OnLoad)を定義して動作を確認~~
+<<<<<<< Updated upstream
+=======
+- DataGridの項目選択において、マウスダブルクリックでinvoke、Shift+ダブルクリックでselect&invoke
+
+>>>>>>> Stashed changes
+- Viewクラスのイベント(TTEditorsManager::OnSave/OnLoad)を定義して動作を確認
 - Editor focus時にDesk captionにindexとtitleを表示
 - AppMan.Document.Editor.MoveTo()の'nextkeyword'/'prevkeyword'で検索語をselect
 - Editorから他のPanelにAlt+XでFocusに移行できない　→修正

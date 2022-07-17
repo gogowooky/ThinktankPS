@@ -816,14 +816,18 @@ class TTEditorsManager : TTToolsManager{
         if( $null -ne $this.FoldManagers[$num-1] ){
             [ICSharpCode.AvalonEdit.Folding.FoldingManager]::Uninstall( $this.FoldManagers[$num-1] )
         }
-        $this.documents.where{
-            $_ -eq $editor.Document
-        }.foreach{
-            $_.Text = ""
-            $_.FileName = ""
-        }
-        $this.Indices[$num-1] = ""
 
+        if( 0 -eq $this.documents.where{ 0 -eq $_.FileName.length }.count ){
+            $this.documents.where{
+                $_ -eq $editor.Document
+            }.foreach{
+                $_.Text = ''
+                $_.FileName = ''
+            }
+            $this.Indices[$num-1] = ''
+        }
+
+        $this.FoldStrategies[$num-1] = $null
         $editor.Document = $null
         $editor.Options.ShowTabs = $True
         $editor.Options.IndentationSize = 6
@@ -841,7 +845,7 @@ class TTEditorsManager : TTToolsManager{
         $editor.Add_GotFocus( $global:TextEditors_GotFocus )
         $editor.Add_PreviewMouseDown( $global:TextEditors_PreviewMouseDown )
         $editor.Add_Drop( $global:TextEditors_PreviewDrop )
-
+        
         return $this
     }
     #endregion
@@ -1244,7 +1248,7 @@ class TTEditorsManager : TTToolsManager{
 
     #region UpdateFolding
     [bool] UpdateFolding( [int]$num ){
-        if( $null -ne $this.FoldStrategies[$num-1] ){
+        if( ($null -ne $this.FoldStrategies[$num-1]) -and ($null -ne $this.FoldManagers[$num-1]) ){
             $this.FoldStrategies[$num-1].UpdateFoldings(
                 $this.FoldManagers[$num-1], $this.Controls[$num-1].Document
             )

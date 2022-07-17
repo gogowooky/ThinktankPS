@@ -19,10 +19,7 @@
 [ScriptBlock] $global:TTPanel_PreviewKeyUp =    {}
 [ScriptBlock] $global:TTTool_PreviewKeyUp =     {}
 
-
-
 [ScriptBlock] $global:TTPanel_SizeChanged = { $global:appcon.event_set_border( $args ) }
-
 
 # [ScriptBlock] $global:TTPanelTool_GotFocus =    { $args[1].Handled = $global:appcon.set_gotfocus_status( $args ) }
 # [ScriptBlock] $global:TTPanelTool_LostFocus =   { $args[1].Handled = $global:appcon.set_lostfocus_status( $args ) }
@@ -34,17 +31,16 @@
 [ScriptBlock] $global:TTDataGrid_SelectionChanged = { $global:appcon.group.datagrid_on_selectionchanged( $args ) }
 [ScriptBlock] $global:TTDataGrid_PreviewMouseDown = { $global:appcon.group.datagrid_on_previewmousedown( $args ) }
 
-
 [ScriptBlock] $global:TextEditors_TextChanged =        { $global:appcon.tools.editor.on_textchanged( $args ) }
 [ScriptBlock] $global:TextEditors_GotFocus =           { $global:appcon.tools.editor.on_focus( $args ) }
 [ScriptBlock] $global:TextEditors_PreviewMouseDown =   { $global:appcon.tools.editor.on_previewmousedown( $args ) }
 [ScriptBlock] $global:TextEditors_PreviewDrop =        { $global:appcon.tools.editor.on_previewdrop( $args ) }
 
-
 [ScriptBlock] $global:TTMenu_GotFocus = {}     # menu制御
 [ScriptBlock] $global:TTMenu_LostFocus = {}
 [ScriptBlock] $global:TTWindow_GotFocus = {}   # application制御
 [ScriptBlock] $global:TTWindow_LostFocus = {}
+
 
 [ScriptBlock] [TTEditorsManager]::OnSave = { $global:appcon.tools.editor.on_save( $args ) }
 [ScriptBlock] [TTEditorsManager]::OnLoad = { $global:appcon.tools.editor.on_load( $args ) }

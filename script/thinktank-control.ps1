@@ -4,7 +4,7 @@
 using namespace System.Windows.Controls
 using namespace System.Windows 
 using namespace System.Xml
-
+using namespace System.Windows.Input
 
 class TTApplicationController {
     #region variants/ new/ default/ initialize_application
@@ -690,12 +690,23 @@ class TTGroupController {
         return $true
     }
     [bool] datagrid_on_previewmousedown( $params ){
-        $mouse = $params[1]
+        $panel =    ($params[0].Name -replace "(Library|Index|Shelf).*",'$1')
+        $mouse =    $params[1]
         switch( $mouse.ChangedButton ){
             ([Input.MouseButton]::Left) {
                 if( $mouse.ClickCount -eq 2 ){
-                    [TTTool]::debug_message( $args[0].Name, "datagrid_on_previewmousedown" )
+                    [TTTool]::debug_message( $panel, "datagrid_on_previewmousedown" )
+                    if(
+                        ([System.Windows.Input.Keyboard]::GetKeyStates([System.Windows.Input.Key]::LeftShift) -eq 'Down') -or 
+                        ([System.Windows.Input.Keyboard]::GetKeyStates([System.Windows.Input.Key]::RightShift) -eq 'Down')
+                    ){
+                        $this.select_actions_then_invoke( $panel )
+                    }else{
+                        $this.invoke_action( $panel )
+  
+                    }
                     $mouse.Handled = $true
+
                 }
             }
         }
@@ -747,6 +758,7 @@ class TTGroupController {
         return $this
     }
     #endregion 
+
 }
 class TTToolsController {
     #region variants/ new/ default/ initialize
@@ -852,6 +864,10 @@ class TTEditorController {
         $global:AppMan.Document.Editor.Initialize( $no ).Load( $no, $index )
         return $this
     }
+    [TTEditorController] load( [string]$index ){
+        $no = $global:AppMan.Document.CurrentNumber
+        return $this.load( $no, $index )
+    }
     [TTEditorController] focus( [int]$no ){
         $global:AppMan.Document.SelectTool( $no, 'Editor' ).Focus( $no )
         return $this
@@ -937,18 +953,15 @@ class TTEditorController {
 
     }
     [bool] on_previewmousedown( $params ){
-
-        return $true
-
-        $editor   = $args[0]
-        $memoitem = $args[1]
+        $editor =   $params[0]
+        $mouse =    $params[1]
     
-        switch( $memoitem.ChangedButton ){
+        switch( $mouse.ChangedButton ){
             ([Input.MouseButton]::Left) {
-                if( $memoitem.ClickCount -eq 2 ){
-                    $pos = $editor.GetPositionFromPoint( $memoitem.GetPosition($editor) )
+                if( $mouse.ClickCount -eq 2 ){
+                    $pos = $editor.GetPositionFromPoint( $mouse.GetPosition($editor) )
                     [TTTagAction]::New( $editor ).invoke( $pos.Line, $pos.Column )
-                    $memoitem.Handled = $true
+                    $mouse.Handled = $true
                 }
             }
         }
@@ -965,6 +978,7 @@ class TTEditorController {
         # 要修正
     
     }
+
     [void] on_save( $params ){
         $toolman, $num = $params
         $index = $toolman.Indices[$num-1]

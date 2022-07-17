@@ -119,13 +119,13 @@ Application     Alt             I           ttcmd_panel_focus_index
 Application     Alt             C           ttcmd_panel_focus_cabinet
 Application     Alt             D           ttcmd_panel_focus_deskwork
 Application     Alt             W           ttcmd_panel_focus_work_toggle
-Application     Alt             Z           ttcmd_panel_collapse_multi_panel
+Application     Alt             Z           ttcmd_panel_collapse_multi_work
 Application     Alt, Shift      S           ttcmd_panel_collapse_shelf
 Application     Alt, Shift      L           ttcmd_panel_collapse_library
 Application     Alt, Shift      I           ttcmd_panel_collapse_index
 Application     Alt, Shift      C           ttcmd_panel_collapse_cabinet
 Application     Alt, Shift      W           ttcmd_panel_focus_work_toggle
-Application     Alt, Shift      Z           ttcmd_panel_collapse_multi_work
+Application     Alt, Shift      Z           ttcmd_panel_collapse_multi_panel
 '@
 #region _application_window_
 function ttcmd_application_window_quit( $source, $mod, $key ){
@@ -772,7 +772,6 @@ function ttcmd_editor_outline_moveto_previous( $source, $mod, $key ){
     $global:appcon.tools.editor.move_to('prevnode')
 }
 function ttcmd_editor_outline_fold_section( $source, $mod, $key ){
-
     #.SYNOPSIS
     # セクションを折り畳む
 
