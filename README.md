@@ -8,7 +8,8 @@
 - StatusでCurrent.Workspace/Toolが正しく表示されない　→設定ミス or 表示エラー
 ## 謎
 - Alt+DでDeskからWorkplaceにFocusするときに、Editorが2度 focusされる謎 [220712]
-
+## 要件等
+- [TTEditorController]saveでMemosのcacheをupdateするかどうかについて
 # KNOWLEDGE
 ## 注意点
 - KeyEventにクラスインスタンス関数を使うのは不吉

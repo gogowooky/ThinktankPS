@@ -851,6 +851,7 @@ class TTEditorsManager : TTToolsManager{
         $editor =   $this.Controls[$num-1]
         $filepath = [TTTool]::index_to_filepath( $index )
 
+        #### noneed to load
         if( -not (Test-Path $filepath) ){ 
             [TTTool]::debug_message( $this, "error >> no such file: $filepath" )
             return $this
@@ -860,35 +861,26 @@ class TTEditorsManager : TTToolsManager{
             return $this
         } 
 
+        #### load
         $refdoc = $this.documents.where{ $_.FileName -eq $filepath }[0]
-        if( $null -ne $refdoc ){ 
-            # 他EditorのDocumentをシェア
+        if( $null -ne $refdoc ){    #::: share file loaded on other editor
             $editor.Document = $refdoc
 
-        }else{
-            # 本Editor用にDocument設定
+        }else{                      #::: setup document object & load file
             $refdoc = $this.documents.where{ $_.FileName -eq "" }[0]
             $editor.Document = $refdoc
             $editor.Document.FileName = $filepath
             $editor.Load( $filepath )
-
         }
 
-        # 折畳み設定
+        #### setup folding object
         $this.Indices[$num-1] = $index
         $this.FoldManagers[$num-1] = [ICSharpCode.AvalonEdit.Folding.FoldingManager]::Install( $editor.TextArea )
         $this.FoldStrategies[$num-1] = [AvalonEdit.Sample.ThinktankFoldingStrategy]::new()
         $this.FoldStrategies[$num-1].UpdateFoldings( $this.FoldManagers[$num-1], $editor.Document )
 
+        #### invoke OnLoad event
         &([TTEditorsManager]::OnLoad) $this $num $index
-
-
-#        [TTDocumentManager] ConfigureEditor( $offset, $wordwrap, $foldings ){
-#            $conf  = $this.config.($this.target_tool)
-#            $conf.editor.CaretOffset = $offset
-#            $conf.editor.WordWrap    = $wordwrap
-#            $folds = $foldings.split(",")
-#            $conf.foldman.AllFoldings.foreach{ $_.IsFolded = ( $_.StartOffset -in $folds ) }
     
         return $this
     }
@@ -896,16 +888,15 @@ class TTEditorsManager : TTToolsManager{
         $editor = $this.Controls[$num-1]
         $filepath = $editor.Document.FileName
 
-        if( (0 -lt $filepath.length) -and ( $editor.IsModified ) ){
-            if( [TTEditorsManager]::DisplaySavingMessage ){
-                $title = $editor.Text.split( "`r`n" )[0]
-                [TTTool]::debug_message( $editor.Name, "Save Memo $($this.Indices[$num]) : $title" )
-            }
+        if( (0 -eq $filepath.length) -or ( -not $editor.IsModified ) ){ return $this }
 
-            $editor.Encoding = [System.Text.Encoding]::UTF8
-            $editor.Save( $filepath )
-            # &[TTEditorsManager]::OnSave $this
-        }
+        #### Save
+        $editor.Encoding = [System.Text.Encoding]::UTF8
+        $editor.Save( $filepath )
+
+        #### invoke OnSave event
+        &([TTEditorsManager]::OnSave) $this $num
+
         return $this
     }
 
@@ -1252,12 +1243,14 @@ class TTEditorsManager : TTToolsManager{
     #endregion
 
     #region UpdateFolding
-    [void] UpdateFolding( [int]$num ){
+    [bool] UpdateFolding( [int]$num ){
         if( $null -ne $this.FoldStrategies[$num-1] ){
             $this.FoldStrategies[$num-1].UpdateFoldings(
-                $this.FoldManager[$num-1], $this.Controls[$num-1].Document
+                $this.FoldManagers[$num-1], $this.Controls[$num-1].Document
             )
+            return $true
         }
+        return $false
     }
     #endregion
     

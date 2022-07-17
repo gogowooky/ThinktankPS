@@ -821,6 +821,10 @@ class TTToolsController {
 }
 class TTEditorController {
     #region variants/ new/ default/ initialize
+
+    static [bool] $DisplaySavedMessage = $true
+    static [bool] $DisplayLoadedMessage = $true
+
     [TTToolsController] $tools
 
     TTEditorController( [TTToolsController] $_tools ){
@@ -840,6 +844,7 @@ class TTEditorController {
         $this.load( 3, $this.tools.app._get('Editor3.Index') )
         return $this
     }
+
     #endregion
 
     #region load/ focus/ save
@@ -852,20 +857,7 @@ class TTEditorController {
         return $this
     }
     [TTEditorController] save( [int]$no ){
-        
         $global:AppMan.Document.Editor.Save( $no )
-        $memoid = $global:AppMan.Document.Editor.Indices[$no-1]
-        $editor = $global:AppMan.Document.Editor.Controls[$no-1]
-        $filepath = $editor.Document.FileName
-
-        # update TTMemos(Model)
-        $memo = $global:TTResources.GetChild('Memos').GetChild( $memoid )
-        $memo.Title = Get-Content $filepath -totalcount 1
-        $memo.UpdateDate = (Get-Item $filepath).LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
-
-        # update TTEditings(Model)
-        $global:TTResources.GetChild('Editings').AddChild( $editor )
-
         return $this
 
     }
@@ -909,14 +901,14 @@ class TTEditorController {
     #region event
     [bool] on_textchanged( $params ){
 
-        return $true
         $editor = $params[0]
         $num = [int][string]($editor.Name[-1])
 
-        $global:AppMan.Document.Editor.UpdateFolding($num)
-        # TTTimerResistEvent "on_textchanged(Editor$num)" 40 0 { 
-        #     $global:appcon.tools.editor.save($num)
-        # }.GetNewClosure()
+        if( $global:AppMan.Document.Editor.UpdateFolding($num) ){
+            TTTimerResistEvent "on_textchanged(Editor$num)" 10 0 { 
+                $global:appcon.tools.editor.save($num)
+            }.GetNewClosure()
+        }
 
         return $true
     }
@@ -974,11 +966,44 @@ class TTEditorController {
     
     }
     [void] on_save( $params ){
+        $toolman, $num = $params
+        $index = $toolman.Indices[$num-1]
+        $editor = $toolman.Controls[$num-1]
+        $filepath = $editor.Document.FileName
+
+        if( [TTEditorController]::DisplaySavedMessage ){
+            $title = $editor.Text.split( "`r`n" )[0]
+            [TTTool]::debug_message( $editor.Name, "Save Memo [$index] $title" )
+        }
+
+        #### Memos
+        $memo = $global:TTResources.GetChild('Memos').GetChild($index)
+        $memo.UpdateDate = (Get-Item $filepath).LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
+        $memo.Title = Get-Content $filepath -totalcount 1
+
+        #### Editings
+        $global:TTResources.GetChild('Editings').AddChild( $editor )
+
     }
     [void] on_load( $params ){
         $toolman, $num, $index = $params
-        $editor_name = $toolman.Controls[$num-1].Name
-        $this.tools.app._set( "$editor_name.Index", $index )
+        $editor = $toolman.Controls[$num-1]
+
+        if( [TTEditorController]::DisplayLoadedMessage ){
+            $title = $editor.Text.split( "`r`n" )[0]
+            [TTTool]::debug_message( $editor.Name, "Load Memo [$index] $title" )
+        }
+
+        #### status
+        $this.tools.app._set( "$($editor.Name).Index", $index )
+
+        #### Editings
+        $editing = $global:TTResources.GetChild('Editings').GetChild($index)
+        if( $null -eq $editing ){ return }
+        $editor.CaretOffset = $editing.Offset
+        $editor.WordWrap    = $editing.Wordwrap
+        $folds = $editing.Foldings.split(",")
+        $toolman.FoldManagers[$num-1].AllFoldings.foreach{ $_.IsFolded = ( $_.StartOffset -in $folds ) }
 
     }
 

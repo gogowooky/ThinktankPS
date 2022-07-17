@@ -1,10 +1,10 @@
 ﻿= Thinktank
 # メモ
-
+ 
 
 ## [2022-03-15] 便利そうなコントロール
 　https://mseeeen.msen.jp/wpf-multi-tag-combo-box/
-
+ 
 　結果を返すとき、[* WPFではUIスレッドをそのまま使うのではなく[ディスパッチャ]を介して使う]
 　https://scrapbox.io/kadoyau/エラー：このオブジェクトは別のスレッドに所有されているため、呼び出しスレッドはこのオブジェクトにアクセスできません
 
