@@ -42,8 +42,8 @@ class TTTool{
     }
     static [string]index_to_filepath( [string]$index ){
         switch -wildcard ( $index ){
-            "thinktank*" { return "$script:TTRootDirPath\thinktank.md" }
-            default      { return "$script:TTMemoDirPath\$index.txt" }
+            "thinktank*" { return "$global:TTRootDirPath\thinktank.md" }
+            default      { return "$global:TTMemoDirPath\$index.txt" }
         }
         return ""
     }
@@ -284,7 +284,7 @@ class TTClipboard {
                 }
                 $target.Document.Insert( $target.CaretOffset, (Invoke-Expression $fmt) )
     
-                $backupFolderName = $script:TTConfigs.GetChild("OutlookBackupFolder").Value
+                $backupFolderName = $global:TTConfigs.GetChild("OutlookBackupFolder").Value
                 $mailFolderName = $mail.parent.FolderPath.substring(2)
                 foreach( $folder in $outlook.GetNamespace("MAPI").Folders ){
                     if( ($folder.Name -eq $backupFolderName) -and
@@ -304,7 +304,7 @@ class TTClipboard {
     
         # $image = [Clipboard]::GetImage()  # image:System.Windows.Interop.InteropBitmap
     
-        $folder = $script:TTConfigs.GetChild("CaptureFolder").value
+        $folder = $global:TTConfigs.GetChild("CaptureFolder").value
         if( (Test-Path $folder) -eq $false ){ $folder = [Environment]::GetFolderPath('MyPictures') }
         $folder = $folder + "\thinktank\" + (Get-Date).ToString("yyyy-MM-dd")
         if( (Test-Path $folder) -eq $false ){ New-Item $folder -ItemType Directory }
@@ -352,7 +352,7 @@ class TTTagAction{
     [psobject[]] $_tags = @(
         @{  
             tag     = 'tag'    
-            regex   = "\[(?<tag>$($script:TTSearchs.GetActionTagsRegex())):(?<param>[^\[\]]+)\]" }, 
+            regex   = "\[(?<tag>$($global:TTSearchs.GetActionTagsRegex())):(?<param>[^\[\]]+)\]" }, 
         @{  
             tag     = 'date'
             regex   = "(\[[0-9]{4}\-[0-9]{2}\-[0-9]{2}\])" },
@@ -462,7 +462,7 @@ class TTTagAction{
 
 
     static [void] tag_action( $tag, $param ){
-        $search = $script:TTSearchs.children[$tag]
+        $search = $global:TTSearchs.children[$tag]
 
         switch ($search.Url){
             "thinktank_tag" {
@@ -509,7 +509,7 @@ class TTTagAction{
         $outlook = New-Object -ComObject Outlook.Application
         try {
             $backupFolder = $null
-            $backupFolderName = $script:TTConfigs.GetChild("OutlookBackupFolder").Value
+            $backupFolderName = $global:TTConfigs.GetChild("OutlookBackupFolder").Value
     
             $folders = $outlook.GetNamespace('MAPI').Folders
             for( $i = 1; $i -le $folders.count; $i++ ){ 

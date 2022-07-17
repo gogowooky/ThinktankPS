@@ -99,6 +99,9 @@ class TTAppManager {
             "(?<panel>Editor|Browser|Grid)(?<num>[123])" {                  # Editor[123]/Browser[123]/Grid[123]
                 return $this.Document.SelectTool( $Matches.num, $Matches.panel ).Focus($Matches.num)
             }
+            default{
+                Write-Host "ERROR!!: AppMan.Focus"
+            }
         }
 
         <#
@@ -350,8 +353,8 @@ class TTPanelManager {
         $text = $this._textbox.Text.Trim().Split(',')[0]
         if( $text -ne '' ){
             $text = $text -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'
-            $text = $text -replace "[ 　\t]+", ' '
-            return $text.split(' ')   
+            $text = $text -replace "[　\t]+", ' '
+            return $text.split(' ')
         }
         return $null
 
@@ -782,10 +785,11 @@ class TTToolsManager { # abstract
 
 class TTEditorsManager : TTToolsManager{
 
-    #region variants/ new/ Initialize/ Initialize()/ 
-    # static [ScriptBlock] $OnSave
-    # static [ScriptBlock] $OnLoad
+    #region variants/ new/ Initialize/ Initialize()
+    static [ScriptBlock] $OnSave = {}
+    static [ScriptBlock] $OnLoad = {}
     static [bool] $StayCursor = $false
+    static [bool] $DisplaySavingMessage = $false
 
     hidden [ICSharpCode.AvalonEdit.Document.TextDocument[]] $documents = @()
     [string[]] $Indices = @( "", "", "" )
@@ -798,7 +802,7 @@ class TTEditorsManager : TTToolsManager{
     [xml] $xshd
 
     TTEditorsManager( $docman ) : base( $docman ) {
-        $this.xshd = Get-Content "$script:TTScriptDirPath\thinktank.xshd"
+        $this.xshd = Get-Content "$global:TTScriptDirPath\thinktank.xshd"
     }
     [TTEditorsManager] Initialize(){               # if needed
         ([TTToolsManager]$this).Initialize()
@@ -840,10 +844,9 @@ class TTEditorsManager : TTToolsManager{
 
         return $this
     }
-
     #endregion
 
-    #region Load/ MoveTo/ NodeTo/ SelectTo
+    #region Load/ Save
     [TTEditorsManager] Load( [int]$num, [string]$index ){
         $editor =   $this.Controls[$num-1]
         $filepath = [TTTool]::index_to_filepath( $index )
@@ -861,12 +864,14 @@ class TTEditorsManager : TTToolsManager{
         if( $null -ne $refdoc ){ 
             # 他EditorのDocumentをシェア
             $editor.Document = $refdoc
+
         }else{
             # 本Editor用にDocument設定
             $refdoc = $this.documents.where{ $_.FileName -eq "" }[0]
             $editor.Document = $refdoc
             $editor.Document.FileName = $filepath
             $editor.Load( $filepath )
+
         }
 
         # 折畳み設定
@@ -875,7 +880,9 @@ class TTEditorsManager : TTToolsManager{
         $this.FoldStrategies[$num-1] = [AvalonEdit.Sample.ThinktankFoldingStrategy]::new()
         $this.FoldStrategies[$num-1].UpdateFoldings( $this.FoldManagers[$num-1], $editor.Document )
 
-        # &[TTEditorsManager]::OnLoad $this
+        &([TTEditorsManager]::OnLoad) $this $num $index
+
+
 #        [TTDocumentManager] ConfigureEditor( $offset, $wordwrap, $foldings ){
 #            $conf  = $this.config.($this.target_tool)
 #            $conf.editor.CaretOffset = $offset
@@ -883,11 +890,28 @@ class TTEditorsManager : TTToolsManager{
 #            $folds = $foldings.split(",")
 #            $conf.foldman.AllFoldings.foreach{ $_.IsFolded = ( $_.StartOffset -in $folds ) }
     
-        Write-Host "State変更すること"
-        # $script:app._set( "($editor.Name).Index", $index )
-
         return $this
     }
+    [TTEditorsManager] Save( [int]$num ){
+        $editor = $this.Controls[$num-1]
+        $filepath = $editor.Document.FileName
+
+        if( (0 -lt $filepath.length) -and ( $editor.IsModified ) ){
+            if( [TTEditorsManager]::DisplaySavingMessage ){
+                $title = $editor.Text.split( "`r`n" )[0]
+                [TTTool]::debug_message( $editor.Name, "Save Memo $($this.Indices[$num]) : $title" )
+            }
+
+            $editor.Encoding = [System.Text.Encoding]::UTF8
+            $editor.Save( $filepath )
+            # &[TTEditorsManager]::OnSave $this
+        }
+        return $this
+    }
+
+    #endregion
+
+    #region MoveTo/ NodeTo/ SelectTo
     [bool] MoveTo( [int]$num, [string]$to ){
         $editor = $this.Controls[$num-1]
         $curpos = $editor.CaretOffset
@@ -917,6 +941,30 @@ class TTEditorsManager : TTToolsManager{
             'nextline' {
                 [EditingCommands]::MoveDownByLine.Execute( $null, $area )
                 if( [TTEditorsManager]::StayCursor ){ $this.ScrollTo( 'nextline' ) }
+            }
+            'prevnode-' {
+                $curlin = $curlin.PreviousLine
+                while( $null -ne $curlin ){
+                    # scan document
+                    if( $doc.GetText( $curlin.Offset, 15 ) -match "^(?<tag>#+) .*" ){
+                        $editor.CaretOffset = $curlin.Offset
+                        $editor.ScrollToLine( $curlin.LineNumber )
+                        break
+                    }
+                    $curlin = $curlin.PreviousLine
+                }
+            }
+            'nextnode-' {
+                $curlin = $curlin.NextLine
+                while( $null -ne $curlin ){
+                    # scan document
+                    if( $doc.GetText( $curlin.Offset, 15 ) -match "^(?<tag>#+) .*" ){
+                        $editor.CaretOffset = $curlin.Offset
+                        $editor.ScrollToLine( $curlin.LineNumber )
+                        break
+                    }
+                    $curlin = $curlin.NextLine
+                }
             }
             'prevnode' { # 変更 220706
                 $level = if( $doc.GetText( $curlin.Offset, 15 ) -match "(?<tag>^#+) .*"  ){ $Matches.tag.length }else{ 10 }
@@ -955,15 +1003,18 @@ class TTEditorsManager : TTToolsManager{
             'prevkeyword' { # 変更 220706
                 $keywords = $this.app.Desk.Keywords()
                 if( $null -eq $keywords ){
-                    $this.MoveTo( $num, 'prevnode' )
+                    $this.MoveTo( $num, 'prevnode-' )
 
                 }else{
-                    $pos = ( $keywords.foreach{
-                        $editor.Document.LastIndexOf( $_, 0, $editor.CaretOffset, [System.StringComparison]::CurrentCultureIgnoreCase )
-                    } | Measure-Object -Maximum ).Maximum
-                
-                    if( $pos -ne -1 ){
-                        $editor.CaretOffset = $pos
+                    $poskey = @( $keywords.foreach{ [pscustomobject]@{
+                            pos = $editor.Document.LastIndexOf( $_, 0, $editor.CaretOffset - 1, [System.StringComparison]::CurrentCultureIgnoreCase )
+                            key = $_ 
+                        }
+                    } | Sort-Object -Property pos -Descending )[0]
+
+                    if( $poskey.pos -ne -1 ){
+                        $editor.SelectionStart = $poskey.pos
+                        $editor.SelectionLength = $poskey.key.length
                         $editor.ScrollTo( $area.Caret.Line, $area.Caret.Column )
 
                     }else{
@@ -974,15 +1025,18 @@ class TTEditorsManager : TTToolsManager{
             'nextkeyword' { # 変更 220706
                 $keywords = $this.app.Desk.Keywords()
                 if( $null -eq $keywords ){
-                    $this.MoveTo( $num, 'nextnode' )
+                    $this.MoveTo( $num, 'nextnode-' )
 
                 }else{
-                    $pos = ( $keywords.foreach{
-                        $editor.Document.IndexOf( $_, $editor.CaretOffset + 1, $editor.Text.Length - $editor.CaretOffset - 1, [System.StringComparison]::CurrentCultureIgnoreCase )
-                    } | Measure-Object -Minimum ).Minimum
+                    $poskey = @( $keywords.foreach{ [pscustomobject]@{
+                        pos = $editor.Document.IndexOf( $_, $editor.CaretOffset + 1, $editor.Text.Length - $editor.CaretOffset - 1, [System.StringComparison]::CurrentCultureIgnoreCase )
+                        key = $_ 
+                    }
+                } | Sort-Object -Property pos -Descending )[-1]
 
-                    if( $pos -ne -1 ){
-                        $editor.CaretOffset = $pos
+                    if( $poskey.pos -ne -1 ){
+                        $editor.SelectionStart = $poskey.pos
+                        $editor.SelectionLength = $poskey.key.length
                         $editor.ScrollTo( $area.Caret.Line, $area.Caret.Column )
                         
                     }else{
@@ -1179,35 +1233,38 @@ class TTEditorsManager : TTToolsManager{
 
     #endregion
 
-    #region no mod
-    [TTEditorsManager] Save( [int]$num ){
-        $editor = $this.Editors[$num]
-        $filepath = $editor.Document.FileName
+    #region Text
+    [string] Text( [int]$num, [string]$attr ){
+        $editor = $this.Controls[$num-1]
 
-        if( (0 -lt $filepath.length) -and ( $editor.IsModified ) ){
-            if( $this.app._istrue( "Config.MemoSavedMessage" ) ){
-                $title = $editor.Text.split( "`r`n" )[0]
-                [TTTool]::debug_message( $editor.Name, "Save Memo $($this.Indices[$num]) : $title" )
-            }
-
-            $editor.Encoding = [System.Text.Encoding]::UTF8
-            $editor.Save( $filepath )
-            &[TTEditorsManager]::OnSave $this
+        switch( $attr ){
+            'Title' { return ($editor.Text -split "`r?`n")[0] }
+            'CurLine' {}
+            'CurSection' {}
+            'CurWord' {}
+            'CurCharacter' {}
+            'CurTag' {}
+            'RootSection' {}
+            'ParentSection' {}
         }
-        return $this
+        return ''
     }
-    [TTDocumentManager] Modified( [int]$num ){
-        $this.Editor[$num].IsModified = $True
-        return $this
+    #endregion
+
+    #region UpdateFolding
+    [void] UpdateFolding( [int]$num ){
+        if( $null -ne $this.FoldStrategies[$num-1] ){
+            $this.FoldStrategies[$num-1].UpdateFoldings(
+                $this.FoldManager[$num-1], $this.Controls[$num-1].Document
+            )
+        }
     }
+    #endregion
+    
+    #region no mod
     [TTDocumentManager] SetWordWrap( [int]$num, $value ){
         $this.Controls.WordWrap = $value
         return $this
-    }
-    [void] UpdateFolding( [int]$num ){
-        if( $null -ne $this.FoldStrategies[$num] ){
-            $this.FoldStrategies[$num].UpdateFoldings( $this.FoldManager[$num], $this.Controls[$num].Document )
-        }
     }
     [TTToolsManager] ScrollTo( [int]$num, [string]$to ){            # should be override
         $editor = $this.Controls[$num]
@@ -1243,7 +1300,7 @@ class TTEditorsManager : TTToolsManager{
 
         return $this
     }
-    [string[]] AtCursor( [int]$num, [string]$action ){
+    [string[]] AtCursor( [int]$num, [string]$action ){ # Textと機能被り
         $editor = $this.Controls[$num]
         switch( $action ){
             'text'  { return $editor.SelectedText -split "`r?`n" }

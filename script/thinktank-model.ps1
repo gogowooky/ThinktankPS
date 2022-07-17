@@ -124,7 +124,7 @@ class TTCollection : TTObject {
         }
     }
     [string] GetFilename() { 
-        return "$script:TTCacheDirPath\$($this.Name).cache"
+        return "$global:TTCacheDirPath\$($this.Name).cache"
     }
     [void] Initialize(){            # should be override
         $this.children = @{}
@@ -174,7 +174,7 @@ class TTCollection : TTObject {
             $this_name = $this.Name 
             if( $this.GetType().Name -eq 'TTResources' ){
                 TTTimerResistEvent "TTResources:AddChild" 2 0 {
-                    $script:TTResources.SaveCache()
+                    $global:TTResources.SaveCache()
                 }
             }else{
                 TTTimerResistEvent "$($this.GetType().Name):AddChild" 2 0 {
@@ -233,8 +233,8 @@ class TTCollection : TTObject {
     }
     [void] DiscardResources() {
         $deleted_date = ( Get-Date -Format "yyyy-MM-dd-HHmmss")
-        Move-Item -Path $this.GetFilename() -Destination $script:TTBackupDirPath -Force
-        Rename-Item -Path "$script:TTBackupDirPath\$($this.Name).cache" -NewName "$($this.Name)_deleted_at_$($deleted_date).cache"
+        Move-Item -Path $this.GetFilename() -Destination $global:TTBackupDirPath -Force
+        Rename-Item -Path "$global:TTBackupDirPath\$($this.Name).cache" -NewName "$($this.Name)_deleted_at_$($deleted_date).cache"
         $this.UpdateDate = $deleted_date
         # $this.SaveCache()
     }
@@ -310,7 +310,7 @@ class TTResources : TTCollection {
         $this.loading =         $false
     }
     [string] GetFilename() { 
-        return "$script:TTCacheDirPath\thinktank.cache"
+        return "$global:TTCacheDirPath\thinktank.cache"
 
     }
     [TTResources] Initialize(){            # should be override
@@ -386,7 +386,7 @@ class TTConfig : TTObject {
 
     [string] GetFilename(){         # should be override
         $memoid = ( $this.MemoPos -replace "([^:]+):(\d+):(\d+)", '$1' )
-        return "$script:TTMemoDirPath\$memoid.txt" 
+        return "$global:TTMemoDirPath\$memoid.txt" 
     }
 
     #endregion ----------------------------------------------------------------------------------------------------------
@@ -424,28 +424,28 @@ class TTConfigs: TTCollection {
 
         $this.AddChild( [TTConfig]@{ Name = "RootFolder"
             Description = "ルートフォルダ"
-            Value = $script:TTRootDirPath
+            Value = $global:TTRootDirPath
             PCName = ""
             MemoPos = "thinktank-modes.ps1"
             UpdateDate = "1970-03-11-000000"
         })
         $this.AddChild( [TTConfig]@{ Name = "MemoFolder"
             Description = "メモフォルダ"
-            Value = $script:TTMemoDirPath
+            Value = $global:TTMemoDirPath
             PCName = ""
             MemoPos = "thinktank-modes.ps1"
             UpdateDate = "1970-03-11-000000"
         })
         $this.AddChild( [TTConfig]@{ Name = "CacheFolder"
             Description = "キャッシュフォルダ"
-            Value = $script:TTCacheDirPath
+            Value = $global:TTCacheDirPath
             PCName = ""
             MemoPos = "thinktank-modes.ps1"
             UpdateDate = "1970-03-11-000000"
         })
         $this.AddChild( [TTConfig]@{ Name = "BackupFolder"
             Description = "バックアップフォルダ"
-            Value = $script:TTBackupDirPath
+            Value = $global:TTBackupDirPath
             PCName = ""
             MemoPos = "thinktank-modes.ps1"
             UpdateDate = "1970-03-11-000000"
@@ -462,7 +462,7 @@ class TTConfigs: TTCollection {
     [bool] Update() {
 
         $lines = @(
-            Get-ChildItem -Path @( "$script:TTMemoDirPath\????-??-??-??????.txt", "$script:TTRootDirPath\thinktank.md" ) | `
+            Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
                 Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
                 Select-String "^Thinktank:設定" | `
                 Select-Object -Property Filename, LineNumber, Matches, Line
@@ -678,7 +678,7 @@ class TTCommands: TTCollection {
             $keys = @( $_.Name.Replace( "ttcmd_", "" ).split("_").foreach{ 
                         (Get-Culture).TextInfo.ToTitleCase($_).Insert(1,")").Insert(0,"_")
                     }) -join ","
-            $value = [ScriptBlock]::Create( "`$script:TTCommands.GetChild(`"$($_.($_.GetDictionary().Index))`").DoAction()" )
+            $value = [ScriptBlock]::Create( "`$global:TTCommands.GetChild(`"$($_.($_.GetDictionary().Index))`").DoAction()" )
             $this.menus += [psobject]@{ keys = $keys; value = $value }
         }
 
@@ -756,7 +756,7 @@ class TTSearchMethod : TTObject {
     }
     [string] GetFilename(){         # should be override
         $memoid = ( $this.MemoPos -replace "([^:]+):(\d+):(\d+)", '$1' )
-        return "$script:TTMemoDirPath\$memoid.txt" 
+        return "$global:TTMemoDirPath\$memoid.txt" 
     }
 
     #endregion ----------------------------------------------------------------------------------------------------------
@@ -802,7 +802,7 @@ class TTSearchMethods: TTCollection {
         $this.menus = @()
         $this.GetChildren().foreach{
             $keys = $_.Category.replace( ":", "," ) + "," + ($_.Name+(" "*30)).SubString(0,30).replace(","," ")
-            $value = [ScriptBlock]::Create( "`$script:TTSearchs.GetChild(`"$($_.($_.GetDictionary().Index))`").DoAction()" )
+            $value = [ScriptBlock]::Create( "`$global:TTSearchs.GetChild(`"$($_.($_.GetDictionary().Index))`").DoAction()" )
             $this.menus += [psobject]@{ keys = $keys; value = $value }
         }
    
@@ -844,7 +844,7 @@ class TTSearchMethods: TTCollection {
     }
     [bool] Update() {               # should be defined
         $lines = @(
-            Get-ChildItem -Path @( "$script:TTMemoDirPath\????-??-??-??????.txt", "$script:TTRootDirPath\thinktank.md" ) | `
+            Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
                 Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
                 Select-String "^Thinktank:検索:" | `
                 Select-Object -Property Filename, LineNumber, Matches, Line
@@ -960,7 +960,7 @@ class TTExternalLink : TTObject {
     }
     [string] GetFilename(){         # should be override
         $memoid = ( $this.MemoPos -replace "([^:]+):(\d+):(\d+)", '$1' )
-        return "$script:TTMemoDirPath\$memoid.txt" 
+        return "$global:TTMemoDirPath\$memoid.txt" 
     }
 
     #endregion ----------------------------------------------------------------------------------------------------------
@@ -1003,7 +1003,7 @@ class TTExternalLinks: TTCollection {
         $this.menus = @()
         $this.GetChildren().foreach{
             $keys = $_.Category.replace( ":", "," ) + "," + ($_.Name+(" "*30)).SubString(0,30).replace(","," ")
-            $value = [ScriptBlock]::Create( "`$script:TTLinks.GetChild(`"$($_.($_.GetDictionary().Index))`").DoAction()" )
+            $value = [ScriptBlock]::Create( "`$global:TTLinks.GetChild(`"$($_.($_.GetDictionary().Index))`").DoAction()" )
             $this.menus += [psobject]@{ keys = $keys; value = $value }
         }
 
@@ -1029,7 +1029,7 @@ class TTExternalLinks: TTCollection {
         $this.UpdateDate = $upd
 
         $lines = @(
-            Get-ChildItem -Path @( "$script:TTMemoDirPath\????-??-??-??????.txt", "$script:TTRootDirPath\thinktank.md" ) | `
+            Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
                 Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
                 Select-String "^Thinktank:URI:" | `
                 Select-Object -Property Filename, LineNumber, Matches, Line
@@ -1128,7 +1128,7 @@ class TTMemo : TTObject {
     }
 
     [string] GetFilename(){         # should be override
-        return "$script:TTMemoDirPath\$($this.MemoID).txt" 
+        return "$global:TTMemoDirPath\$($this.MemoID).txt" 
     }
 
     #endregion ----------------------------------------------------------------------------------------------------------
@@ -1169,7 +1169,7 @@ class TTMemos: TTCollection {
 
         $this.menus = @()
         $lines = @(
-            Get-ChildItem -Path @( "$script:TTRootDirPath\thinktank.md" ) | `
+            Get-ChildItem -Path @( "$global:TTRootDirPath\thinktank.md" ) | `
                 Select-String "^Thinktank@?(?<pcname>.*)?:Keywords:" | `
                 Select-Object -Property Filename, LineNumber, Matches, Line
         )
@@ -1193,7 +1193,7 @@ class TTMemos: TTCollection {
     }
     [bool] Update() {               # should be defined
         $lines = @( 
-            Get-ChildItem -Path @(  "$script:TTMemoDirPath\????-??-??-??????.txt", "$script:TTRootDirPath\thinktank.md" ) | `
+            Get-ChildItem -Path @(  "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
                 Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } 
         )
 
@@ -1219,7 +1219,7 @@ class TTMemos: TTCollection {
     [string] CreateChild() {
         $time = Get-Date
         $memoid = $time.tostring('yyyy-MM-dd-HHmmss')
-        $filepath = "$script:TTMemoDirPath\$memoid.txt"
+        $filepath = "$global:TTMemoDirPath\$memoid.txt"
         $title = "[$memoid] New Memo"
         $text = "$title`r`n==========================================================================================================`r`n"
         $text | Out-File $filepath  -Encoding utf8
@@ -1281,7 +1281,7 @@ class TTEditing : TTObject {
     }
 
     [string] GetFilename(){         # should be override
-        return "$script:TTMemoDirPath\$($this.MemoID).txt" 
+        return "$global:TTMemoDirPath\$($this.MemoID).txt" 
     }
 
     #endregion ----------------------------------------------------------------------------------------------------------

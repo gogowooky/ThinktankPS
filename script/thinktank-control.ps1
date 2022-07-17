@@ -167,23 +167,34 @@ class TTApplicationController {
 
             }
             "(?<name>Editor|Browser|Grid)(?<num>[123])" {
-                $this._set( 'Current.Workplace', "Work$($Matches.num)" )
-                $this._set( 'Current.Tool', $Matches.name )
+                $num = [int]($Matches.num)
+                $name= $Matches.name
+                $this._set( 'Current.Workplace', "Work$num" )
+                $this._set( 'Current.Tool', $name )
                 $this._set( 'Focus.Application', $Matches[0] )
-                $global:AppMan.Desk.FocusMark("●|$($_[0])$($_[-1])|")
-                $global:AppMan.Document.CurrentNumber = [int]($Matches.num)
-
+                $global:AppMan.Desk.FocusMark("●[$($_[0])$($_[-1])]") # Editor1 → E1
+                switch($name){ # Desk caption
+                    'Editor' {
+                        $index = $global:AppMan.Document.Editor.Indices[$num-1]
+                        $title = $global:TTResources.GetChild('Memos').GetChild($index).Title
+                        $this.group.caption( 'Desk', "[$index] $title")
+                    }
+                }
+                $global:AppMan.Document.CurrentNumber = $num
             }
         }
         return $true
     }
     [bool] event_refocus( $params ){ # Library/Index/Shelf/Desk/Cabinet
-        $panel = ( $params[0].Name -replace "(Library|Index|Shelf|Cabinet).*", '$1' )
-        $this.focus( $panel, '', '' )
-        return $true
+        if( $params[0].Name -match "(?<panel>Library|Index|Shelf|Cabinet).*" ){
+            $this.group.focus( $Matches.panel, '', '' )
+            return $true
+        }
+        return $false
     }
 
-    [bool] event_set_border( $params ){ 
+    [bool] event_set_border( $params ){
+        return $true
         $panel = $params[0].Name
         switch -wildcard ( $panel ){
             'Library*' {
@@ -268,12 +279,9 @@ class TTViewController {
                 $order = @( 'Standard', 'Zen' )
                 switch( $value ){
                     'Standard' {
-                        $library_w = $this.app._get('Layout.Library.Width')
-                        $library_h = $this.app._get('Layout.Library.Height')
-                        $shelf_h = $this.app._get('Layout.Shelf.Height')
-                        $global:AppMan.Border( 'Layout.Library.Width', $library_w )
-                        $global:AppMan.Border( 'Layout.Library.Height', $library_h )
-                        $global:AppMan.Border( 'Layout.Shelf.Height', $shelf_h )
+                        $global:AppMan.Border( 'Layout.Library.Width', $this.app._get('Layout.Library.Width') )
+                        $global:AppMan.Border( 'Layout.Library.Height', $this.app._get('Layout.Library.Height') )
+                        $global:AppMan.Border( 'Layout.Shelf.Height', $this.app._get('Layout.Shelf.Height') )
                         $this.app._set( 'Layout.Style.Group', $value )
                     }
                     'Zen' {
@@ -330,23 +338,29 @@ class TTViewController {
                 $order = @( 'Work12', 'Work123', 'Work13' )
                 switch( $value ){
                     'Alone' {
+                        $this.app._set( 'Layout.Work1.Width', $global:AppMan.Border('Layout.Work1.Width') )
+                        $this.app._set( 'Layout.Work1.Height', $global:AppMan.Border('Layout.Work1.Height') )
+                        $global:AppMan.Border( 'Layout.Work1.Width', 100 )
+                        $global:AppMan.Border( 'Layout.Work1.Height', 100 )
                         $work = $this.app._get('Current.Workplace')
                         $this.style( 'Work', $work )
                         $this.app.group.focus( $work, '', '' )
                     }
                     'Work12' {
-                        $global:AppMan.Border( 'Layout.Work1.Width', $this._work1_w )
+                        $this.app._set( 'Layout.Work1.Height', $global:AppMan.Border('Layout.Work1.Height') )
+                        $global:AppMan.Border( 'Layout.Work1.Width', $this.app._get('Layout.Work1.Width') )
                         $global:AppMan.Border( 'Layout.Work1.Height', 100 )
                         $this.app._set( 'Layout.Style.Desk', $value )                
                     }
                     'Work123' {
-                        $global:AppMan.Border( 'Layout.Work1.Width', $this._work1_w )
-                        $global:AppMan.Border( 'Layout.Work1.Height', $this._work1_h )
+                        $global:AppMan.Border( 'Layout.Work1.Width', $this.app._get('Layout.Work1.Width') )
+                        $global:AppMan.Border( 'Layout.Work1.Height', $this.app._get('Layout.Work1.Height') )
                         $this.app._set( 'Layout.Style.Desk', $value )                
                     }
                     'Work13' {
+                        $this.app._set( 'Layout.Work1.Width', $global:AppMan.Border('Layout.Work1.Width') )
                         $global:AppMan.Border( 'Layout.Work1.Width', 100 )
-                        $global:AppMan.Border( 'Layout.Work1.Height', $this._work1_h )
+                        $global:AppMan.Border( 'Layout.Work1.Height', $this.app._get('Layout.Work1.Height') )
                         $this.app._set( 'Layout.Style.Desk', $value )                
                     }
                     'toggle' {
@@ -366,11 +380,12 @@ class TTViewController {
                         $this.app._set( 'Layout.Style.Library', $value )
                     }
                     'Default' {
-                        $global:AppMan.Border( 'Layout.Library.Width', $this._library_w )
+                        $global:AppMan.Border( 'Layout.Library.Width', $this.app._get('Layout.Library.Width') )
                         $this.app._set( 'Layout.Style.Library', $value )
                     }
                     'Extent' {
-                        $global:AppMan.Border( 'Layout.Library.Width', $this._library_exw )
+                        $width = $this.app._get('Layout.Library.Width') + 10
+                        $this.border( 'Layout.Library.Width', $width )
                         $this.app._set( 'Layout.Style.Library', $value )
                     }
                     'toggle' {
@@ -389,7 +404,7 @@ class TTViewController {
                         $this.app._set( 'Layout.Style.Index', $value )
                     }
                     'Default' {
-                        $global:AppMan.Border( 'Layout.Library.Height', $this._library_h )
+                        $global:AppMan.Border( 'Layout.Library.Height', $this.app._get('Layout.Library.Height') )
                         $this.app._set( 'Layout.Style.Index', $value )
                     }
                     'Extent' {
@@ -412,11 +427,12 @@ class TTViewController {
                         $this.app._set( 'Layout.Style.Shelf', $value )
                     }
                     'Default' {
-                        $global:AppMan.Border( 'Layout.Shelf.Height', $this._shelf_h )
+                        $global:AppMan.Border( 'Layout.Shelf.Height', $this.app._get('Layout.Shelf.Height') )
                         $this.app._set( 'Layout.Style.Shelf', $value )
                     }
                     'Extent' {
-                        $global:AppMan.Border( 'Layout.Shelf.Height', $this._shelf_exh )
+                        $width = $this.app._get('Layout.Shelf.Height') + 20
+                        $global:AppMan.Border( 'Layout.Shelf.Height', $width )
                         $this.app._set( 'Layout.Style.Shelf', $value )
                     }
                     'Full' {
@@ -561,21 +577,15 @@ class TTGroupController {
                         if( $script:nopanel ){ $global:appcon.view.style( $script:ttp, 'None' ) }
                     }.GetNewClosure() )
 
-                }elseif( [TTTentativeKeyBindingMode]::Name -ne $tentative_panel ){  #:::: to cancel tentative mode
-                    [TTTentativeKeyBindingMode]::Initialize()
+                }elseif( [TTTentativeKeyBindingMode]::Name -eq $tentative_panel ){  #:::: to cancel tentative mode
+                    $global:AppMan.Focus( $tentative_panel )
 
                 }
             }
 
         }else{                                                                      #### normal focus
             $global:AppMan.Focus( $panel )
-            # if( $panel -eq 'Workplace' ){
-            #     $global:AppMan.Focus( $this.app._get('Current.Workplace') )
 
-            # }elseif( $this.app._ne( 'Focus.Application', $panel ) ){
-            #     $global:AppMan.Focus( $panel )
-
-            # }
         }
 
         return $this
@@ -823,7 +833,7 @@ class TTEditorController {
         $this.tools.app._set( 'Editor3.Index', 'thinktank' )
 
         return $this
-    }
+    }   
     [TTEditorController] initialize(){
         $this.load( 1, $this.tools.app._get('Editor1.Index') )
         $this.load( 2, $this.tools.app._get('Editor2.Index') )
@@ -832,13 +842,39 @@ class TTEditorController {
     }
     #endregion
 
-    #region load/ focus
+    #region load/ focus/ save
     [TTEditorController] load( [int]$no, [string]$index ){
         $global:AppMan.Document.Editor.Initialize( $no ).Load( $no, $index )
         return $this
     }
     [TTEditorController] focus( [int]$no ){
         $global:AppMan.Document.SelectTool( $no, 'Editor' ).Focus( $no )
+        return $this
+    }
+    [TTEditorController] save( [int]$no ){
+        
+        $global:AppMan.Document.Editor.Save( $no )
+        $memoid = $global:AppMan.Document.Editor.Indices[$no-1]
+        $editor = $global:AppMan.Document.Editor.Controls[$no-1]
+        $filepath = $editor.Document.FileName
+
+        # update TTMemos(Model)
+        $memo = $global:TTResources.GetChild('Memos').GetChild( $memoid )
+        $memo.Title = Get-Content $filepath -totalcount 1
+        $memo.UpdateDate = (Get-Item $filepath).LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
+
+        # update TTEditings(Model)
+        $global:TTResources.GetChild('Editings').AddChild( $editor )
+
+        return $this
+
+    }
+
+    #endregion
+
+    #region modified
+    [TTEditorController] modified( [int]$no, [bool]$modified ){
+        $global:AppMan.Document.Editor.Controls[$no-1].IsModified = $modified
         return $this
     }
     #endregion
@@ -870,19 +906,17 @@ class TTEditorController {
 
     #endregion
 
-
     #region event
     [bool] on_textchanged( $params ){
 
         return $true
-
         $editor = $params[0]
-        $script:DocMan.Tool( $editor.Name ).UpdatexEditorFolding()
-        switch( $editor.Name ){
-            'xEditor1' { TTTimerResistEvent "TextxEditors1_TextChanged" 40 0 { $script:desk.tool('Editor1').save() } }
-            'xEditor2' { TTTimerResistEvent "TextxEditors2_TextChanged" 40 0 { $script:desk.tool('Editor2').save() } }
-            'xEditor3' { TTTimerResistEvent "TextxEditors3_TextChanged" 40 0 { $script:desk.tool('Editor3').save() } }
-        }
+        $num = [int][string]($editor.Name[-1])
+
+        $global:AppMan.Document.Editor.UpdateFolding($num)
+        # TTTimerResistEvent "on_textchanged(Editor$num)" 40 0 { 
+        #     $global:appcon.tools.editor.save($num)
+        # }.GetNewClosure()
 
         return $true
     }
@@ -938,6 +972,14 @@ class TTEditorController {
         Write-Host $drag   
         # 要修正
     
+    }
+    [void] on_save( $params ){
+    }
+    [void] on_load( $params ){
+        $toolman, $num, $index = $params
+        $editor_name = $toolman.Controls[$num-1].Name
+        $this.tools.app._set( "$editor_name.Index", $index )
+
     }
 
 
@@ -1023,7 +1065,7 @@ class TTLibrary : TTListPanel {
         $this._name = "Library"
     }
     [TTLibrary] initialize(){
-        [void] ([TTListPanel]$this).initialize( $script:TTResources ) 
+        [void] ([TTListPanel]$this).initialize( $global:TTResources ) 
 
         $this._items.Add_SelectionChanged( $script:LibraryItems_SelectionChanged )
         $this._items.Add_PreviewKeyDown( $script:LibraryItems_PreviewKeyDown )
@@ -1061,7 +1103,7 @@ class TTShelf : TTListPanel {
     [TTShelf] initialize( $library_name ){
         $this._library_name = $library_name
 
-        [void] ([TTListPanel]$this).initialize( $script:TTResources.GetChild( $this._library_name ) )
+        [void] ([TTListPanel]$this).initialize( $global:TTResources.GetChild( $this._library_name ) )
 
         $this._items.Add_SelectionChanged( $script:ShelfItems_SelectionChanged )
         $this._items.Add_PreviewKeyDown( $script:ShelfItems_PreviewKeyDown )
@@ -1144,7 +1186,7 @@ class TTIndex : TTShelf {
     [TTIndex] initialize( $library_name ){
         $this._library_name = $library_name
 
-        [void] ([TTListPanel]$this).initialize( $script:TTResources.GetChild( $this._library_name ) )
+        [void] ([TTListPanel]$this).initialize( $global:TTResources.GetChild( $this._library_name ) )
 
         $this._items.Add_SelectionChanged( $script:IndexItems_SelectionChanged )
         $this._items.Add_PreviewKeyDown( $script:IndexItems_PreviewKeyDown )
@@ -1229,16 +1271,9 @@ class TTListMenu : TTListPanel {
 }
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #>
-# region desk / TTDesk
+#region desk / TTDesk
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 class TTDesk{
-    [string] $_name
-    [object] $_keyword
-    [object] $_caption
-    [object] $_sorting
-    hidden [string[]]$bullets
-    [string] $_tool
-
     TTDesk(){
         $this.bullets = @( '・ ', ' - ', '= ', '■ ', '● ', '⇒ ', '→ ', '↓ ', '> ', '; ' )
         $this._name = "Desk"
@@ -1259,7 +1294,7 @@ class TTDesk{
         $this._keyword.Add_PreviewKeyDown( $script:DeskKeyword_PreviewKeyDown )
         $this._keyword.Add_TextChanged( $script:DeskKeyword_TextChanged )  
 
-        [xml]$xshd = Get-Content "$script:TTScriptDirPath\thinktank.xshd"
+        [xml]$xshd = Get-Content "$global:TTScriptDirPath\thinktank.xshd"
         $script:Editors.foreach{
             $_.Options.ShowTabs = $True
             $_.Options.IndentationSize = 6
@@ -1294,7 +1329,7 @@ class TTDesk{
 
         $menus = @()
         $lines = @(
-            Get-ChildItem -Path @( "$script:TTRootDirPath\thinktank.md" ) | `
+            Get-ChildItem -Path @( "$global:TTRootDirPath\thinktank.md" ) | `
                 Select-String "^Thinktank@?(?<pcname>.*)?:Keywords:" | `
                 Select-Object -Property Filename, LineNumber, Matches, Line
         )
@@ -1344,7 +1379,7 @@ class TTDesk{
 
         $script:shelf.refresh()
 
-        $editing = $script:TTEditings.GetChild( $index )
+        $editing = $global:TTEditings.GetChild( $index )
         if( $null -ne $editing ){
             $script:DocMan.Tool( $this._tool ).ConfigureEditor( $editing.Offset, $editing.WordWrap, $editing.Foldings )
         }
@@ -1359,19 +1394,15 @@ class TTDesk{
         $memoid = ( $filepath -replace '.+[\\/](?<memoid>[\w\-]+)\..{2,5}','${memoid}' )       
 
         # update TTMemos(Model)
-        $memo = $script:TTMemos.GetChild( $memoid )
+        $memo = $global:TTMemos.GetChild( $memoid )
         $memo.Title = Get-Content $filepath -totalcount 1
         $memo.UpdateDate = (Get-Item $filepath).LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
 
         # update TTEditings(Model)
-        $script:TTEditings.AddChild( $editor )
+        $global:TTEditings.AddChild( $editor )
 
         return $this
 
-    }
-    [TTDesk] modified( $modified ){
-        $script:DocMan.Tool( $this._tool ).Modified( $modified )
-        return $this
     }
     [TTDesk] caption( $text ){
         if( 0 -lt $text.length ){
@@ -1483,17 +1514,17 @@ class TTDesk{
         return $script:DocMan.Tool( $this._tool ).Replace( $regex, $text )
     }
     [string] create_memo(){
-        return $script:TTMemos.CreateChild()
+        return $global:TTMemos.CreateChild()
     }
     [TTDesk] delete_memo( $index ){
-        $script:TTMemos.DeleteChild( $index )
+        $global:TTMemos.DeleteChild( $index )
         return $this
     }
     [void] create_cache( $keyword ){
         if( 0 -eq $keyword.length ){ $keyword = $script:app._get( 'Desk.Keyword' ) }
         if( 0 -eq $keyword.length ){ return }
         # $exmemo = [TTExMemos]::New().Keyword( $keyword )
-        # $script:TTResources.AddChild( $exmemo )
+        # $global:TTResources.AddChild( $exmemo )
 
         $script:library.initialize()    
     }

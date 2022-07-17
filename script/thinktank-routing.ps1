@@ -1,32 +1,7 @@
 ﻿
 
 
-# .NET Action, Func, Delegate, Lambda expression in PowerShell
-# https://www.reza-aghaei.com/net-action-func-delegate-lambda-expression-in-powershell/
 
-
-#region　View Key-Command Binding 
-#'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-#　oem1 = semicolon [;]
-#　
-$global:KeyBind_Misc = @'
-xShelf       Shift       Return      ttcmd_shelf_activate_item
-xShelf       Alt         Up          ttcmd_application_border_inworkplace_up
-xShelf       Alt         Down        ttcmd_application_border_inworkplace_down
-xShelf       Alt         Left        ttcmd_application_border_inwpanel_left
-xShelf       Alt         Right       ttcmd_application_border_inwpanel_right
-xShelf       Alt         D1          ttcmd_shelf_selected_toeditor1
-xShelf       Alt         D2          ttcmd_shelf_selected_toeditor2
-xShelf       Alt         D3          ttcmd_shelf_selected_toeditor3
-xShelf       Alt         M           ttcmd_shelf_focus_menu
-xShelf       Control     C           ttcmd_shelf_copy_item
-xIndex       Alt         D1          ttcmd_shelf_selected_toeditor1
-xIndex       Alt         D2          ttcmd_shelf_selected_toeditor2
-xIndex       Alt         D3          ttcmd_shelf_selected_toeditor3
-xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
-'@
-
-#endregion
 
 #region  View Events Binding
 [ScriptBlock] $global:TTWindowLoaded =  { $args[1].Handled = $global:appcon.initialize_application() }
@@ -41,8 +16,8 @@ xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 [ScriptBlock] $global:TTTool_PreviewKeyDown =   {}
 
 [ScriptBlock] $global:TTWindow_PreviewKeyUp =   $global:TTPreviewKeyUp
-[ScriptBlock] $global:TTPanel_PreviewKeyUp =    $global:TTPreviewKeyUp
-[ScriptBlock] $global:TTTool_PreviewKeyUp =     $global:TTPreviewKeyUp
+[ScriptBlock] $global:TTPanel_PreviewKeyUp =    {}
+[ScriptBlock] $global:TTTool_PreviewKeyUp =     {}
 
 
 
@@ -70,6 +45,9 @@ xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 [ScriptBlock] $global:TTMenu_LostFocus = {}
 [ScriptBlock] $global:TTWindow_GotFocus = {}   # application制御
 [ScriptBlock] $global:TTWindow_LostFocus = {}
+
+[ScriptBlock] [TTEditorsManager]::OnSave = { $global:appcon.tools.editor.on_save( $args ) }
+[ScriptBlock] [TTEditorsManager]::OnLoad = { $global:appcon.tools.editor.on_load( $args ) }
 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -117,6 +95,30 @@ xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
 #region　Model Events Binding
 [ScriptBlock] $global:TTStatus_OnSave = {  $global:appcon.event_save_status( $args ) } 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+#region　View Key-Command Binding 
+#'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+#　oem1 = semicolon [;]
+#　
+$global:KeyBind_Misc = @'
+xShelf       Shift       Return      ttcmd_shelf_activate_item
+xShelf       Alt         Up          ttcmd_application_border_inworkplace_up
+xShelf       Alt         Down        ttcmd_application_border_inworkplace_down
+xShelf       Alt         Left        ttcmd_application_border_inwpanel_left
+xShelf       Alt         Right       ttcmd_application_border_inwpanel_right
+xShelf       Alt         D1          ttcmd_shelf_selected_toeditor1
+xShelf       Alt         D2          ttcmd_shelf_selected_toeditor2
+xShelf       Alt         D3          ttcmd_shelf_selected_toeditor3
+xShelf       Alt         M           ttcmd_shelf_focus_menu
+xShelf       Control     C           ttcmd_shelf_copy_item
+xIndex       Alt         D1          ttcmd_shelf_selected_toeditor1
+xIndex       Alt         D2          ttcmd_shelf_selected_toeditor2
+xIndex       Alt         D3          ttcmd_shelf_selected_toeditor3
+xIndex       Control     C           ttcmd_shelf_copy_item; break Handled
+'@
+
+#endregion
 
 
 

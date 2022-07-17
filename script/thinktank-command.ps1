@@ -1319,14 +1319,6 @@ function ttcmd_editor_focus_currenteditor( $source, $mod, $key ){
     $current = $script:app._get( 'Desk.CurrentEditor' )
     $script:desk.focus( $current )
 }
-function ttcmd_editor_save( $source, $mod, $key ){
-    #.SYNOPSIS
-    # メモを強制保存する
-
-    $tool = $script:app._get( "Desk.CurrentEditor" )
-    $script:desk.tool( $tool ).modified( $true ).save()
-
-}
 function ttcmd_editor_new_tocurrenteditor( $source, $mod, $key ){
     #.SYNOPSIS
     # 新規メモを作成し、カレントエディタに読み込む
@@ -1518,7 +1510,7 @@ function ttcmd_editor_copy_tag_atcursor( $source, $mod, $key ){
     # カレントエディタカーソル位置のタグをコピーする
 
     $editor  = $script:DocMan.current_editor
-    $memo    = $script:TTMemos.GetChild( $script:DocMan.config.($editor.Name).index )
+    $memo    = $global:TTMemos.GetChild( $script:DocMan.config.($editor.Name).index )
     $posinfo = $script:DocMan.Tool('Editor').AtCursor( 'posinfo' )[0]
     [TTClipboard]::Copy( $memo, $posinfo )
 }

@@ -1,4 +1,4 @@
-
+﻿
 
 
 #region Key Command Binding
@@ -10,6 +10,8 @@
     $key =      if( $mod -in @('Alt','Alt, Shift') ){ [string]($args[1].SystemKey) }else{ [string]($args[1].Key) }
     $tttv  =    [TTTentativeKeyBindingMode]::Name
     $panel =    $global:appcon._get('Focus.Application')
+
+    if( $key.Contains('Alt') -or $key.Contains('Control') ){ return }
 
     if( $source -eq 'Application' ){        #### Application
         if( $tttv -ne '' ){                 #### tentative Index/Library/Shelf
@@ -125,7 +127,7 @@ Application     Alt, Shift      C           ttcmd_panel_collapse_cabinet
 Application     Alt, Shift      W           ttcmd_panel_focus_work_toggle
 Application     Alt, Shift      Z           ttcmd_panel_collapse_multi_work
 '@
-#region application_window
+#region _application_window_
 function ttcmd_application_window_quit( $source, $mod, $key ){
     #.SYNOPSIS
     # アプリケーションを終了する
@@ -163,7 +165,7 @@ function ttcmd_application_window_turn( $source, $mod, $key ){
 }
 
 #endregion
-#region panel_focus
+#region _panel_focus/collapse_
 function ttcmd_panel_focus_shelf( $source, $mod, $key ){
     #.SYNOPSIS
     # Shelfに一時的フォーカス、その後、フォーカス
@@ -216,7 +218,6 @@ function ttcmd_panel_focus_work_toggle( $source, $mod, $key ){
     }
 
 }
-
 function ttcmd_panel_collapse_shelf( $source, $mod, $key ){
     #.SYNOPSIS
     # Shelfを非表示
@@ -253,9 +254,9 @@ function ttcmd_panel_collapse_cabinet( $source, $mod, $key ){
 
 function ttcmd_panel_collapse_multi_panel( $source, $mod, $key ){
     #.SYNOPSIS
-    # PanelのDeskのみ/すべてをトグル表示
+    # Deskのみ/全Panelをトグル表示
 
-    $panel = @( 'Library', 'Index', 'Shelf', 'Desk' ).where{ $global:appcon.view.forcusable($_) }
+    $panel = @( 'Library', 'Index', 'Shelf', 'Desk' ).where{ $global:appcon.view.focusable($_) }
 
     if( ($panel.count -eq 1) -and ($panel[0] -eq 'Desk') ){
         $global:appcon.view.style( 'Group', 'Standard' )
@@ -269,10 +270,10 @@ function ttcmd_panel_collapse_multi_work( $source, $mod, $key ){
     #.SYNOPSIS
     # Workplace単独/マルチをトグル表示
 
-    $tool = @( 'Work1', 'Work2', 'Work3' ).where{ $global:appcon.view.forcusable($_) }
+    $tool = @( 'Work1', 'Work2', 'Work3' ).where{ $global:appcon.view.focusable($_) }
 
     if( $tool.count -eq 1 ){
-        $global:appcon.view.style( 'Group', 'Standard' )
+        $global:appcon.view.style( 'Desk', 'Work123' )
 
     }else{
         $global:appcon.view.style( 'Desk', 'Alone' ) 
@@ -489,7 +490,7 @@ function ttcmd_panel_discard_selected( $source, $mod, $key ){
     #.SYNOPSIS
     # 選択アイテムの関連リソースを削除する
 
-    $global:appcon.group.action( $source, 'SelectedItems', 'DiscardResources' )
+    $global:appcon.group.invoke_action( $source, 'SelectedItems', 'DiscardResources' )
 }
 
 #endregion
@@ -631,6 +632,14 @@ function ttcmd_application_border_indesk_right( $source, $mod, $key ){
 #region Editor
 #########################################################################################################################
 $global:KeyBind_Editor = @'
+Editor      Alt             Up              ttcmd_editor_outline_moveto_previous
+Editor      Alt             Down            ttcmd_editor_outline_moveto_next
+Editor      Alt             Left            ttcmd_editor_outline_fold_section
+Editor      Alt             Right           ttcmd_editor_outline_collapse_section
+Editor      Alt             P               ttcmd_editor_move_toprevkeyword
+Editor      Alt             N               ttcmd_editor_move_tonextkeyword
+Editor      Alt             B               ttcmd_editor_outline_fold_section
+Editor      Alt             F               ttcmd_editor_outline_collapse_section
 Editor      Control         P               ttcmd_editor_move_toprevline
 Editor      Control         N               ttcmd_editor_move_tonextline
 Editor      Control         B               ttcmd_editor_move_leftchar
@@ -638,20 +647,14 @@ Editor      Control         F               ttcmd_editor_move_rightchar
 Editor      Control         A               ttcmd_editor_move_tolinestart
 Editor      Control         E               ttcmd_editor_move_tolineend
 Editor      Control         K               ttcmd_editor_delete_tolineend
-Editor      Alt             P               ttcmd_editor_move_toprevkeyword
-Editor      Alt             N               ttcmd_editor_move_tonextkeyword
-Editor      Alt             B               ttcmd_editor_outline_fold_section
-Editor      Alt             F               ttcmd_editor_outline_collapse_section
-Editor      Alt             Up              ttcmd_editor_outline_moveto_previous
-Editor      Alt             Down            ttcmd_editor_outline_moveto_next
-Editor      Alt             Left            ttcmd_editor_outline_fold_section
-Editor      Alt             Right           ttcmd_editor_outline_collapse_section
+Editor      Control         S               ttcmd_editor_save
 
 
 xEditor      None            PageUp          ttcmd_editor_scroll_toprevline
 xEditor      None            Next            ttcmd_editor_scroll_tonextline
 xEditor      None            BrowserBack     ttcmd_editor_scroll_toprevline
 xEditor      None            BrowserForward  ttcmd_editor_scroll_tonextline
+
 xEditor      None            Return          ttcmd_editor_scroll_tonewline
 xEditor      Alt             T               ttcmd_editor_edit_insert_date
 xEditor      Alt             V               ttcmd_editor_edit_insert_clipboard
@@ -672,7 +675,6 @@ xEditor      Control         Back            ttcmd_editor_history_previous_tocur
 xEditor      Control         I               ttcmd_editor_outline_insert_section
 xEditor      Control         H               ttcmd_editor_edit_backspace
 xEditor      Control         D               ttcmd_editor_edit_delete
-xEditor      Control         S               ttcmd_editor_save
 xEditor      Control         G               ttcmd_editor_new_tocurrenteditor
 xEditor      Control         OemBackslash    ttcmd_application_config_editor_wordwrap_toggle
 xEditor      Control         Oem3            ttcmd_application_config_editor_staycursor_toggle
@@ -743,6 +745,18 @@ function ttcmd_editor_move_tonextkeyword( $source, $mod, $key ){
 }
 
 #endregion
+
+#region _editor_misc_
+function ttcmd_editor_save( $source, $mod, $key ){
+    #.SYNOPSIS
+    # メモを強制保存する
+
+    $no = [int]( $global:appcon._get( "Current.Workplace" ) -replace ".+([123])$",'$1' )
+    $global:appcon.tools.editor.modified($no,$true).save($no)
+
+}
+#endregion
+
 
 #region _outline_moveto/fold/collapse_
 function ttcmd_editor_outline_moveto_next( $source, $mod, $key ){

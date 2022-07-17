@@ -36,7 +36,7 @@ Add-Type -AssemblyName PresentationFramework, System.Windows.Forms, System.Drawi
 . .\script\thinktank-view-bind.ps1      #　.NET Framwork eventとcontrol, Key Eventとcommandをbinding
 
 
-. .\script\thinktank-event.ps1          #  .NET Framework（UI入力）
+. .\script\thinktank-routing.ps1        #  event-event, event-function ルーティング
 . .\script\thinktank-command.ps1        #　コマンド
 
 #endregion###############################################################################################################
@@ -120,10 +120,9 @@ function TTTimerResistEvent( [string]$name, [long]$countdown, [long]$rewind, [Sc
 }
 #endregion###############################################################################################################
 
+#　セットアップ
 KeyBindingSetup
 
-#region 本体
-#'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 #　View
 $global:AppMan =        [TTAppManager]::new()
 
@@ -137,5 +136,4 @@ $global:appcon =        [TTApplicationController]::new()
 
 $global:AppMan.Show()
 
-#endregion###############################################################################################################
 
