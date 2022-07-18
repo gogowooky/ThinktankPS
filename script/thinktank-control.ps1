@@ -964,7 +964,7 @@ class TTEditorController {
 
         $editor = $params[0]
         $name = $editor.Name
-        $memo = $script:DocMan.config.$name.index
+        $memo = $global:DocMan.config.$name.index
         $line = $editor.Document.GetLineByNumber(1)
         $title = $editor.Document.GetText( $line.Offset, $line.Length )
 
@@ -1026,7 +1026,9 @@ class TTEditorController {
         $memo.Title = Get-Content $filepath -totalcount 1
 
         #### Editings
-        $global:TTResources.GetChild('Editings').AddChild( $editor )
+        $foldman = $toolman.FoldManagers[$num-1]
+        $foldings = @( $foldman.AllFoldings.where{ $_.IsFolded }.foreach{ $_.StartOffset } ) -join ","
+        $global:TTResources.GetChild('Editings').AddChild( $editor, $foldings )
 
     }
     [void] on_load( $params ){
@@ -1046,8 +1048,8 @@ class TTEditorController {
         if( $null -eq $editing ){ return }
         $editor.CaretOffset = $editing.Offset
         $editor.WordWrap    = $editing.Wordwrap
-        $folds = $editing.Foldings.split(",")
-        $toolman.FoldManagers[$num-1].AllFoldings.foreach{ $_.IsFolded = ( $_.StartOffset -in $folds ) }
+        $foldings = $editing.Foldings.split(",")
+        $toolman.FoldManagers[$num-1].AllFoldings.foreach{ $_.IsFolded = ( $_.StartOffset -in $foldings ) }
 
     }
 

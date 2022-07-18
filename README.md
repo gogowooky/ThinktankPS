@@ -38,6 +38,9 @@
 
 
 ## 対応済・修正済
+- Editor.Save時にEditingが保存されない
+- Editor.Load時にEditingが反映されない
+
 - Library Panelの選択アイテム色変更
 - TTGroupController.refresh：   TTResources.flagに表示Panel頭文字記入 
   TTGroupController.load：      TTGroupController.refresh('Library')を呼び出し

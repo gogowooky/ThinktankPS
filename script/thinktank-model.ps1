@@ -1317,15 +1317,12 @@ class TTEditings: TTCollection {
     [void] Initialize(){            # should be override
         $this.LoadCache()
     }
-    [void] AddChild( [ICSharpCode.AvalonEdit.TextEditor]$editor ) {     # should be override
-        $name = $editor.Name
-        $config = $script:DocMan.config.$name
-        
+    [void] AddChild( [ICSharpCode.AvalonEdit.TextEditor]$editor, [string]$foldings ) {     # should be override
         $item = [TTEditing]::new()
         $item.MemoID = ( $editor.Document.FileName -replace '.+[\\/](?<memoid>[\w\-]+)\..{2,5}', '${memoid}' )
         $item.Offset = ( $editor.CaretOffset )
         $item.WordWrap = $editor.WordWrap
-        $item.Foldings = @( $config.foldman.AllFoldings.where{ $_.IsFolded }.foreach{ $_.StartOffset } ) -join ","
+        $item.Foldings = $foldings
         $item.UpdateDate = ( Get-Date -Format "yyyy-MM-dd-HHmmss")
         $this.children[$item.MemoID] = $item
 
