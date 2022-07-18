@@ -1,12 +1,13 @@
 # ThinktankPS2
 
-# TOGO
+# TODO
 ## 処理中
 - 複数選択item対象の処理として、逐次処理、に加え、一括処理を加えたい。（select_actions_then_invoke）
 　すべてのアクションに$itemsを渡すことにする。
 
 - Shift+左ダブルクリックを右シングルクリックに変更（datagrid_on_previewmousedown）
 ## 未処理
+- PopupMenuをカーソル位置またはマウス位置に
 - Configs表示の更新（Panel.Focusが表示されない）
 - Editor Load時にTTMemo[] flagへ読込済みEditorを設定
 - Shelf設定時にTTResources[] flagへ読込済みPanelを設定
@@ -23,20 +24,11 @@
 ## 要件等
 - [TTEditorController]saveでMemosのcacheをupdateするかどうかについて
 
-# KNOWLEDGE
-## 注意点
-- KeyEventにクラスインスタンス関数を使うのは不吉 
-
-## アイデア
-- カーソル位置固定モード（文字入力によるカーソル位置変更時に、Panel内縦座標はスクロールで維持する）
-- 単語レベルカーソル移動、Selection
-
-# STATUS 
 ## 一旦固定
 - Focus状態はタブに表示（背景色、枠色を使わない）
 - KeyEvent処理はGlobalで処理（クラスインスタンスを使わない）
 
-
+# STATUS 
 ## 対応済・修正済
 - Editor.Save時にEditingが保存されない
 - Editor.Load時にEditingが反映されない
@@ -59,3 +51,12 @@
 - 同上、'nextkeyword'/'prevkeyword'のkeyowrd無し動作を'nextnode-'/'prevnode-'に変更
 - ttcmd_panel_collapse_multi_panel　動作確認
 - ttcmd_panel_collapse_multi_work　動作確認
+
+# KNOWLEDGE
+## 注意点
+- KeyEventにクラスインスタンス関数を使うのは不吉 
+
+## アイデア
+- カーソル位置固定モード（文字入力によるカーソル位置変更時に、Panel内縦座標はスクロールで維持する）
+- 単語レベルカーソル移動、Selection
+

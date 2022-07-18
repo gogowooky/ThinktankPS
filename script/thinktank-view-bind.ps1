@@ -296,8 +296,8 @@ Library+    Alt         Up          ttcmd_application_border_inlpanel_up
 Library+    Alt         Down        ttcmd_application_border_inlpanel_down
 Library+    Alt         Left        ttcmd_application_border_inwpanel_left
 Library+    Alt         Right       ttcmd_application_border_inwpanel_right
-Library+    Alt, Shift  Space       ttcmd_panel_action_invoke
-Library+    Alt         Space       ttcmd_panel_action_select
+Library+    Alt, Shift  Space       ttcmd_panel_action_select
+Library+    Alt         Space       ttcmd_panel_action_invoke
 Library+    Alt         D0          ttcmd_panel_reload
 Library+    Alt         K           ttcmd_panel_filter_clear
 Library+    Alt         D           ttcmd_panel_discard_selected
@@ -318,8 +318,8 @@ Library     None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Library     Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Library     None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Library     Shift       F6          ttcmd_panel_sort_asc_6thcolumn
-Library     Shift       Return      ttcmd_panel_action_invoke
-Library     None        Return      ttcmd_panel_action_select
+Library     Shift       Return      ttcmd_panel_action_select
+Library     None        Return      ttcmd_panel_action_invoke
 '@
 $global:KeyBind_Index = @'
 Index+      Alt         I           ttcmd_panel_focus_index
@@ -331,8 +331,8 @@ Index+      Alt         Up          ttcmd_application_border_inlpanel_up
 Index+      Alt         Down        ttcmd_application_border_inlpanel_down
 Index+      Alt         Left        ttcmd_application_border_inwpanel_left
 Index+      Alt         Right       ttcmd_application_border_inwpanel_right
-Index+      Alt, Shift  Space       ttcmd_panel_action_invoke
-Index+      Alt         Space       ttcmd_panel_action_select
+Index+      Alt, Shift  Space       ttcmd_panel_action_select
+Index+      Alt         Space       ttcmd_panel_action_invoke
 Index+      Alt         D0          ttcmd_panel_reload
 Index+      Alt         K           ttcmd_panel_filter_clear
 Index+      Alt         D           ttcmd_panel_discard_selected
@@ -353,8 +353,8 @@ Index       None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Index       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Index       None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Index       Shift       F6          ttcmd_panel_sort_asc_6thcolumn
-Index       Shift       Return      ttcmd_panel_action_invoke
-Index       None        Return      ttcmd_panel_action_select
+Index       Shift       Return      ttcmd_panel_action_select
+Index       None        Return      ttcmd_panel_action_invoke
 '@
 $global:KeyBind_Shelf = @'
 Shelf+      Alt         S           ttcmd_panel_focus_shelf
@@ -366,8 +366,8 @@ Shelf+      Alt         Up          ttcmd_application_border_inrpanel_up
 Shelf+      Alt         Down        ttcmd_application_border_inrpanel_down
 Shelf+      Alt         Left        ttcmd_application_border_inwpanel_left
 Shelf+      Alt         Right       ttcmd_application_border_inwpanel_right
-Shelf+      Alt, Shift  Space       ttcmd_panel_action_invoke
-Shelf+      Alt         Space       ttcmd_panel_action_select
+Shelf+      Alt, Shift  Space       ttcmd_panel_action_select
+Shelf+      Alt         Space       ttcmd_panel_action_invoke
 Shelf+      Alt         D0          ttcmd_panel_reload
 Shelf+      Alt         K           ttcmd_panel_filter_clear
 Shelf+      Alt         D           ttcmd_panel_discard_selected
@@ -388,8 +388,8 @@ Shelf       None        F5          ttcmd_panel_sort_dsc_5thcolumn
 Shelf       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Shelf       None        F6          ttcmd_panel_sort_dsc_6thcolumn
 Shelf       Shift       F6          ttcmd_panel_sort_asc_6thcolumn
-Shelf       Shift       Return      ttcmd_panel_action_invoke
-Shelf       None        Return      ttcmd_panel_action_select
+Shelf       Shift       Return      ttcmd_panel_action_select
+Shelf       None        Return      ttcmd_panel_action_invoke
 '@
 
 #region _panel_move_

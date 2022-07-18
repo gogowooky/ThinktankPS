@@ -315,7 +315,7 @@ class TTPanelManager {
         return $this._datagrid.SelectedItem.($this._index) 
     }
     [TTPanelManager] Refresh(){
-        
+
         $this._datagrid.Items.refresh()
         return $this
     }
@@ -947,7 +947,7 @@ class TTEditorsManager : TTToolsManager{
                 $curlin = $curlin.NextLine
                 while( $null -ne $curlin ){
                     # scan document
-                    if( $doc.GetText( $curlin.Offset, 15 ) -match "^(?<tag>#+) .*" ){
+                    if( $doc.GetText( $curlin.Offset, $curlin.Length ) -match "^(?<tag>#+) .*" ){
                         $editor.CaretOffset = $curlin.Offset
                         $editor.ScrollToLine( $curlin.LineNumber )
                         break
@@ -956,7 +956,7 @@ class TTEditorsManager : TTToolsManager{
                 }
             }
             'prevnode' { # 変更 220706
-                $level = if( $doc.GetText( $curlin.Offset, 15 ) -match "(?<tag>^#+) .*"  ){ $Matches.tag.length }else{ 10 }
+                $level = if( $doc.GetText( $curlin.Offset, $curlin.Length  ) -match "(?<tag>^#+) .*"  ){ $Matches.tag.length }else{ 10 }
                 $curlin = $curlin.PreviousLine
                 while( $null -ne $curlin ){
                     # scan document
@@ -973,7 +973,7 @@ class TTEditorsManager : TTToolsManager{
                 }
             }
             'nextnode' { # 変更 220706
-                $level = if( $doc.GetText( $curlin.Offset, 15 ) -match "(?<tag>^#+) .*"  ){ $Matches.tag.length }else{ 10 }
+                $level = if( $doc.GetText( $curlin.Offset, $curlin.Length ) -match "(?<tag>^#+) .*"  ){ $Matches.tag.length }else{ 10 }
                 $curlin = $curlin.NextLine
                 while( $null -ne $curlin ){
                     # scan document
