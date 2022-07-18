@@ -45,16 +45,16 @@ class TTObject {
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
 
-    [bool] InvokeAction( $name ) {
+    [bool] InvokeAction( $name, [object[]]$items ) {
         $func = Invoke-Expression "[$($this.gettype())]::$name"
         $title = ((Get-Help $func).synopsis)
-        $ret = (&$func $this)
+        $ret = (&$func $this $items)
         [TTTool]::debug_message( $this, "InvokeAction: @{ $title, $func }" )
 
         return $ret
     }
-    [bool] InvokeAction() {
-        return $this.InvokeAction('Action')
+    [bool] InvokeAction( [object[]]$items ) {
+        return $this.InvokeAction( 'Action', $items )
     }
     [hashtable] GetActions() {
         $title_funcs = [ordered] @{}
@@ -291,6 +291,8 @@ class TTCollection : TTObject {
     static [string] $ActionToIndex = ''
     static [string] $ActionToCabinet = ''
     static [string] $ActionDataLocaiton = ''
+
+
     #endregion ----------------------------------------------------------------------------------------------------------
 
 }

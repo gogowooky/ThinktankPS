@@ -591,8 +591,8 @@ class TTGroupController {
         return $this
     }
     [bool] invoke_action( [string]$panel ){
-        $item = $global:AppMan.$panel.SelectedItem()
-        return $item.InvokeAction()
+        $items = $global:AppMan.$panel.SelectedItems()
+        return $items[0].InvokeAction( 'Action', $items )
     }
     [bool] select_actions_then_invoke( [string]$panel ){
         $items = $global:AppMan.$panel.SelectedItems()
@@ -600,13 +600,13 @@ class TTGroupController {
         $title = "{0}:{1}:アクション選択" -f $global:AppMan.$panel.Caption(), $panel
         $actions = $items[0].GetActions()
         $selected = $global:AppMan.PopupMenu.Caption( $title ).Items( $actions.Keys ).Show()
+
         $selected.foreach{
             $action = $actions[$_]
-            $items.foreach{ $_.InvokeAction($action) }
+            $items[0].InvokeAction( $action, $items )
         }
         return $true
     }
-
     #endregion
 
     #region reload/ load/ cursor/ sort/ extract/ selected/ refresh 
@@ -695,19 +695,13 @@ class TTGroupController {
         switch( $mouse.ChangedButton ){
             ([Input.MouseButton]::Left) {
                 if( $mouse.ClickCount -eq 2 ){
-                    [TTTool]::debug_message( $panel, "datagrid_on_previewmousedown" )
-                    if(
-                        ([System.Windows.Input.Keyboard]::GetKeyStates([System.Windows.Input.Key]::LeftShift) -eq 'Down') -or 
-                        ([System.Windows.Input.Keyboard]::GetKeyStates([System.Windows.Input.Key]::RightShift) -eq 'Down')
-                    ){
-                        $this.select_actions_then_invoke( $panel )
-                    }else{
-                        $this.invoke_action( $panel )
-  
-                    }
+                    $this.invoke_action( $panel )
                     $mouse.Handled = $true
-
                 }
+            }
+            ([Input.MouseButton]::Right) {
+                $this.select_actions_then_invoke( $panel )
+                $mouse.Handled = $true
             }
         }
         return $true

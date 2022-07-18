@@ -1,6 +1,11 @@
 # ThinktankPS2
 
 # TOGO
+## 処理中
+- 複数選択item対象の処理として、逐次処理、に加え、一括処理を加えたい。（select_actions_then_invoke）
+　すべてのアクションに$itemsを渡すことにする。
+
+- Shift+左ダブルクリックを右シングルクリックに変更（datagrid_on_previewmousedown）
 ## 未処理
 - Configs表示の更新（Panel.Focusが表示されない）
 - Editor Load時にTTMemo[] flagへ読込済みEditorを設定

@@ -6,14 +6,14 @@
 
 #region　Functions
 #''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-function ttact_noop( $ttobj ){
+function ttact_noop( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # 何もしない
 
     [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_noop" )
 
 }
-function ttact_select_file( $ttobj ){
+function ttact_select_file( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # 関連ファイルをエクスプローラーで選択する
 
@@ -28,7 +28,7 @@ function ttact_select_file( $ttobj ){
             Start-Process "explorer.exe" "/select,`"$($ttobj.GetFilename())`"" 
     }
 }
-function ttact_discard_resources( $ttobj ){
+function ttact_discard_resources( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # 関連リソースを開放する
 
@@ -40,21 +40,21 @@ function ttact_discard_resources( $ttobj ){
     }
     
 }
-function ttact_display_in_shelf( $ttobj ){
+function ttact_display_in_shelf( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # Shelfパネルに表示する
 
     [TTTool]::debug_message( $ttobj.gettype(), "ttact_display_in_shelf" )
     $global:appcon.group.load( 'Shelf', $ttobj.name )
 }
-function ttact_display_in_index( $ttobj ){
+function ttact_display_in_index( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # Indexパネルに表示する
 
     [TTTool]::debug_message( $ttobj.gettype(), "ttact_display_in_index" )
     $global:appcon.group.load( 'Index', $ttobj.name )
 }
-function ttact_display_in_cabinet( $ttobj ){
+function ttact_display_in_cabinet( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # Cabinetパネルに表示する
 
@@ -62,14 +62,14 @@ function ttact_display_in_cabinet( $ttobj ){
     $global:appcon.group.load( 'Cabinet', $ttobj.name ).focus('Cabinet')
 }
 
-function ttact_open_memo( $ttobj ){
+function ttact_open_memo( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # メモを開く
     
     [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_memo" )
     $global:appcon.tools.editor.load( $ttobj.MemoID )
 }
-function ttact_copy_url_toclipboard( $ttobj ){
+function ttact_copy_url_toclipboard( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # urlをクリップボードに保存する
 
@@ -79,7 +79,7 @@ function ttact_copy_url_toclipboard( $ttobj ){
         'TTSearchMethod' { [TTClipboard]::Copy( $ttobj.Url ) }
     }
 }
-function ttact_open_url_ex( $ttobj ){
+function ttact_open_url_ex( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # urlを外部ツールで開く
 
@@ -89,7 +89,7 @@ function ttact_open_url_ex( $ttobj ){
         'TTSearchMethod' { [TTTool]::open_url( $ttobj.Url ) }
     }
 }
-function ttact_open_url( $ttobj ){
+function ttact_open_url( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # urlを開く（未実装）
 
