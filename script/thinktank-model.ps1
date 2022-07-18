@@ -40,7 +40,7 @@ class TTObject {
     }
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    
+
     #region Object Action
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
@@ -116,7 +116,7 @@ class TTCollection : TTObject {
     [hashtable] GetDictionary() {   # should be override
         return @{
             count      =    "件数"
-            flag =          "フラグ"
+            flag =          "覧"
             Name =          "名前"
             Description =   "説明"
             UpdateDate =    "更新日"
@@ -274,9 +274,9 @@ class TTCollection : TTObject {
 
     [hashtable] GetDisplay(){
         return @{
-            Library = "Description,count,Name,UpdateDate"
-            Shelf =   "Description,count,Name,UpdateDate"
-            Index =   "Name,count,Description"
+            Library = "flag,Description,count,Name,UpdateDate"
+            Shelf =   "flag,Description,count,Name,UpdateDate"
+            Index =   "flag,Name,count,Description"
             Cabinet = "Description,count,Name,UpdateDate"
         }
     }

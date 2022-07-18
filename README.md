@@ -38,11 +38,14 @@
 
 
 ## 対応済・修正済
-<<<<<<< Updated upstream
-=======
+- Library Panelの選択アイテム色変更
+- TTGroupController.refresh：   TTResources.flagに表示Panel頭文字記入 
+  TTGroupController.load：      TTGroupController.refresh('Library')を呼び出し
+- TTGroupController.refresh：   TTMemo.flagに表示Editor番号記入
+  TTEditorController.on_load：  TTGroupController.refreshを呼び出し
+
 - DataGridの項目選択において、マウスダブルクリックでinvoke、Shift+ダブルクリックでselect&invoke
 
->>>>>>> Stashed changes
 - Viewクラスのイベント(TTEditorsManager::OnSave/OnLoad)を定義して動作を確認
 - Editor focus時にDesk captionにindexとtitleを表示
 - AppMan.Document.Editor.MoveTo()の'nextkeyword'/'prevkeyword'で検索語をselect

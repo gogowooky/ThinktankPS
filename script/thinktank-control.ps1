@@ -221,9 +221,9 @@ class TTApplicationController {
     [bool] event_save_status( $params ){ 
         $collection = $params[0]
         @( 'Library', 'Index', 'Shelf' ).where{
-            $global:appcon._get( "$_.Resource" ) -eq $collection.Name
+            $global:appcon._get("$_.Resource") -eq $collection.Name
         }.foreach{
-            $global:appcon.group.refresh( $_ )   
+            # $global:appcon.group.refresh($_)
         }
         return $true
     }
@@ -639,6 +639,8 @@ class TTGroupController {
 
         [TTPanelManager]::DisplayAlert = $displayalert
 
+        $this.refresh('Library')
+
         return $this
     }
     [TTGroupController] cursor( [string]$panel, [string]$to ){
@@ -665,6 +667,33 @@ class TTGroupController {
         return $global:AppMan.$panel.SelectedIndex()
     }
     [TTGroupController] refresh( [string]$panel ){
+        $res = $this.app._get("$panel.Resource")
+        switch( $res ){
+            'Memos' { 
+                $idx = $global:AppMan.Document.Editor.Indices
+                $global:AppMan.$panel._datagrid.Items.foreach{
+                    if( $_.MemoID -in $idx ){
+                        $_.flag = $idx.IndexOf($_.MemoID) + 1
+                    }else{
+                        $_.flag = ''
+                    }
+                }
+            }
+            'Thinktank' {
+                @('Index','Shelf','Cabinet').foreach{
+                    $pan = $_
+                    $panel_res = $this.app._get("$_.Resource")
+                    $global:AppMan.Library._datagrid.Items.foreach{
+                        if( $_.Name -in $panel_res ){
+                            $_.flag = [string]($pan[0])
+                        }else{
+                            $_flag = ''
+                        }
+                    }
+                }
+            }
+        }
+
         $global:AppMan.$panel.Refresh()
         return $this
     }
@@ -856,6 +885,13 @@ class TTEditorController {
     #region load/ focus/ save
     [TTEditorController] load( [int]$no, [string]$index ){
         $global:AppMan.Document.Editor.Initialize( $no ).Load( $no, $index )
+
+        ### Panel
+        @('Index','Shelf','Cabinet').foreach{
+            $this.tools.app.group.refresh($_)
+        }
+        
+
         return $this
     }
     [TTEditorController] load( [string]$index ){

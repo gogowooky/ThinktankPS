@@ -13,14 +13,13 @@
     <SolidColorBrush x:Key="TTLabelFontColor"                   Color="#FFFFFF"/>
     <SolidColorBrush x:Key="TTTextBackgroundColor"              Color="#FFFFFF"/>
     <SolidColorBrush x:Key="TTEditorInactiveCursorLine"         Color="#E6E6FA"/>
-    <SolidColorBrush x:Key="TTEditorActiveCursorLine"           Color="#F8E6FA"/>
-    <SolidColorBrush x:Key="TTEditorActiveCursorLine2"          Color="#D0E0FF"/>
-    <SolidColorBrush x:Key="TTEditorActiveCursorLine3"          Color="#F3F3C8"/>
+    <SolidColorBrush x:Key="TTEditorActiveCursorLine"           Color="#F5EFF0"/>
+    <SolidColorBrush x:Key="TTEditorActiveCursorLine2"          Color="#E5EBFF"/>
+    <SolidColorBrush x:Key="TTEditorActiveCursorLine3"          Color="#EFEFE0"/>
     <SolidColorBrush x:Key="TTDraggingSplitterColor"            Color="#9932CC"/>
     <SolidColorBrush x:Key="TTColumnHeaderColor"                Color="#7B68EE"/>
     <SolidColorBrush x:Key="TTColumnHeaderOnMouseColor"         Color="#C6C6FA"/>
     <SolidColorBrush x:Key="TTColumnHeaderOnMouseFontColor"     Color="#FFFFFF"/>
-    <SolidColorBrush x:Key="TTListItemBdColorData"              Color="#C6C6FA"/>
     <SolidColorBrush x:Key="TTListItemBgColorData"              Color="#EAEAFF"/>
     <SolidColorBrush x:Key="TTListItemFntColorData"             Color="#FFFFFF"/>
     <SolidColorBrush x:Key="TTListItemColorSelected"            Color="#C6C6FA"/>
@@ -199,6 +198,18 @@
             </DataTrigger>
             <DataTrigger Binding="{Binding flag}" Value="3">
                 <Setter Property="Background" Value="{StaticResource TTEditorActiveCursorLine3}"/> 
+                <Setter Property="Foreground" Value="{StaticResource TTBaseFontColor}"/> 
+            </DataTrigger>
+            <DataTrigger Binding="{Binding flag}" Value="I">
+                <Setter Property="Background" Value="{StaticResource TTEditorActiveCursorLine2}"/> 
+                <Setter Property="Foreground" Value="{StaticResource TTBaseFontColor}"/> 
+            </DataTrigger>
+            <DataTrigger Binding="{Binding flag}" Value="S">
+                <Setter Property="Background" Value="{StaticResource TTEditorActiveCursorLine2}"/> 
+                <Setter Property="Foreground" Value="{StaticResource TTBaseFontColor}"/> 
+            </DataTrigger>
+            <DataTrigger Binding="{Binding flag}" Value="C">
+                <Setter Property="Background" Value="{StaticResource TTEditorActiveCursorLine2}"/> 
                 <Setter Property="Foreground" Value="{StaticResource TTBaseFontColor}"/> 
             </DataTrigger>
             <Trigger Property="IsSelected" Value="true" >

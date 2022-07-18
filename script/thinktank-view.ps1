@@ -262,14 +262,7 @@ class TTPanelManager {
 
     #endregion
 
-    #region Resource(io)/ Items/ SelecteItems/ SelectedItem/ GetItems/ SelectedIndex/ Refresh
-    # [TTPanelManager] Resource( [string]$name ){
-    #     $this._resource = $name
-    #     return $this
-    # }
-    # [string] Resource(){
-    #     return $this._resource
-    # }
+    #region Items/ SelecteItems/ SelectedItem/ GetItems/ SelectedIndex/ Refresh
     [TTPanelManager] Items( [psobject[]]$items, [hashtable]$dictionary, [string[]]$order ){
         # 【引数】 
         # items : @( @{ Name = ""; Value = "" } )
@@ -322,6 +315,7 @@ class TTPanelManager {
         return $this._datagrid.SelectedItem.($this._index) 
     }
     [TTPanelManager] Refresh(){
+        
         $this._datagrid.Items.refresh()
         return $this
     }
