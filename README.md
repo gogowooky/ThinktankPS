@@ -4,15 +4,14 @@
 ## 処理中
 - 複数選択item対象の処理として、逐次処理、に加え、一括処理を加えたい。（select_actions_then_invoke）
 　すべてのアクションに$itemsを渡すことにする。
-
 - Shift+左ダブルクリックを右シングルクリックに変更（datagrid_on_previewmousedown）
+
 ## 未処理
 - PopupMenuをカーソル位置またはマウス位置に
+　参：Mouse.GetPosition(IInputElement) メソッド
+　
+
 - Configs表示の更新（Panel.Focusが表示されない）
-- Editor Load時にTTMemo[] flagへ読込済みEditorを設定
-- Shelf設定時にTTResources[] flagへ読込済みPanelを設定
-- Index設定時にTTResources[] flagへ読込済みPanelを設定
-- Cabinet設定時にTTResources[] flagへ読込済みPanelを設定
 
 ## 不具合
 - Panel非表示時にtentative表示すると、脱mode後に再非表示されない
@@ -30,6 +29,11 @@
 
 # STATUS 
 ## 対応済・修正済
+- Editor Load時にTTMemo[] flagへ読込済みEditorを設定
+- Shelf設定時にTTResources[] flagへ読込済みPanelを設定
+- Index設定時にTTResources[] flagへ読込済みPanelを設定
+- Cabinet設定時にTTResources[] flagへ読込済みPanelを設定
+
 - Editor.Save時にEditingが保存されない
 - Editor.Load時にEditingが反映されない
 
