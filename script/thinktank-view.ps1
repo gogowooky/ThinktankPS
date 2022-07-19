@@ -935,7 +935,7 @@ class TTEditorsManager : TTToolsManager{
                 $curlin = $curlin.PreviousLine
                 while( $null -ne $curlin ){
                     # scan document
-                    if( $doc.GetText( $curlin.Offset, 15 ) -match "^(?<tag>#+) .*" ){
+                    if( $doc.GetText( $curlin.Offset, $curlin.Length ) -match "^(?<tag>#+) .*" ){
                         $editor.CaretOffset = $curlin.Offset
                         $editor.ScrollToLine( $curlin.LineNumber )
                         break
@@ -960,7 +960,7 @@ class TTEditorsManager : TTToolsManager{
                 $curlin = $curlin.PreviousLine
                 while( $null -ne $curlin ){
                     # scan document
-                    if( $doc.GetText( $curlin.Offset, 15 ) -match "^(?<tag>#{1,$level}) .*" ){
+                    if( $doc.GetText( $curlin.Offset, $curlin.Length ) -match "^(?<tag>#{1,$level}) .*" ){
                         if( ($level -eq $Matches.tag.length) -or ( $level -eq 10) ){
                             $editor.CaretOffset = $curlin.Offset
                             $editor.ScrollToLine( $curlin.LineNumber )
@@ -977,7 +977,7 @@ class TTEditorsManager : TTToolsManager{
                 $curlin = $curlin.NextLine
                 while( $null -ne $curlin ){
                     # scan document
-                    if( $doc.GetText( $curlin.Offset, 15 ) -match "^(?<tag>#{1,$level}) .*" ){
+                    if( $doc.GetText( $curlin.Offset, $curlin.Length ) -match "^(?<tag>#{1,$level}) .*" ){
                         if( ($level -eq $Matches.tag.length) -or ($level -eq 10) ){
                             $editor.CaretOffset = $curlin.Offset
                             $editor.ScrollToLine( $curlin.LineNumber )
@@ -1482,16 +1482,7 @@ class TTPopupMenuManager {
         $sortDescription = New-Object System.ComponentModel.SortDescription( "", 'Ascending' )
         $view.SortDescriptions.Add($sortDescription)
 
-        $width = (
-            $this._list.ItemsSource.foreach{
-                [System.Text.Encoding]::GetEncoding("shift_jis").GetByteCount( $_ )
-            } | Measure-Object -Max
-        ).Maximum
-        $this._list.view.Columns[0].Width = $width * 10 + 15
-        $this._list.SelectedItem = $this._list.ItemsSource.where{ $_ -like "@*" }[0]
-        $this._window.Width = $width * 10 + 15
-        $this._window.Width = $width * 10 + 15
-        $this._window.Height = ($this._list.Items.Count + 1) * 22.5 + 15  
+
         return $this
     }
     [TTPopupMenuManager] Hide( [bool]$result ){
@@ -1504,6 +1495,18 @@ class TTPopupMenuManager {
         return $this
     }
     [psobject] Show(){
+
+        $width = (
+            $this._list.ItemsSource.foreach{
+                [System.Text.Encoding]::GetEncoding("shift_jis").GetByteCount( $_ )
+            } | Measure-Object -Max
+        ).Maximum
+        $this._list.view.Columns[0].Width = $width * 10 + 15
+        $this._list.SelectedItem = $this._list.ItemsSource.where{ $_ -like "@*" }[0]
+        $this._window.Width = $width * 10 + 15
+        $this._window.Width = $width * 10 + 15
+        $this._window.Height = ($this._list.Items.Count + 1) * 22.5 + 15  
+        
         $this._list.SelectedIndex = 0
         $this._window.ShowDialog()
         return $this._selected

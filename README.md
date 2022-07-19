@@ -9,7 +9,10 @@
 ## 未処理
 - PopupMenuをカーソル位置またはマウス位置に
 　参：Mouse.GetPosition(IInputElement) メソッド
-　
+　参：DataGridコントロールでクリックされたセルの位置を取得するには？
+
+- 文字を表示した場合の幅・高
+　参：[C# WPF] テキストのサイズを算出する
 
 - Configs表示の更新（Panel.Focusが表示されない）
 

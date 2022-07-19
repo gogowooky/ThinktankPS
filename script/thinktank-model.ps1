@@ -29,7 +29,6 @@ class TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    
     #region Object Display
     [hashtable] GetDisplay() {      # should be override 
         return @{
@@ -39,7 +38,6 @@ class TTObject {
         }
     }
     #endregion ----------------------------------------------------------------------------------------------------------
-
 
     #region Object Action
     static [string] $Action = ''
