@@ -24,12 +24,12 @@
 # [ScriptBlock] $global:TTPanelTool_GotFocus =    { $args[1].Handled = $global:appcon.set_gotfocus_status( $args ) }
 # [ScriptBlock] $global:TTPanelTool_LostFocus =   { $args[1].Handled = $global:appcon.set_lostfocus_status( $args ) }
 
-[ScriptBlock] $global:TTPanel_TextChanged_ToExtract =   { $global:appcon.group.textbox_on_textchanged( $args ) }
-[ScriptBlock] $global:TTDesk_TextChanged_ToHighlight =  { $global:appcon.group.desk_textbox_on_textchanged( $args ) }
+[ScriptBlock] $global:TTPanel_TextChanged_ToExtract =   { $global:appcon.group.event_extract_datagrid_items( $args ) }
+[ScriptBlock] $global:TTDesk_TextChanged_ToHighlight =  { $global:appcon.group.event_highlight_text_on_editor( $args ) }
 
-[ScriptBlock] $global:TTDataGrid_Sorting =          { $global:appcon.group.datagrid_on_sorting( $args ) }
-[ScriptBlock] $global:TTDataGrid_SelectionChanged = { $global:appcon.group.datagrid_on_selectionchanged( $args ) }
-[ScriptBlock] $global:TTDataGrid_PreviewMouseDown = { $global:appcon.group.datagrid_on_previewmousedown( $args ) }
+[ScriptBlock] $global:TTDataGrid_Sorting =          { $global:appcon.group.event_sort_datagrid( $args ) }
+[ScriptBlock] $global:TTDataGrid_SelectionChanged = { $global:appcon.group.event_selection_change_datagrid( $args ) }
+[ScriptBlock] $global:TTDataGrid_PreviewMouseDown = { $global:appcon.group.event_select_datagrid_item_by_mouse( $args ) }
 
 [ScriptBlock] $global:TextEditors_TextChanged =        { $global:appcon.tools.editor.on_textchanged( $args ) }
 [ScriptBlock] $global:TextEditors_GotFocus =           { $global:appcon.tools.editor.on_focus( $args ) }

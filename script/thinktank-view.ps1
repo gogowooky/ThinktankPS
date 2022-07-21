@@ -344,11 +344,15 @@ class TTPanelManager {
         return $this._textbox.Text
     }
     [string[]]Keywords(){
-        $text = $this._textbox.Text.Trim().Split(',')[0]
-        if( $text -ne '' ){
-            $text = $text -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'
-            $text = $text -replace "[　\t]+", ' '
-            return $text.split(' ')
+        $tb = $this._textbox
+        if( $tb.Text -ne '' ){
+            $pos = $tb.Text.SubString( 0, $tb.CaretIndex ).split(',').count - 1
+            $text = $tb.Text.Split(',')[$pos].Trim()
+            if( $text -ne '' ){
+                $text = $text -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'
+                $text = $text -replace "[　\t]+", ' '
+                return $text.Split(' ')
+            }
         }
         return $null
 
@@ -789,7 +793,7 @@ class TTEditorsManager : TTToolsManager{
     [string[]] $Indices = @( "", "", "" )
     [object[]] $FoldManagers = @( $null, $null, $null )
     [object[]] $FoldStrategies = @( $null, $null, $null )
-    [object[]] $HightlightRules = @( $null, $null, $null )
+    [object[]] $HightlightRules = @( @(), @(), @() )
     [string[][]] $Histories= @( @(), @(), @() )
     [int[]] $HistoryPositions
     [string[]] $IDs = @( 'Editor1', 'Editor2', 'Editor3' )
@@ -955,7 +959,7 @@ class TTEditorsManager : TTToolsManager{
                     $curlin = $curlin.NextLine
                 }
             }
-            'prevnode' { # 変更 220706
+            'prevnode' {
                 $level = if( $doc.GetText( $curlin.Offset, $curlin.Length  ) -match "(?<tag>^#+) .*"  ){ $Matches.tag.length }else{ 10 }
                 $curlin = $curlin.PreviousLine
                 while( $null -ne $curlin ){
@@ -972,7 +976,7 @@ class TTEditorsManager : TTToolsManager{
                     $curlin = $curlin.PreviousLine
                 }
             }
-            'nextnode' { # 変更 220706
+            'nextnode' {
                 $level = if( $doc.GetText( $curlin.Offset, $curlin.Length ) -match "(?<tag>^#+) .*"  ){ $Matches.tag.length }else{ 10 }
                 $curlin = $curlin.NextLine
                 while( $null -ne $curlin ){
@@ -989,7 +993,7 @@ class TTEditorsManager : TTToolsManager{
                     $curlin = $curlin.NextLine
                 }
             }
-            'prevkeyword' { # 変更 220706
+            'prevkeyword' {
                 $keywords = $this.app.Desk.Keywords()
                 if( $null -eq $keywords ){
                     $this.MoveTo( $num, 'prevnode-' )
@@ -1011,7 +1015,7 @@ class TTEditorsManager : TTToolsManager{
                     }
                 }
             }
-            'nextkeyword' { # 変更 220706
+            'nextkeyword' {
                 $keywords = $this.app.Desk.Keywords()
                 if( $null -eq $keywords ){
                     $this.MoveTo( $num, 'nextnode-' )
@@ -1034,7 +1038,7 @@ class TTEditorsManager : TTToolsManager{
                 }
             }
             'prevkeywordnode' {
-                $text = $global:AppMan.Desk._textbox.Text.Trim().Split(",")[0]         # テキストボックスの最初の , までをキーワード認識
+                $text = $global:AppMan.Desk._textbox.Text.Trim().Split(",")[0]  # テキストボックスの最初の , までをキーワード認識
                 $text = $text -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'  # 正規表現記号をエスケープ 
                 $text = $text -replace "[ 　\t]+", " "                          # 空白文字を半角に統一
 

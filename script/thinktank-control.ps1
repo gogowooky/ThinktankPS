@@ -687,7 +687,7 @@ class TTGroupController {
                         if( $_.Name -in $panel_res ){
                             $_.flag = [string]($pan[0])
                         }else{
-                            $_flag = ''
+                            $_.flag = ''
                         }
                     }
                 }
@@ -701,7 +701,7 @@ class TTGroupController {
     #endregion
 
     #region events
-    [bool] datagrid_on_sorting( $params ){ # Library/Index/Shelf/Desk/Cabinet
+    [bool] event_sort_datagrid( $params ){ # Library/Index/Shelf/Desk/Cabinet
         $panel = ( $params[0].Name -replace "(Library|Index|Shelf|Cabinet).*", '$1' )
         $e = $params[1]
         $e.Handled = $false
@@ -710,7 +710,7 @@ class TTGroupController {
 
         return $true
     }
-    [bool] datagrid_on_selectionchanged( $params ){ # Library/Index/Shelf/Desk/Cabinet
+    [bool] event_selection_change_datagrid( $params ){ # Library/Index/Shelf/Desk/Cabinet
         $panel = ( $params[0].Name -replace "(Library|Index|Shelf|Cabinet).*", '$1' )
         $index = $this.selected( $panel )
         $this.app._set( "$panel.Selected", $index )
@@ -718,7 +718,7 @@ class TTGroupController {
 
         return $true
     }
-    [bool] datagrid_on_previewmousedown( $params ){
+    [bool] event_select_datagrid_item_by_mouse( $params ){
         $panel =    ($params[0].Name -replace "(Library|Index|Shelf).*",'$1')
         $mouse =    $params[1]
         switch( $mouse.ChangedButton ){
@@ -735,50 +735,51 @@ class TTGroupController {
         }
         return $true
     }
-    [bool] textbox_on_textchanged( $params ){
+    [bool] event_extract_datagrid_items( $params ){
         $panel = ( $params[0].Name -replace "(Library|Index|Shelf|Cabinet).*", '$1' )
         $this.app._set( "$panel.Keyword", $this.keyword( $panel ) )
         $this.extract( $panel )
     
         return $true
     }
-    [bool] desk_textbox_on_textchanged( $params ){
-        $panel = ( $params[0].Name -replace "(Desk).*", '$1' )
-        $this.app._set( "$panel.Keyword", $this.keyword( $panel ) )
-   
-        # $script:app._set( 'Desk.Keyword', $script:desk._keyword.Text.Trim() )
-        # $script:Editors.foreach{
-        #     $editor = $_
-        #     $name = $editor.Name
-        #     $text = $script:desk._keyword.Text.Trim()
-        #     if( 0 -lt $script:DocMan.config.$name.hlrules.count ){
-        #         $script:DocMan.config.$name.hlrules.foreach{
-        #             $editor.SyntaxHighlighting.MainRuleSet.Rules.Remove( $_ )
-        #         }
-        #         $script:DocMan.config.$name.hlrules.clear()
-        #     }
-        #     $keywords = $text.split(",")
-        #     $keywords.foreach{
-        #         $keyword = $_
-        #         $select = "Select" + ($keywords.IndexOf($keyword)+1)
-        #         $color1 = $editor.SyntaxHighlighting.NamedHighlightingColors.where{ $_.Name -eq $select }[0]
-        
-        #         if( $keyword -ne "" ){
-        #             $rule = [ICSharpCode.AvalonEdit.Highlighting.HighlightingRule]::new()
-        #             $rule.Color = $color1
-        #             $keyword = $keyword -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'
-        #             $keyword = "(" + ($keyword -replace "[ 　\t]+", "|" ) + ")"
-        #             $rule.Regex = [Regex]::new( $keyword )
-    
-        #             $script:DocMan.config.$name.hlrules += $rule
-        #             $editor.SyntaxHighlighting.MainRuleSet.Rules.Insert( 0, $rule )
-        #         }
-    
-        #         $editor.TextArea.TextView.Redraw()
-        #     }
-        # }
+    [bool] event_highlight_text_on_editor( $params ){
 
-        return $this
+        $text = $global:AppMan.Desk._textbox.Text.Trim()
+        $this.app._set( 'Desk.Keyword', $text )
+
+        TTTimerResistEvent "Desk:event_highlight_text_on_editor" 1 0 {
+
+            $text = $global:AppMan.Desk._textbox.Text.Trim()
+
+            for( $num = 0; $num -lt 3; $num++ ){
+                $editor =   $global:AppMan.Document.Editor.Controls[$num]
+                $rules =    $global:AppMan.Document.Editor.HightlightRules[$num]
+                $editor_rules = $editor.SyntaxHighlighting.MainRuleSet.Rules.where{ $_.Color.Name -like "Select*" }
+                $editor_rules.foreach{ $editor.SyntaxHighlighting.MainRuleSet.Rules.Remove($_) }
+                $rules.clear()
+                $rules = @()
+
+                for( $color = 1; $color -lt 5; $color++ ){
+                    $keyword = ([string]$text.split(",")[$color-1]).Trim()
+                    if( 0 -eq $keyword.length ){ break }
+
+                    $rule = [ICSharpCode.AvalonEdit.Highlighting.HighlightingRule]::new()
+                    $rule.Color = $editor.SyntaxHighlighting.NamedHighlightingColors.where{ $_.Name -eq "Select$color" }[0]
+                    $keyword = $keyword -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'
+                    $keyword = "(" + ($keyword -replace "[ 　\t]+", "|" ) + ")"
+                    $rule.Regex = [Regex]::new( $keyword )
+                    $rules += $rule
+                    $editor.SyntaxHighlighting.MainRuleSet.Rules.Add( $rule )
+                }
+                $editor.TextArea.TextView.Redraw()
+
+            }
+
+        }.GetNewClosure()
+
+        $global:AppMan.Document.Editor.Controls.foreach{ $_.TextArea.TextView.Redraw() }
+
+        return $true
     }
     #endregion 
 

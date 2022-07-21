@@ -2,6 +2,7 @@
 
 # TODO
 ## 処理中
+- desk_textbox_on_textchanged
 - 複数選択item対象の処理として、逐次処理、に加え、一括処理を加えたい。（select_actions_then_invoke）
 　すべてのアクションに$itemsを渡すことにする。
 - Shift+左ダブルクリックを右シングルクリックに変更（datagrid_on_previewmousedown）
@@ -30,8 +31,17 @@
 - Focus状態はタブに表示（背景色、枠色を使わない）
 - KeyEvent処理はGlobalで処理（クラスインスタンスを使わない）
 
+## 方針
+- 日付
+- Actionタグ
+- 全文検索
+
 # STATUS 
 ## 対応済・修正済
+- TTGroupController.event_highlight_text_on_editor：　ハイライト
+
+- TTPanelManager.Keywords:　カンマでグループ、スペースでキーワードを区切る。　カーソル位置でグループ選択
+
 - Editor Load時にTTMemo[] flagへ読込済みEditorを設定
 - Shelf設定時にTTResources[] flagへ読込済みPanelを設定
 - Index設定時にTTResources[] flagへ読込済みPanelを設定
