@@ -11,11 +11,15 @@
 [ScriptBlock] $global:TTTool_GotFocus =     { $args[1].Handled = $global:appcon.event_set_focus_application( $args ) }
 [ScriptBlock] $global:TTDataGrid_GotFocus = { $args[1].Handled = $global:appcon.event_refocus( $args ) }
 
-[ScriptBlock] $global:TTWindow_PreviewKeyDown = $global:TTPreviewKeyDown
+[ScriptBlock] $global:TTAppMan_PreviewKeyDown = $global:TTPreviewKeyDown
+[ScriptBlock] $global:TTCabin_PreviewKeyDown =  $global:TTPreviewKeyDown
+[ScriptBlock] $global:TTPopup_PreviewKeyDown =  $global:TTPreviewKeyDown
 [ScriptBlock] $global:TTPanel_PreviewKeyDown =  {}
 [ScriptBlock] $global:TTTool_PreviewKeyDown =   {}
 
 [ScriptBlock] $global:TTWindow_PreviewKeyUp =   $global:TTPreviewKeyUp
+[ScriptBlock] $global:TTCabin_PreviewKeyUp =    $global:TTPreviewKeyUp
+[ScriptBlock] $global:TTPopup_PreviewKeyUp =    $global:TTPreviewKeyUp
 [ScriptBlock] $global:TTPanel_PreviewKeyUp =    {}
 [ScriptBlock] $global:TTTool_PreviewKeyUp =     {}
 

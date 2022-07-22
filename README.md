@@ -4,6 +4,8 @@
 ## 処理中
 - ttcmd_editor_tag_invoke
 　Editorで、Alt+Spc, Alt/Shift-Spcにアサイン
+　　Menu表示の際、同キー（Alt+Spc, Alt/Shift-Spc）での確定後に、Editorでコマンドが再入されてりまう。
+　　Menu表示の際は、KeyUpを確実に確認する必要がある。
 　
 - 複数選択item対象の処理として、逐次処理、に加え、一括処理を加えたい。（select_actions_then_invoke）
 　すべてのアクションに$itemsを渡すことにする。

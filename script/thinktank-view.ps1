@@ -35,7 +35,7 @@ class TTAppManager {
 
         $this._window.Add_Loaded( $global:TTWindowLoaded )
 
-        $this._window.Add_PreviewKeyDown( $global:TTWindow_PreviewKeyDown )
+        $this._window.Add_PreviewKeyDown( $global:TTAppMan_PreviewKeyDown )
         $this._window.Add_PreviewKeyUp( $global:TTWindow_PreviewKeyUp )
 
         $this._grid_window_lr = $this.FindName('GridWindowLR')
@@ -652,8 +652,8 @@ class TTCabinetManager : TTPanelManager {
         $this._window.Add_Closing({ $args[1].Cancel = $True })
         $this._window.Add_MouseLeftButtonDown({ $global:AppMan.Cabinet._window.DragMove() })
         $this._window.Add_MouseDoubleClick({ $global:AppMan.Cabinet.Hide($true); $args[1].Handled=$True })
-        $this._window.Add_PreviewKeyDown( $global:TTWindow_PreviewKeyDown )
-        $this._window.Add_PreviewKeyUp( $global:TTWindow_PreviewKeyUp )
+        $this._window.Add_PreviewKeyDown( $global:TTCabin_PreviewKeyDown )
+        $this._window.Add_PreviewKeyUp( $global:TTCabin_PreviewKeyUp )
 
         $this._datagrid.Add_Sorting( $global:TTDataGrid_Sorting )
         $this._datagrid.Add_SelectionChanged( $global:TTDataGrid_SelectionChanged )
@@ -1447,8 +1447,8 @@ class TTPopupMenuManager {
         $this._window.Add_Closing({ $args[1].Cancel = $True })
         $this._window.Add_MouseLeftButtonDown({ $global:AppMan.PopupMenu._window.DragMove() })
         $this._window.Add_MouseDoubleClick({ $global:AppMan.PopupMenu.Hide($true); $args[1].Handled=$True })
-        $this._window.Add_PreviewKeyDown( $global:TTWindow_PreviewKeyDown )
-        $this._window.Add_PreviewKeyUp( $global:TTWindow_PreviewKeyUp )
+        $this._window.Add_PreviewKeyDown( $global:TTPopup_PreviewKeyDown )
+        $this._window.Add_PreviewKeyUp( $global:TTPopup_PreviewKeyUp )
         
         $style = [Style]::new()
         $style.Setters.Add( [Setter]::new( [Controls.GridViewColumnHeader]::VisibilityProperty, [Visibility]::Collapsed ) )

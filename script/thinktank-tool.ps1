@@ -29,12 +29,11 @@ class TTTool{
         if( $n -eq -1 ){ $n = 1 }
         return $items[ ( $items.length + $n - 1 ) % $items.length ]
     }
-
     static [void]open_url( [string]$url ){
         $url = $url.replace('"','')
     
         if( $url -like "*[param]*" ){
-            $url = $url.replace( "[param]", [System.Web.HttpUtility]::UrlEncode($script:app.keyword()) )
+            $url = $url.replace( "[param]", [System.Web.HttpUtility]::UrlEncode( $global:AppMan.Desk.Keyword() ) )
         }
         # Start-Process $url
         Start-Process "microsoft-edge:$url"
@@ -349,21 +348,19 @@ class TTTagAction{
     [object] $_editor
     [int] $_offset
 
+    $regex_tags = $global:TTResources.Getchild('Searchs').GetActionTagsRegex()
     [psobject[]] $_tags = @(
-        @{  tag     = 'tag'    
-            regex   = "\[(?<tag>$($global:TTSearchs.GetActionTagsRegex())):(?<param>[^\[\]]+)\]" }, 
         @{  tag     = 'date'
             regex   = "(\[[0-9]{4}\-[0-9]{2}\-[0-9]{2}\])" },
-        @{  tag     = 'event'
-            regex   = '(\[(?<date>[0-9]{4}\-[0-9]{2}\-[0-9]{2}):(?<tag>\w+)(?<alert>:\d+[dmy])?\])' },
         @{  tag     = 'check'
             regex   = '(\[[ox_]\])' },
         @{  tag     = 'url'
             regex   = "((https?://[^　 \[\],;<>\`"\']+)|(`"https?://[^\[\],;<>\`"\']+)`")" },
         @{  tag     = 'path'
-            regex   = '(([a-zA-Z]:\\[\w\\\-\.]*|"[a-zA-Z]:\\[\w\\\-\.].*")|(\\\\[\w\\\-\.]*|"\\\\[\w\\\-\.].*"))' }
+            regex   = '(([a-zA-Z]:\\[\w\\\-\.]*|"[a-zA-Z]:\\[\w\\\-\.].*")|(\\\\[\w\\\-\.]*|"\\\\[\w\\\-\.].*"))' },
+        @{  tag     = 'tag'    
+            regex   = "\[(?<tag>$regex_tags):(?<param>[^\[\]]+)\]" }
     )
-    
     TTTagAction( $tool ){
         $this._editor = $tool
     }
@@ -399,28 +396,20 @@ class TTTagAction{
         foreach( $tag in $this._tags ){
             if( $null -eq $this.regex_at( $tag.regex ) ){ continue }
             switch( $tag.tag ){
-                'tag'   { $this.tag_DoAction(); break }
-                'date'  { $this.date_DoAction(); break }
-                'event' { $this.event_DoAction(); break }           
-                'check' { $this.check_DoAction(); break }
-                'url'   { $this.url_DoAction(); break }
-                'path'  { $this.path_DoAction(); break }
+                'date'  { $this.date_action(); break }
+                'check' { $this.check_action(); break }
+                'url'   { $this.url_action(); break }
+                'path'  { $this.path_action(); break }
+                'tag'   { $this.tag_action(); break }
             }
         }
     }
 
-    [void] tag_DoAction(){
-        $tag   = $this._ma.groups['tag'].Value
-        $param = $this._ma.groups['param'].Value 
-        [TTTagAction]::tag_action( $tag, $param )
-    }
-    [void] date_DoAction(){ # 未実装
+
+    [void] date_action(){ # 未実装
         return
     }
-    [void] event_DoAction(){ # 未実装
-        return
-    }
-    [void] check_DoAction(){
+    [void] check_action(){
         $ma = $this._ma
         $offset = $this._offset
         $editor = $this._editor
@@ -429,18 +418,18 @@ class TTTagAction{
         $editor.Document.Replace( $curline.offset + $ma.Index, 3, @{"[o]"="[x]";"[x]"="[_]";"[_]"="[o]"}[ $ma.Value ] )
         $editor.CaretOffset = $offset
     }
-    [void] url_DoAction(){
+    [void] url_action(){
         $actions = [hashtable]@{
             "@URLを開く"        = 'open url'
             "一つ上のURLを開く" = 'open parent url'
         }
-        $select = (ShowPopupMenu $actions.Keys 'Control' 'Space' "URL" $this._editor )
-        switch( $actions[$select] ){
+        $selected = $global:AppMan.PopupMenu.Caption( 'URLを開く' ).Items( $actions.Keys ).Show()
+        switch( $actions[$selected] ){
             'open url'        { [TTTool]::open_url( $this._ma.Value ) }
             'open parent url' { [TTTool]::open_url( (Split-Path $this._ma.Value -Parent) ) }
         }
     }
-    [void] path_DoAction(){
+    [void] path_action(){
         $actions = @{
             "@ファイルを開く"    = 'open file'
             "ディレクトリを開く" = 'open directory'
@@ -452,19 +441,20 @@ class TTTagAction{
         }
 
     }
+    [void] tag_action(){
+        $tag   = $this._ma.groups['tag'].Value
+        $param = $this._ma.groups['param'].Value 
 
-
-    static [void] tag_action( $tag, $param ){
         $search = $global:TTSearchs.children[$tag]
 
         switch ($search.Url){
             "thinktank_tag" {
                 switch($search.Tag){
-                    'Route' { [TTTagAction]::tag_route( $param ); return }
-                    'memo'  { [TTTagAction]::tag_memo( $param ); return }
-                    'mail'  { [TTTagAction]::tag_mail( $param ); return }
-                    'ref'   { [TTTagAction]::tag_ref( $param ); return }
-                    'photo' { [TTTagAction]::tag_photo( $param ); return }
+                    'Route' { [TTTagAction]::route_tag( $param ); return }
+                    'memo'  { [TTTagAction]::memo_tag( $param ); return }
+                    'mail'  { [TTTagAction]::mail_tag( $param ); return }
+                    'ref'   { [TTTagAction]::ref_tag( $param ); return }
+                    'photo' { [TTTagAction]::photo_tag( $param ); return }
                 }
             }
             default {
@@ -472,7 +462,9 @@ class TTTagAction{
             }
         }
     }
-    static [void] tag_route( $param ){
+
+
+    static [void] route_tag( $param ){
         if( $param.Trim() -eq "" ){ return }
         $dest = ""
         $waypnt = ""
@@ -496,7 +488,7 @@ class TTTagAction{
         Start-Process "https://www.google.com/maps/dir/?api=1&origin=$orig&destination=$dest&travelmode=driving&dir_action=navigate$waypnt"
    
     }
-    static [void] tag_mail( $param ){
+    static [void] mail_tag( $param ){
         if( $param -eq "" ){ return }
     
         $outlook = New-Object -ComObject Outlook.Application
@@ -536,7 +528,7 @@ class TTTagAction{
         }
     
     }
-    static [void] tag_memo( $param ){ # 未完成
+    static [void] memo_tag( $param ){ # 未完成
 
         switch -regex ( $param ){
             # [memo:xxxx-xx-xx-xxxxxx] MemoIDを開く
@@ -593,12 +585,12 @@ class TTTagAction{
 
         return
     }
-    static [void] tag_ref( $param ){ # 未実装 
-        Write-Host "tag_ref $param"
+    static [void] ref_tag( $param ){ # 未実装 
+        Write-Host "ref_tag $param"
         return
     }
-    static [void] tag_photo( $param ){ # 未実装
-        Write-Host "tag_photo $param"
+    static [void] photo_tag( $param ){ # 未実装
+        Write-Host "photo_tag $param"
         return
     }
    
