@@ -365,9 +365,7 @@ class TTTagAction{
     )
     
     TTTagAction( $tool ){
-        switch( $tool.GetType().Name ){
-            'Editor' { $this._editor = $tool }
-        }
+        $this._editor = $tool
     }
     [System.Text.RegularExpressions.Match] regex_at( $regex ){
         if( $null -eq $this._editor ){ return $null }

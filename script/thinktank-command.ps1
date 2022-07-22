@@ -1411,28 +1411,6 @@ function ttcmd_editor_edit_insert_clipboard( $source, $mod, $key ){
     params( $modkey, $key )
     [TTClipboard]::PasteTo( $script:DocMan.current_editor, $modkey, $key )
 }
-function ttcmd_editor_edit_insert_date( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 日付タグを挿入する
-
-    params( $mod, $key )
-    # scan & select 
-    $editor = $script:DocMan.current_editor
-    $script:datetag.scan( $editor )
-    $item = ShowPopupMenu -items $script:datetag.tags() -modkey $mod -key $key -title "Date" -editor $editor
-
-    # insert tag 
-    if( $null -ne $item ){
-        if( $script:datetag.length -eq 0 ){
-            $editor.Document.Insert( $editor.CaretOffset, $item )    
-        }else{
-            $editor.Document.Remove( $script:datetag.offset, $script:datetag.length )
-            $editor.Document.Insert( $script:datetag.offset, $item )
-        }
-    }
-
-    $script:datetag.reset()
-}
 function ttcmd_editor_edit_turn_bullet_norm( $source, $mod, $key ){
     #.SYNOPSIS
     # カーソル位置にアイテムヘッダーを挿入する
@@ -1501,12 +1479,6 @@ function ttcmd_editor_change_focus( $source, $mod, $key ){
             '.?Editor3.*' { ttcmd_desk_works_focus_work3 }
         }
     }
-}
-function ttcmd_editor_tag_invoke( $source, $mod, $key ){
-    #.SYNOPSIS
-    # タグを実行する
-
-    [TTTagAction]::New( $script:DocMan.current_editor ).DoAction()
 }
 
 function ttcmd_editor_copy_tag_atcursor( $source, $mod, $key ){

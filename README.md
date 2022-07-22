@@ -2,7 +2,9 @@
 
 # TODO
 ## 処理中
-- desk_textbox_on_textchanged
+- ttcmd_editor_tag_invoke
+　Editorで、Alt+Spc, Alt/Shift-Spcにアサイン
+　
 - 複数選択item対象の処理として、逐次処理、に加え、一括処理を加えたい。（select_actions_then_invoke）
 　すべてのアクションに$itemsを渡すことにする。
 - Shift+左ダブルクリックを右シングルクリックに変更（datagrid_on_previewmousedown）
@@ -42,6 +44,8 @@
 
 # STATUS 
 ## 対応済・修正済
+- TTGroupController.event_highlight_text_on_editor：　ハイライトで正規表現対応
+
 - TTGroupController.event_highlight_text_on_editor：　ハイライト
 
 - TTPanelManager.Keywords:　カンマでグループ、スペースでキーワードを区切る。　カーソル位置でグループ選択

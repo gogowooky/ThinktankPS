@@ -695,7 +695,6 @@ class TTCabinetManager : TTPanelManager {
 
 #region　TTDocumentManager
 class TTDocumentManager{
-
     #region variants/ new
     [TTAppManager] $app
     [TTEditorsManager] $Editor

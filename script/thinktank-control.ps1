@@ -152,7 +152,7 @@ class TTApplicationController {
 
         [TTTool]::debug_message( $params[0].Name, "event_set_focus_application" )
 
-        switch -regex ($this._get('Focus.Application')){
+        switch -regex ($this._get('Focus.Application')){    #### Unmark
             "(Library|Index|Shelf|Desk)" {
                 $global:AppMan.$_.FocusMark('')
             }
@@ -160,7 +160,8 @@ class TTApplicationController {
                 $global:AppMan.Desk.FocusMark('')
             }
         }
-        switch -regex ( $params[0].Name ){
+
+        switch -regex ( $params[0].Name ){                  #### Mark
             "(?<name>Library|Index|Shelf|Desk)" {
                 $this._set( 'Focus.Application', $Matches.name )
                 $global:AppMan.($this._get('Focus.Application')).FocusMark('●')
@@ -765,8 +766,16 @@ class TTGroupController {
 
                     $rule = [ICSharpCode.AvalonEdit.Highlighting.HighlightingRule]::new()
                     $rule.Color = $editor.SyntaxHighlighting.NamedHighlightingColors.where{ $_.Name -eq "Select$color" }[0]
-                    $keyword = $keyword -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'
-                    $keyword = "(" + ($keyword -replace "[ 　\t]+", "|" ) + ")"
+
+                    if( $keyword -like "RE:*" ){
+                        $keyword = $keyword.substring( 3 )
+                        if( 0 -eq $keyword.length ){ break }
+
+                    }else{
+                        $keyword = $keyword -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'
+                        $keyword = "(" + ($keyword -replace "[ 　\t]+", "|" ) + ")"
+    
+                    }
                     $rule.Regex = [Regex]::new( $keyword )
                     $rules += $rule
                     $editor.SyntaxHighlighting.MainRuleSet.Rules.Add( $rule )

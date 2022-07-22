@@ -190,7 +190,7 @@ Editor/Browser/Grid：           同一workplaceでは切り替えてFocusする
 
 ## [2022-05-05] 
 全文検索@TTExMemosが一応動くが、以下対応が必要
-・ Shelf/Indexの操作のうち、TTMemosを前提としていたものを書き換えること
+・ Shelf/Indexの操作のうち、TTMemosを前提としていたものを書き換えること 
 ・ Libraryの整備
 　Ctrl+DでCacherが消えない、　Ctrl+Shift+Dでthinktank.cacheを削除
 ・ DoActionとSelectiActionsを管理しやすい様にする

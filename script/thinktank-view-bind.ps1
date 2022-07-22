@@ -648,15 +648,17 @@ Editor      Control         A               ttcmd_editor_move_tolinestart
 Editor      Control         E               ttcmd_editor_move_tolineend
 Editor      Control         K               ttcmd_editor_delete_tolineend
 Editor      Control         S               ttcmd_editor_save
+Editor      Alt             Space           ttcmd_editor_tag_invoke
+Editor      Alt, Shift      Space           ttcmd_editor_tag_invoke
 
 
+xEditor      Alt             T               ttcmd_editor_edit_insert_date
 xEditor      None            PageUp          ttcmd_editor_scroll_toprevline
 xEditor      None            Next            ttcmd_editor_scroll_tonextline
 xEditor      None            BrowserBack     ttcmd_editor_scroll_toprevline
 xEditor      None            BrowserForward  ttcmd_editor_scroll_tonextline
 
 xEditor      None            Return          ttcmd_editor_scroll_tonewline
-xEditor      Alt             T               ttcmd_editor_edit_insert_date
 xEditor      Alt             V               ttcmd_editor_edit_insert_clipboard
 xEditor      Alt             C               ttcmd_editor_copy_tag_atcursor
 xEditor      Alt             D1              ttcmd_desk_works_focus_work1
@@ -669,7 +671,6 @@ xEditor      Alt             Next            ttcmd_editor_scroll_roprevline
 xEditor      Control         D1              ttcmd_desk_works_focus_work1
 xEditor      Control         D2              ttcmd_desk_works_focus_work2
 xEditor      Control         D3              ttcmd_desk_works_focus_work3
-xEditor      Control         Space           ttcmd_editor_tag_invoke
 xEditor      Control         OemPlus         ttcmd_editor_edit_turn_bullet_norm
 xEditor      Control         Back            ttcmd_editor_history_previous_tocurrenteditor
 xEditor      Control         I               ttcmd_editor_outline_insert_section
@@ -755,6 +756,44 @@ function ttcmd_editor_save( $source, $mod, $key ){
     $global:appcon.tools.editor.modified($no,$true).save($no)
 
 }
+function ttcmd_editor_tag_invoke( $source, $mod, $key ){
+#.SYNOPSIS  
+    # タグを実行する
+
+    if( $mod.Contains('Shift') ){
+ 
+    }else{
+        $current_editor = $global:AppMan.Document.Editor.Controls[ $global:AppMan.Document.CurrentNumber ]
+        [TTTagAction]::New( $current_editor ).DoAction()
+ 
+    }
+}
+
+
+function ttcmd_editor_edit_insert_date( $source, $mod, $key ){
+    #.SYNOPSIS
+    # 日付タグを挿入する
+
+    return 
+
+    # # scan & select 
+    # $editor = $script:DocMan.current_editor
+    # $script:datetag.scan( $editor )
+    # $item = ShowPopupMenu -items $script:datetag.tags() -modkey $mod -key $key -title "Date" -editor $editor
+
+    # # insert tag 
+    # if( $null -ne $item ){
+    #     if( $script:datetag.length -eq 0 ){
+    #         $editor.Document.Insert( $editor.CaretOffset, $item )    
+    #     }else{
+    #         $editor.Document.Remove( $script:datetag.offset, $script:datetag.length )
+    #         $editor.Document.Insert( $script:datetag.offset, $item )
+    #     }
+    # }
+
+    # $script:datetag.reset()
+}
+
 #endregion
 
 
