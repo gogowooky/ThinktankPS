@@ -359,7 +359,7 @@ class TTTagAction{
         @{  tag     = 'path'
             regex   = '(([a-zA-Z]:\\[\w\\\-\.]*|"[a-zA-Z]:\\[\w\\\-\.].*")|(\\\\[\w\\\-\.]*|"\\\\[\w\\\-\.].*"))' },
         @{  tag     = 'tag'    
-            regex   = "\[(?<tag>$regex_tags):(?<param>[^\[\]]+)\]" }
+            regex   = "\[(?<tag>$($this.regex_tags)):(?<param>[^\[\]]+)\]" }
     )
     TTTagAction( $tool ){
         $this._editor = $tool
@@ -434,8 +434,8 @@ class TTTagAction{
             "@ファイルを開く"    = 'open file'
             "ディレクトリを開く" = 'open directory'
         }
-        $select = (ShowPopupMenu $actions.keys 'Control' 'Space' "ファイル" $this._editor )
-        switch( $actions[$select] ){
+        $selected = $global:AppMan.PopupMenu.Caption( 'Pathを開く' ).Items( $actions.Keys ).Show()
+        switch( $actions[$selected] ){
             'open file'      { Start-Process $this._ma.Value }
             'open directory' { Start-Process (Split-Path ($this._ma.Value.replace('"','')) -Parent) }
         }
@@ -443,13 +443,13 @@ class TTTagAction{
     }
     [void] tag_action(){
         $tag   = $this._ma.groups['tag'].Value
-        $param = $this._ma.groups['param'].Value 
+        $param = $this._ma.groups['param'].Value
 
-        $search = $global:TTSearchs.children[$tag]
+        $search = $global:TTResources.GetChild('Searchs').children[$tag]
 
         switch ($search.Url){
             "thinktank_tag" {
-                switch($search.Tag){
+                switch( $tag ){
                     'Route' { [TTTagAction]::route_tag( $param ); return }
                     'memo'  { [TTTagAction]::memo_tag( $param ); return }
                     'mail'  { [TTTagAction]::mail_tag( $param ); return }
@@ -484,8 +484,7 @@ class TTTagAction{
                 $waypnt = "&waypoints=" + ($points[1..($points.count-2)] -join "|") 
             }
         }
-    
-        Start-Process "https://www.google.com/maps/dir/?api=1&origin=$orig&destination=$dest&travelmode=driving&dir_action=navigate$waypnt"
+        [TTTool]::open_url( "https://www.google.com/maps/dir/?api=1&origin=$orig&destination=$dest&travelmode=driving&dir_action=navigate$waypnt" ) 
    
     }
     static [void] mail_tag( $param ){
@@ -494,7 +493,7 @@ class TTTagAction{
         $outlook = New-Object -ComObject Outlook.Application
         try {
             $backupFolder = $null
-            $backupFolderName = $global:TTConfigs.GetChild("OutlookBackupFolder").Value
+            $backupFolderName = $global:TTResources.GetChild('Configs').GetChild("OutlookBackupFolder").Value
     
             $folders = $outlook.GetNamespace('MAPI').Folders
             for( $i = 1; $i -le $folders.count; $i++ ){ 
@@ -510,7 +509,7 @@ class TTTagAction{
                 $items = $backupFolder.Items.Restrict( "[ReceivedTime] >= '$time1' AND [ReceivedTime] < '$time2'" )
                 for( $j = 1; $j -Le $items.count; $j++ ){
                     if( $items.Item($j).ReceivedTime.ToString("yyyy-MM-dd-HHmmss") -eq $time.ToString("yyyy-MM-dd-HHmmss") ){
-                        $items.Item($j).GetDictionary()
+                        $items.Item($j).GetInspector().Display()
                     }
                 } 
                 
@@ -518,52 +517,64 @@ class TTTagAction{
                 # show Mails with keyword
                 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                 $explorer = $backupFolder.GetExplorer( 2 ) # olFolderDisplayNoNavigation, 2
-                $explorer.SelectActions()
+                # $explorer.SelectActions()
                 $explorer.Search( $param, 2 ) # olSearchScopeAllOutlookItems, 2
+                $explorer.Display()
                 $explorer.WindowState = 0 # olMaximized, 0
-                $explorer.SelectAllItems
+                # SelectAllItems()
             }
         } finally {
             [void][System.Runtime.Interopservices.Marshal]::ReleaseComObject($outlook)
         }
     
     }
-    static [void] memo_tag( $param ){ # 未完成
+    static [void] memo_tag( $param ){ # 中途
 
         switch -regex ( $param ){
             # [memo:xxxx-xx-xx-xxxxxx] MemoIDを開く
             "^(\d{4}\-\d{2}\-\d{2}\-\d{6}|thinktank)$" {        
-                $script:desk.tool( 'Editor2' ).load( $param )
-                ttcmd_desk_borderstyle_work12
-                ttcmd_desk_works_focus_work2
+                $global:appcon.tools.editor.load( $param )
                 break
             }
 
             # [memo:xxxx-xx-xx-xxxxxx:数字:数字] MemoIDを開いて数字行に飛ぶ
-            "^(?<index>(\d{4}\-\d{2}\-\d{2}\-\d{6}|thinktank)):(?<line>\d+(:\d+)?)$" { 
-                $script:desk.tool( 'Editor2' ).load( $Matches.index ).move_to( $Matches.line )
-                ttcmd_desk_borderstyle_work12
-                ttcmd_desk_works_focus_work2
+            "^(?<index>(\d{4}\-\d{2}\-\d{2}\-\d{6}|thinktank)):(?<line>\d+(?<col>:\d+)?)$" { 
+                $editor = $global:appcon.tools.editor.load( $Matches.index )
+                $editor.move_to( $Matches.line )
+                $editor.select_to('linestart')
                 break
             }
 
             # [memo:xxxx-xx-xx-xxxxxx:#文字] MemoIDを開いて文字をキーワードに設定して、最初のSectionに飛ぶ
             "^(?<index>(\d{4}\-\d{2}\-\d{2}\-\d{6}|thinktank)):#(?<keyword>.+)$" {
-                $script:desk.tool( 'Editor2' ).load( $Matches.index ).search( $Matches.keyword ).move_to( 'nextkeywordnode' )
-                ttcmd_desk_borderstyle_work12
-                ttcmd_desk_works_focus_work2
+                Write-Host "未完成"
+                return
+
+                $global:appcon.group.keyword( 'Desk', $Matches.line )
+                $editor = $global:appcon.tools.editor.load( $Matches.index )
+                $editor.move_to('documentstart')
+                $editor.move_to('nextkeywordnode')
+                $editor.select_to( $Matches.keyword )
                 break
             }
             # [memo:xxxx-xx-xx-xxxxxx:文字] MemoIDを開いて文字をキーワードに設定して、最初の場所に飛ぶ
             "^(?<index>(\d{4}\-\d{2}\-\d{2}\-\d{6}|thinktank)):(?<keyword>.+)$" {
-                $script:desk.tool( 'Editor2' ).load( $Matches.index ).search( $Matches.keyword ).move_to( 'nextkeyword' )
-                ttcmd_desk_borderstyle_work12
-                ttcmd_desk_works_focus_work2
+                Write-Host "未完成"
+                return
+
+                $global:appcon.group.keyword( 'Desk', $Matches.line )
+                $editor = $global:appcon.tools.editor.load( $Matches.index )
+                $editor.move_to('documentstart')
+                $editor.move_to('nextkeyword')
+                $editor.select_to( $Matches.keyword )
                 break
             }
 
-            # [memo:shelf:文字] Shelf.keywordに入力してタイトルでフィルターする
-            "^shelf:(?<keyword>.+)$" {
+            # [memo:x文字] Cabinet.keywordに入力してタイトルでフィルターする
+            "^(?<header>.)(?<keyword>.+)$" {
+                Write-Host "未完成"
+                return
+
                 [TTTool]::display_resource( "Memo", 'shelf' )
                 $script:shelf.search( $Matches.keyword ).focus()
                 break

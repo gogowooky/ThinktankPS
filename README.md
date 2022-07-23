@@ -43,9 +43,18 @@
 - 日付
 - Actionタグ
 - 全文検索
+- メモタグ, 文書内ジャンプ、全メモ検索でも同じになるように
+  [memo:xxxx-xx-xx-xxxxxx]          
+  [memo:xxxx-xx-xx-xxxxxx:30:12]    [go:30]        
+  [memo:xxxx-xx-xx-xxxxxx:.keyword] [go:.keyword]   [search:.keyword]
+  [memo:xxxx-xx-xx-xxxxxx:keyword]  [go:keyword]    [search:keyword]
+
+
 
 # STATUS 
 ## 対応済・修正済
+- route_tag, mail_tag, memo_tagの一部
+
 - TTGroupController.event_highlight_text_on_editor：　ハイライトで正規表現対応
 
 - TTGroupController.event_highlight_text_on_editor：　ハイライト

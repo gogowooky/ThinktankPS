@@ -1079,10 +1079,11 @@ class TTEditorsManager : TTToolsManager{
             default{
                 switch -regex( $to ){
                     "^(?<line>\d+)$" {
-                        $editor.CaretOffset = $editor.Document.GetLineByNumber( [int]($Matches.line) ).Offset - 1
+                        $editor.CaretOffset = $editor.Document.GetLineByNumber( [int]($Matches.line) ).EndOffset
                     }
+
                     "^(?<line>\d+):(?<column>\d+)$" {
-                        $editor.CaretOffset = $editor.Document.GetLineByNumber( [int]($Matches.line) ).Offset + [int]($Matches.column) - 1
+                        $editor.CaretOffset = $editor.Document.GetLineByNumber( [int]($Matches.line) ).Offset + [int]($Matches.column)
                     }
                     "^#(?<keyword>.+)$" {
                         
@@ -1182,6 +1183,11 @@ class TTEditorsManager : TTToolsManager{
             'all' {
                 $editor.SelectAllItems
             }
+            'line' {
+                $line = $editor.Document.GetLineByOffset( $curpos )
+                $editor.SelectionStart =    $line.Offset
+                $editor.SelectionLength =   $line.Length
+            }
             'lineend' { 
                 $editor.SelectionStart = $curpos
                 $editor.SelectionLength = $editor.Document.GetLineByOffset( $curpos ).EndOffset - $curpos
@@ -1210,6 +1216,11 @@ class TTEditorsManager : TTToolsManager{
                 [EditingCommands]::MoveUpByLine.Execute( $null, $editor.TextArea )
                 $editor.SelectionStart = $curpos
                 $editor.SelectionLength = $editor.CaretOffset - $curpos
+            }
+            default {
+                $line = $editor.Document.GetLineByOffset( $curpos )
+                $editor.SelectionStart = $editor.Document.GetText( $line.Offset, $line.Length ).IndexOf($_) + $line.Offset
+                $editor.SelectionLength = $_.length
             }
         }
 

@@ -935,6 +935,10 @@ class TTEditorController {
     [bool] move_to( [int]$no, [string]$to ){
         return $global:AppMan.Document.Editor.MoveTo( $no, $to )
     }
+    [bool] select_to( [string]$to ){
+        $no = $global:AppMan.Document.CurrentNumber
+        return $this.select_to( $no, $to, '' )
+    }
     [bool] select_to( [string]$to, [string]$following_action ){
         $no = $global:AppMan.Document.CurrentNumber
         return $this.select_to( $no, $to, $following_action )

@@ -761,12 +761,15 @@ function ttcmd_editor_tag_invoke( $source, $mod, $key ){
     # タグを実行する
 
     if( $mod.Contains('Shift') ){
- 
+        
+
     }else{
         $current_editor = $global:AppMan.Document.Editor.Controls[$global:AppMan.Document.CurrentNumber-1]
         [TTTagAction]::New( $current_editor ).DoAction()
- 
+        
     }
+
+    return $true
 }
 
 
