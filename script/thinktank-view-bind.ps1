@@ -786,25 +786,21 @@ function ttcmd_editor_edit_insert_date( $source, $mod, $key ){
     #.SYNOPSIS
     # 日付タグを挿入する
 
-    return 
-
     # scan & select 
-    $editor = $global:AppMan.Document.Editor.Controls[$global:AppMan.Document.CurrentNumber]
+    $editor = $global:AppMan.Document.Editor.Controls[$global:AppMan.Document.CurrentNumber-1]
     $global:datetag.scan( $editor )
+    $selected = $global:AppMan.PopupMenu.Caption( '日付' ).Items( $global:datetag.tags() ).Show()
 
-    # $item = ShowPopupMenu -items $script:datetag.tags() -modkey $mod -key $key -title "Date" -editor $editor
+    # # insert tag
+    if( 0 -eq $selected.length ){ return }
+    if( $global:datetag.length -eq 0 ){
+        $editor.Document.Insert( $editor.CaretOffset, $selected )    
+    }else{
+        $editor.Document.Remove( $global:datetag.offset, $global:datetag.length )
+        $editor.Document.Insert( $global:datetag.offset, $selected )
+    }
 
-    # # insert tag 
-    # if( $null -ne $item ){
-    #     if( $script:datetag.length -eq 0 ){
-    #         $editor.Document.Insert( $editor.CaretOffset, $item )    
-    #     }else{
-    #         $editor.Document.Remove( $script:datetag.offset, $script:datetag.length )
-    #         $editor.Document.Insert( $script:datetag.offset, $item )
-    #     }
-    # }
-
-    # $script:datetag.reset()
+    $global:datetag.reset()
 }
 
 #endregion
