@@ -730,8 +730,10 @@ class TTGroupController {
                 }
             }
             ([Input.MouseButton]::Right) {
-                $this.select_actions_then_invoke( $panel )
-                $mouse.Handled = $true
+                if( $mouse.ClickCount -eq 1 ){
+                    $this.select_actions_then_invoke( $panel )
+                    $mouse.Handled = $true
+                }
             }
         }
         return $true
@@ -894,12 +896,14 @@ class TTEditorController {
 
     #region load/ focus/ save
     [TTEditorController] load( [int]$no, [string]$index ){
+        if( $index -in @( 'forward', 'backward' ) ){
+            $index = $global:AppMan.Document.Editor.History( $no, $index )
+        }
+
         $global:AppMan.Document.Editor.Initialize( $no ).Load( $no, $index )
 
         ### Panel
-        @('Index','Shelf','Cabinet').foreach{
-            $this.tools.app.group.refresh($_)
-        }
+        @('Index','Shelf','Cabinet').foreach{ $this.tools.app.group.refresh($_) }
         
 
         return $this

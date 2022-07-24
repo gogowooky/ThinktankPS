@@ -1274,20 +1274,6 @@ function ttcmd_application_config_app_cachesaved_message_off( $source, $mod, $ke
 
 #region　Editor Edit
 #########################################################################################################################
-function ttcmd_editor_history_previous_tocurrenteditor( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 前のファイルを開く
-    
-    $current = $script:app._get( 'Desk.CurrentEditor' )
-    $script:desk.tool( 'Editor' ).load( "previous" ).focus( $current )
-}
-function ttcmd_editor_history_next_tocurrenteditor( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 先のファイルを開く
-    
-    $current = $script:app._get( 'Desk.CurrentEditor' )
-    $script:desk.tool( 'Editor' ).load( "next" ).focus( $current )
-}
 function ttcmd_desk_works_focus_current_norm( $source, $mod, $key ){
     #.SYNOPSIS
     # カレントエディタにフォーカスする

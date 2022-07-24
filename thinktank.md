@@ -19,7 +19,6 @@
 [memo:#練習]
 
 
-
 [1]AvalonEdit, http://avalonedit.net/documentation/ 
 
 Thinktank:URI:AvalonEdit, http://avalonedit.net/documentation/, :Program:WPF:TextEditor 

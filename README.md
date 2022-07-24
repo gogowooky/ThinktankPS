@@ -2,14 +2,11 @@
 
 # TODO
 ## 処理中
-- ttcmd_editor_tag_invoke
-　Editorで、Alt+Spc, Alt/Shift-Spcにアサイン
-　　Menu表示の際、同キー（Alt+Spc, Alt/Shift-Spc）での確定後に、Editorでコマンドが再入されてりまう。
-　　Menu表示の際は、KeyUpを確実に確認する必要がある。
-　
+- TTEditorsManager.History
+  View内で処理する、Control側ではindexをForward/Back指定で自動読込する。
+
 - 複数選択item対象の処理として、逐次処理、に加え、一括処理を加えたい。（select_actions_then_invoke）
 　すべてのアクションに$itemsを渡すことにする。
-- Shift+左ダブルクリックを右シングルクリックに変更（datagrid_on_previewmousedown）
 
 ## 未処理
 - PopupMenuをカーソル位置またはマウス位置に
@@ -45,7 +42,7 @@
 - 全文検索
 - メモタグ, 文書内ジャンプ、全メモ検索でも同じになるように
   [memo:xxxx-xx-xx-xxxxxx]          
-  [memo:xxxx-xx-xx-xxxxxx:30:12]    [go:30]        
+  [memo:xxxx-xx-xx-xxxxxx:30:12]    [go:30]
   [memo:xxxx-xx-xx-xxxxxx:.keyword] [go:.keyword]   [search:.keyword]
   [memo:xxxx-xx-xx-xxxxxx:keyword]  [go:keyword]    [search:keyword]
 

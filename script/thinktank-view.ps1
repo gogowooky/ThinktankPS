@@ -789,13 +789,13 @@ class TTEditorsManager : TTToolsManager{
     static [bool] $DisplaySavingMessage = $false
 
     hidden [ICSharpCode.AvalonEdit.Document.TextDocument[]] $documents = @()
-    [string[]] $Indices = @( "", "", "" )
-    [object[]] $FoldManagers = @( $null, $null, $null )
-    [object[]] $FoldStrategies = @( $null, $null, $null )
-    [object[]] $HightlightRules = @( @(), @(), @() )
-    [string[][]] $Histories= @( @(), @(), @() )
-    [int[]] $HistoryPositions
-    [string[]] $IDs = @( 'Editor1', 'Editor2', 'Editor3' )
+    [string[]] $Indices =           @( "", "", "" )
+    [object[]] $FoldManagers =      @( $null, $null, $null )
+    [object[]] $FoldStrategies =    @( $null, $null, $null )
+    [object[]] $HightlightRules =   @( @(), @(), @() )
+    [string[][]] $Histories=        @( @(@('') * 100), @(@('') * 100), @(@('') * 100) )
+    [int[]] $HistoryPositions =     @( -1, -1, -1 )
+    [string[]] $IDs =               @( 'Editor1', 'Editor2', 'Editor3' )
     [xml] $xshd
 
     TTEditorsManager( $docman ) : base( $docman ) {
@@ -805,7 +805,9 @@ class TTEditorsManager : TTToolsManager{
         ([TTToolsManager]$this).Initialize()
         $this.documents = @((1..3).foreach{ [ICSharpCode.AvalonEdit.Document.TextDocument]::new() })
         $this.documents.foreach{ $_.FileName = "" }
-        (1..3).foreach{ [void]$this.Initialize($_) }
+        (1..3).foreach{
+            [void]$this.Initialize($_)
+        }
         return $this
     }
     [TTEditorsManager] Initialize( [int]$num ){
@@ -845,10 +847,12 @@ class TTEditorsManager : TTToolsManager{
         
         return $this
     }
+
     #endregion
 
-    #region Load/ Save
+    #region Load/ Save/ History
     [TTEditorsManager] Load( [int]$num, [string]$index ){
+
         $editor =   $this.Controls[$num-1]
         $filepath = [TTTool]::index_to_filepath( $index )
 
@@ -863,6 +867,8 @@ class TTEditorsManager : TTToolsManager{
         } 
 
         #### load
+        $index = $this.History( $num, $index )
+
         $refdoc = $this.documents.where{ $_.FileName -eq $filepath }[0]
         if( $null -ne $refdoc ){    #::: share file loaded on other editor
             $editor.Document = $refdoc
@@ -900,7 +906,40 @@ class TTEditorsManager : TTToolsManager{
 
         return $this
     }
+    [string] History( [int]$num, [string]$action ){
 
+        $curpos = $this.HistoryPositions[$num-1]
+        $curidx = $this.Histories[$num-1][$curpos]
+
+        switch( $action ){
+            'backward' {    #### Previous index of history
+                if( $curpos -le 0 ){ return $curidx }
+                $curpos -= 1
+                $this.HistoryPositions[$num-1] = $curpos
+                return $this.Histories[$num-1][$curpos]
+            }
+            'forward' {     #### Forward index of history
+                if( $curpos -eq 100 ){ return $curidx }
+                $curpos += 1
+                if( 0 -eq $this.Histories[$num-1][$curpos].length ){ return $curidx }
+                $this.HistoryPositions[$num-1] = $curpos
+                return $this.Histories[$num-1][$curpos]
+
+            }
+            default {
+                if( $curidx -eq $action ){ return $action }
+                if( $curpos -eq 100 ){ return $action }
+                $curpos += 1
+                $this.HistoryPositions[$num-1] = $curpos
+                if( $this.Histories[$num-1][$curpos] -ne $action ){
+                    $this.Histories[$num-1][$curpos] = $action
+                    @(($curpos+1)..99).foreach{ $this.Histories[$num-1][$_] = '' }
+                }        
+            }
+        }
+
+        return $action
+    }
     #endregion
 
     #region MoveTo/ NodeTo/ SelectTo

@@ -649,7 +649,8 @@ Editor      Control         E               ttcmd_editor_move_tolineend
 Editor      Control         K               ttcmd_editor_delete_tolineend
 Editor      Control         S               ttcmd_editor_save
 Editor      Alt             Space           ttcmd_editor_tag_invoke
-Editor      Alt, Shift      Space           ttcmd_editor_tag_invoke
+Editor      Control         Back            ttcmd_editor_history_previous_tocurrenteditor
+Editor      Control, Shift  Back            ttcmd_editor_history_next_tocurrenteditor
 
 
 xEditor      Alt             T               ttcmd_editor_edit_insert_date
@@ -672,7 +673,6 @@ xEditor      Control         D1              ttcmd_desk_works_focus_work1
 xEditor      Control         D2              ttcmd_desk_works_focus_work2
 xEditor      Control         D3              ttcmd_desk_works_focus_work3
 xEditor      Control         OemPlus         ttcmd_editor_edit_turn_bullet_norm
-xEditor      Control         Back            ttcmd_editor_history_previous_tocurrenteditor
 xEditor      Control         I               ttcmd_editor_outline_insert_section
 xEditor      Control         H               ttcmd_editor_edit_backspace
 xEditor      Control         D               ttcmd_editor_edit_delete
@@ -680,7 +680,6 @@ xEditor      Control         G               ttcmd_editor_new_tocurrenteditor
 xEditor      Control         OemBackslash    ttcmd_application_config_editor_wordwrap_toggle
 xEditor      Control         Oem3            ttcmd_application_config_editor_staycursor_toggle
 xEditor      Control, Shift  OemPlus         ttcmd_editor_edit_turn_bullet_rev
-xEditor      Control, Shift  Back            ttcmd_editor_history_next_tocurrenteditor
 xEditor      Control, Shift  A               ttcmd_editor_select_tolinestart
 xEditor      Control, Shift  E               ttcmd_editor_select_tolineend
 xEditor      Control, Shift  P               ttcmd_editor_select_toprevline
@@ -771,6 +770,20 @@ function ttcmd_editor_tag_invoke( $source, $mod, $key ){
 
     return $true
 }
+function ttcmd_editor_history_previous_tocurrenteditor( $source, $mod, $key ){
+    #.SYNOPSIS
+    # 前のファイルを開く
+    
+    $global:appcon.tools.editor.load( "backward" )
+}
+function ttcmd_editor_history_next_tocurrenteditor( $source, $mod, $key ){
+    #.SYNOPSIS
+    # 先のファイルを開く
+    
+    $global:appcon.tools.editor.load( "forward" )
+}
+
+
 
 
 function ttcmd_editor_edit_insert_date( $source, $mod, $key ){

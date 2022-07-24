@@ -23,6 +23,10 @@
 [ScriptBlock] $global:TTPanel_PreviewKeyUp =    {}
 [ScriptBlock] $global:TTTool_PreviewKeyUp =     {}
 
+[ScriptBlock] $global:TTDataGrid_PreviewMouseDown =     { $global:appcon.group.event_select_datagrid_item_by_mouse( $args ) }
+[ScriptBlock] $global:TextEditors_PreviewMouseDown =    { $global:appcon.tools.editor.on_previewmousedown( $args ) }
+
+
 [ScriptBlock] $global:TTPanel_SizeChanged = { $global:appcon.event_set_border( $args ) }
 
 # [ScriptBlock] $global:TTPanelTool_GotFocus =    { $args[1].Handled = $global:appcon.set_gotfocus_status( $args ) }
@@ -33,11 +37,9 @@
 
 [ScriptBlock] $global:TTDataGrid_Sorting =          { $global:appcon.group.event_sort_datagrid( $args ) }
 [ScriptBlock] $global:TTDataGrid_SelectionChanged = { $global:appcon.group.event_selection_change_datagrid( $args ) }
-[ScriptBlock] $global:TTDataGrid_PreviewMouseDown = { $global:appcon.group.event_select_datagrid_item_by_mouse( $args ) }
 
 [ScriptBlock] $global:TextEditors_TextChanged =        { $global:appcon.tools.editor.on_textchanged( $args ) }
 [ScriptBlock] $global:TextEditors_GotFocus =           { $global:appcon.tools.editor.on_focus( $args ) }
-[ScriptBlock] $global:TextEditors_PreviewMouseDown =   { $global:appcon.tools.editor.on_previewmousedown( $args ) }
 [ScriptBlock] $global:TextEditors_PreviewDrop =        { $global:appcon.tools.editor.on_previewdrop( $args ) }
 
 [ScriptBlock] $global:TTMenu_GotFocus = {}     # menu制御
