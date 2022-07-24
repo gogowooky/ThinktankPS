@@ -34,7 +34,7 @@
 - 
 
 ## 方針
-- 日付入力
+- 日付入力（）
 - クリップボード入力
 - Actionタグ
 - 全文検索
@@ -48,6 +48,8 @@
 
 # STATUS 
 ## 対応済・修正済
+- TTTagAction:　当日のみ入力可
+
 - TTEditorsManager.History
   View内で処理する、Control側ではindexにForward/Back指定。
 
