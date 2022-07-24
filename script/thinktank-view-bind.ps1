@@ -651,9 +651,8 @@ Editor      Control         S               ttcmd_editor_save
 Editor      Alt             Space           ttcmd_editor_tag_invoke
 Editor      Control         Back            ttcmd_editor_history_previous_tocurrenteditor
 Editor      Control, Shift  Back            ttcmd_editor_history_next_tocurrenteditor
+Editor      Alt             T               ttcmd_editor_edit_insert_date
 
-
-xEditor      Alt             T               ttcmd_editor_edit_insert_date
 xEditor      None            PageUp          ttcmd_editor_scroll_toprevline
 xEditor      None            Next            ttcmd_editor_scroll_tonextline
 xEditor      None            BrowserBack     ttcmd_editor_scroll_toprevline
@@ -774,17 +773,14 @@ function ttcmd_editor_history_previous_tocurrenteditor( $source, $mod, $key ){
     #.SYNOPSIS
     # 前のファイルを開く
     
-    $global:appcon.tools.editor.load( "backward" )
+    $global:appcon.tools.editor.load('backward')
 }
 function ttcmd_editor_history_next_tocurrenteditor( $source, $mod, $key ){
     #.SYNOPSIS
     # 先のファイルを開く
     
-    $global:appcon.tools.editor.load( "forward" )
+    $global:appcon.tools.editor.load('forward')
 }
-
-
-
 
 function ttcmd_editor_edit_insert_date( $source, $mod, $key ){
     #.SYNOPSIS
@@ -792,9 +788,10 @@ function ttcmd_editor_edit_insert_date( $source, $mod, $key ){
 
     return 
 
-    # # scan & select 
-    # $editor = $script:DocMan.current_editor
-    # $script:datetag.scan( $editor )
+    # scan & select 
+    $editor = $global:AppMan.Document.Editor.Controls[$global:AppMan.Document.CurrentNumber]
+    $global:datetag.scan( $editor )
+
     # $item = ShowPopupMenu -items $script:datetag.tags() -modkey $mod -key $key -title "Date" -editor $editor
 
     # # insert tag 

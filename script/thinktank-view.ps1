@@ -809,6 +809,7 @@ class TTEditorsManager : TTToolsManager{
             [void]$this.Initialize($_)
         }
         return $this
+
     }
     [TTEditorsManager] Initialize( [int]$num ){
         $editor = $this.Controls[$num-1]

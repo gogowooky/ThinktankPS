@@ -2,9 +2,6 @@
 
 # TODO
 ## 処理中
-- TTEditorsManager.History
-  View内で処理する、Control側ではindexをForward/Back指定で自動読込する。
-
 - 複数選択item対象の処理として、逐次処理、に加え、一括処理を加えたい。（select_actions_then_invoke）
 　すべてのアクションに$itemsを渡すことにする。
 
@@ -37,19 +34,23 @@
 - 
 
 ## 方針
-- 日付
+- 日付入力
+- クリップボード入力
 - Actionタグ
 - 全文検索
 - メモタグ, 文書内ジャンプ、全メモ検索でも同じになるように
   [memo:xxxx-xx-xx-xxxxxx]          
-  [memo:xxxx-xx-xx-xxxxxx:30:12]    [go:30]
-  [memo:xxxx-xx-xx-xxxxxx:.keyword] [go:.keyword]   [search:.keyword]
-  [memo:xxxx-xx-xx-xxxxxx:keyword]  [go:keyword]    [search:keyword]
+  [memo:xxxx-xx-xx-xxxxxx:30:12]        [go:30]
+  [memo:xxxx-xx-xx-xxxxxx:head:keyword] [go:head:keyword]   [search:head:keyword]
+  [memo:xxxx-xx-xx-xxxxxx:keyword]      [go:keyword]        [search:keyword]
 
 
 
 # STATUS 
 ## 対応済・修正済
+- TTEditorsManager.History
+  View内で処理する、Control側ではindexにForward/Back指定。
+
 - route_tag, mail_tag, memo_tagの一部
 
 - TTGroupController.event_highlight_text_on_editor：　ハイライトで正規表現対応
