@@ -16,6 +16,11 @@
 - Configs表示の更新（Panel.Focusが表示されない）
 
 ## 不具合
+- PopupMenu, Cabinetで、Alt-ESCで終了するよう設定すること
+- マウスでMemo選択loadするとEditor2/3が一緒になってしまう。
+- メモloadのあとカーソルが見えるようにscrollすること
+- メモ中にThinktank:URI: があるとデータ回収できず落ちる
+- Panelでソートすると落ちる
 - Panel非表示時にtentative表示すると、脱mode後に再非表示されない
 - StatusでCurrent.Workspace/Toolが正しく表示されない　→設定ミス or 表示エラー
 
