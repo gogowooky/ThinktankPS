@@ -904,7 +904,6 @@ class TTEditorController {
 
         ### Panel
         @('Index','Shelf','Cabinet').foreach{ $this.tools.app.group.refresh($_) }
-        
 
         return $this
     }
@@ -1068,6 +1067,8 @@ class TTEditorController {
         $editor.WordWrap    = $editing.Wordwrap
         $foldings = $editing.Foldings.split(",")
         $toolman.FoldManagers[$num-1].AllFoldings.foreach{ $_.IsFolded = ( $_.StartOffset -in $foldings ) }
+        $caret = $editor.TextArea.Caret
+        $editor.ScrollTo( $caret.Line, $caret.Column )
 
     }
 
