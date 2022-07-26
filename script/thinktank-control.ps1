@@ -136,6 +136,20 @@ class TTApplicationController {
     }
     #endregion
 
+    #region dialog
+    [bool] dialog( $id ){ 
+        switch( $id ){
+            'site'      { [TTTool]::message( "Githubへのリンク", "Thinktank" ) }
+            'version'   { [TTTool]::message( "Thinktankのバージョン", "Thinktank" ) }
+            'shortcut'  { [TTTool]::message( "ショートカットキーの一覧", "Thinktank" ) }
+            'help'      { [TTTool]::message( "使い方を表示する", "Thinktank" ) }
+            'about'     { [TTTool]::message( "このアプリは何なのかについて表示する", "Thinktank" ) }
+        }
+        return $true
+   
+    }
+    #endregion
+
     #region event
     [bool] event_set_focus_panel( $params ){ 
 

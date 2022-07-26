@@ -62,6 +62,7 @@
 [ScriptBlock] $global:TTPreviewKeyUp = { # Bind to AppMan, PopupMenu, Cabinet
     if( [TTTentativeKeyBindingMode]::Check( $args[1].Key ) ){
         ttcmd_menu_cancel 'PopupMenu' '' ''
+        ttcmd_menu_cancel 'Cabinet' '' ''
         $args[1].Handled = $True
     }
 }
@@ -280,6 +281,40 @@ function ttcmd_panel_collapse_multi_work( $source, $mod, $key ){
 
     }
 }
+#endregion
+
+#region _help_
+function ttcmd_application_help_site( $source, $mod, $key ){
+    #.SYNOPSIS
+    # アプリケーションサイトを表示する
+
+    $global:appcon.dialog( 'site' )
+}
+function ttcmd_application_help_version( $source, $mod, $key ){
+    #.SYNOPSIS
+    # アプリケーションのバージョン表示
+
+    $global:appcon.dialog( 'version' )
+}
+function ttcmd_application_help_shortcuts( $source, $mod, $key ){
+    #.SYNOPSIS
+    # アプリケーションのショートカットキー一覧表示
+
+    $global:appcon.dialog( 'shortcut' )
+}
+function ttcmd_application_help_instruction( $source, $mod, $key ){
+    #.SYNOPSIS
+    # アプリケーションを使い方表示
+
+    $global:appcon.dialog( 'help' )
+}
+function ttcmd_application_help_breifing( $source, $mod, $key ){
+    #.SYNOPSIS
+    # アプリケーションの説明
+
+    $global:appcon.dialog( 'about' )
+}
+
 #endregion
 
 #endregion###############################################################################################################
@@ -856,10 +891,10 @@ Cabinet         None            Down        ttcmd_panel_move_down
 Cabinet         Shift           Up          ttcmd_panel_move_first
 Cabinet         Shift           Down        ttcmd_panel_move_last
 Cabinet         Ctrl            D           ttcmd_panel_discard_selected
-Cabinet         Alt             Escape      ttcmd_panel_collapse_cabinet
-Cabinet         None            Escape      ttcmd_panel_collapse_cabinet
 Cabinet         Alt             D0          ttcmd_panel_reload
 Cabinet         Alt             K           ttcmd_panel_filter_clear
+Cabinet         Alt             Q           ttcmd_panel_collapse_cabinet
+Cabinet         None            Escape      ttcmd_panel_collapse_cabinet
 Cabinet         Alt             Space       ttcmd_panel_action_select
 Cabinet         Alt, Shift      Space       ttcmd_panel_action_invoke
 Cabinet         None            Return      ttcmd_panel_action_select
@@ -874,17 +909,58 @@ Cabinet         Shift           Return      ttcmd_panel_action_invoke
 $global:KeyBind_PopupMenu = @'
 PopupMenu   Alt             P           ttcmd_menu_move_up
 PopupMenu   Alt             N           ttcmd_menu_move_down
-PopupMenu   None            Up          ttcmd_menu_move_up
-PopupMenu   None            Down        ttcmd_menu_move_down
 PopupMenu   Alt, Shift      P           ttcmd_menu_move_first
 PopupMenu   Alt, Shift      N           ttcmd_menu_move_last
+PopupMenu   None            Up          ttcmd_menu_move_up
+PopupMenu   None            Down        ttcmd_menu_move_down
 PopupMenu   Shift           Up          ttcmd_menu_move_first
 PopupMenu   Shift           Down        ttcmd_menu_move_last
-popupMenu   Alt             Escape      ttcmd_menu_cancel
+popupMenu   Alt             Q           ttcmd_menu_cancel
 PopupMenu   None            Escape      ttcmd_menu_cancel
-PopupMenu   Alt             Return      ttcmd_menu_ok
 PopupMenu   Alt             Space       ttcmd_menu_ok
+PopupMenu   Alt             Return      ttcmd_menu_ok
 PopupMenu   None            Return      ttcmd_menu_ok
 '@
+
+function ttcmd_menu_move_up( $source, $mod, $key ){
+    #.SYNOPSIS
+    # パネルのカーソルを上に移動
+
+    $global:appcon.menu.cursor( $source, 'up' )
+}
+function ttcmd_menu_move_down( $source, $mod, $key ){
+    #.SYNOPSIS
+    # パネルのカーソルを下に移動
+
+    $global:appcon.menu.cursor( $source, 'down' )
+}
+function ttcmd_menu_move_first( $source, $mod, $key ){
+    #.SYNOPSIS
+    # パネルのカーソルを先頭に移動
+
+    $global:appcon.menu.cursor( $source, 'first' )
+}
+function ttcmd_menu_move_last( $source, $mod, $key ){
+    #.SYNOPSIS
+    # パネルのカーソルを末尾に移動
+
+    $global:appcon.menu.cursor( $source, 'last' )
+}
+function ttcmd_menu_cancel( $source, $mod, $key ){
+    #.SYNOPSIS
+    # メニューの選択をキャンセル
+
+    $global:appcon.menu.close( $source, 'cancel' )
+    return $true
+}
+function ttcmd_menu_ok( $source, $mod, $key ){
+    #.SYNOPSIS
+    # メニューの選択を確定
+
+    $global:appcon.menu.close( $source, 'ok' )
+    return $true
+}
+
+
 
 #endregion###############################################################################################################

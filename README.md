@@ -31,17 +31,17 @@
 - 
 
 ## 方針
-- 日付入力（）
-- クリップボード入力
-- Actionタグ
+- 日付入力（） ⇒まだ途中
+- クリップボード入力　　⇒まだ途中
+- Actionタグ　　⇒まだ途中
 - 全文検索
 - メモタグ, 文書内ジャンプ、全メモ検索でも同じになるように
   [memo:xxxx-xx-xx-xxxxxx]          
   [memo:xxxx-xx-xx-xxxxxx:30:12]        [go:30]
   [memo:xxxx-xx-xx-xxxxxx:head:keyword] [go:head:keyword]   [search:head:keyword]
   [memo:xxxx-xx-xx-xxxxxx:keyword]      [go:keyword]        [search:keyword]
+
 ## 不具合
-- PopupMenu, Cabinetで、Alt-ESCで終了するよう設定すること
 - マウスでMemo選択loadするとEditor2/3が一緒になってしまう。
 - メモ中にThinktank:URI: があるとデータ回収できず落ちる
 - Panel非表示時にtentative表示すると、脱mode後に再非表示されない
@@ -49,6 +49,11 @@
 
 # STATUS 
 ## 対応済・修正済
+- PopupMenu, Cabinetで、Alt-ESCで終了するよう設定すること
+　Alt-ESCはタスク切替のシステムショートカットで、キー入力に入ってこない。
+　Applicationレベルで定義しても同じ、調べるとUser32.Dllを書き換えるとか出てくる
+　⇒あきらめたほうがよさそう
+
 - TTEditorController.paste(): 特殊ペーストのインターフェイス
 - Panelでソートすると落ちる　
   → 社用PCでのみ発生：　$script: →$global: 変更で完了

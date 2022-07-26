@@ -574,8 +574,9 @@ class TTTentativeKeyBindingMode{
     static [bool] Check( $key ){ 
         # Alt/CtrlのKeyUpは、Preview.KeyUpでkeyを確認できる。
         # KeyUpイベントで以下を用いてmodeから抜ける。
-        switch( "$([TTTentativeKeyBindingMode]::Mod)" ){
-            'Alt' {
+        # switch( "$([TTTentativeKeyBindingMode]::Mod)" ){
+        switch( [TTTentativeKeyBindingMode]::Mod ){
+                'Alt' {
                 if( $key -in @('RightAlt', 'LeftAlt') ){
                     &([TTTentativeKeyBindingMode]::OnExit)
                     [TTTentativeKeyBindingMode]::Initialize()

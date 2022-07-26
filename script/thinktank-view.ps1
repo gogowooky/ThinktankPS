@@ -139,15 +139,6 @@ class TTAppManager {
         }
         return $false
     }
-    [void] Dialog( $id ){
-        switch( $id ){
-            'site'      { [TTTool]::message( "Githubへのリンク", "Thinktank" ) }
-            'version'   { [TTTool]::message( "Thinktankのバージョン", "Thinktank" ) }
-            'shortcut'  { [TTTool]::message( "ショートカットキーの一覧", "Thinktank" ) }
-            'help'      { [TTTool]::message( "使い方を表示する", "Thinktank" ) }
-            'about'     { [TTTool]::message( "このアプリは何なのかについて表示する", "Thinktank" ) }
-        }
-    }
     #endregion
 
     #region Border(io)/ Top(io)/ Left(io)/ Title(io)
@@ -681,7 +672,7 @@ class TTCabinetManager : TTPanelManager {
         }else{
             $this._selected = $null
         }
-        $this._window.Dispatcher.Invoke({ $global:AppMan.Cabinet._window.Hide() })
+        $this._window.Dispatcher.Invoke({$global:AppMan.Cabinet._window.Hide() })
         return $this
     }
     [string] Focus(){
