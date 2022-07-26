@@ -15,13 +15,6 @@
 
 - Configs表示の更新（Panel.Focusが表示されない）
 
-## 不具合
-- Panelでソートすると落ちる　→ 社用PCでのみ発生
-- PopupMenu, Cabinetで、Alt-ESCで終了するよう設定すること
-- マウスでMemo選択loadするとEditor2/3が一緒になってしまう。
-- メモ中にThinktank:URI: があるとデータ回収できず落ちる
-- Panel非表示時にtentative表示すると、脱mode後に再非表示されない
-- StatusでCurrent.Workspace/Toolが正しく表示されない　→設定ミス or 表示エラー
 
 ## 謎
 - Alt+DでDeskからWorkplaceにFocusするときに、Editorが2度 focusされる謎 [220712]
@@ -47,11 +40,19 @@
   [memo:xxxx-xx-xx-xxxxxx:30:12]        [go:30]
   [memo:xxxx-xx-xx-xxxxxx:head:keyword] [go:head:keyword]   [search:head:keyword]
   [memo:xxxx-xx-xx-xxxxxx:keyword]      [go:keyword]        [search:keyword]
-
-
+## 不具合
+- PopupMenu, Cabinetで、Alt-ESCで終了するよう設定すること
+- マウスでMemo選択loadするとEditor2/3が一緒になってしまう。
+- メモ中にThinktank:URI: があるとデータ回収できず落ちる
+- Panel非表示時にtentative表示すると、脱mode後に再非表示されない
+- StatusでCurrent.Workspace/Toolが正しく表示されない　→設定ミス or 表示エラー
 
 # STATUS 
 ## 対応済・修正済
+- TTEditorController.paste(): 特殊ペーストのインターフェイス
+- Panelでソートすると落ちる　
+  → 社用PCでのみ発生：　$script: →$global: 変更で完了
+
 - メモloadのあとカーソルが見えるようにscrollすること
 
 - TTTagAction:　当日のみ入力可

@@ -1,5 +1,5 @@
 ﻿= Thinktank
-# [2022-07-25] [2022-07-25] [2022-07-25] 2022/07/25 メモ
+# メモ
 ## [2022-03-15] 便利そうなコントロール
 　https://mseeeen.msen.jp/wpf-multi-tag-combo-box/
  
@@ -69,11 +69,19 @@ Thinktank:URI:AvalonEdit, http://avalonedit.net/documentation/, :Program:WPF:Tex
 [_]
 ## url
 http://google.com, http://yahoo.com
+Amazon | HG 機動戦士ガンダム 水星の魔女 ダリルバルデ 1/144スケール 色分け済みプラモデル | プラモデル 通販
 
-
-
-## path
 c:\windows,c:\windows\addins
+[mail:2022-03-26-153803][mail:2021-11-04-194542][mail:2021-11-25-170408][mail:2021-11-25-170408]
+
+[mail:2022-07-21-040023]
+[mail:2022-07-23-084845]
+
+
+Mail Delivery Subsystem:[mail:2022-07-18-221620]
+エポスカード:[mail:2022-07-19-080050]
+
+
 ## 予備
     
     static [psobject[]] $Actions = @(

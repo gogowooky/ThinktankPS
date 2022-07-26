@@ -1390,13 +1390,6 @@ function ttcmd_editor_edit_backspace( $source, $mod, $key ){
 
     $script:desk.tool( 'Editor' ).edit( 'backspace' )
 }
-function ttcmd_editor_edit_insert_clipboard( $source, $mod, $key ){
-    #.SYNOPSIS
-    # クリップボードの内容を貼り付ける
-
-    params( $modkey, $key )
-    [TTClipboard]::PasteTo( $script:DocMan.current_editor, $modkey, $key )
-}
 function ttcmd_editor_edit_turn_bullet_norm( $source, $mod, $key ){
     #.SYNOPSIS
     # カーソル位置にアイテムヘッダーを挿入する

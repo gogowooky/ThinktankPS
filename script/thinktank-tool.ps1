@@ -97,244 +97,41 @@ class TTTool{
 class TTClipboard {
     static [string] $_type
     static [object] $_target
-    static [string] $_modkey
-    static [string] $_key
     static [object] $_copied
 
-    static [void]Copy( [string]$text ){
+    static [void]Copy( [string]$text ){                     #### text
         [Clipboard]::SetText( $text )    
     }
-    static [void]Copy( [object]$object ){ # TTObject
+    static [void]Copy( [object]$object ){                   #### TTObject
         [Clipboard]::SetData( "TTObject", $object )
         [TTClipboard]::_copied = $object
     }
-    static [void]Copy( [object]$object, [string]$text ){ # text,TTObject
+    static [void]Copy( [object]$object, [string]$text ){    #### TTObject, text
         $data = [DataObject]::New( "TTObject", $object )
         $data.SetText( $text )
         [Clipboard]::SetDataObject( $data )
         [TTClipboard]::_copied = $object
     }
-    static [void]PasteTo( $target, $modkey, $key ){
-        [TTClipboard]::_target = $target
-        [TTClipboard]::_modkey = $modkey
-        [TTClipboard]::_key = $key
-        [TTClipboard]::_type = ""
+    static [string]DataType(){
+        $type = ''
 
         switch( $true ){
-            { [Clipboard]::ContainsFileDropList() }             { [TTClipboard]::_type += "FileDropList," }
-            { [Clipboard]::ContainsAudio() }                    { [TTClipboard]::_type += "Audio," }
-            { [Clipboard]::ContainsText() }                     { [TTClipboard]::_type += "Text," }
-            { [Clipboard]::ContainsImage() }                    { [TTClipboard]::_type += "Image," }
-            { [Clipboard]::ContainsData("CSV") }                { [TTClipboard]::_type += "CSV," }
-            { [Clipboard]::ContainsData("Rich Text Format") }   { [TTClipboard]::_type += "Rtf," }
-            { [Clipboard]::ContainsData("HTML Format") }        { [TTClipboard]::_type += "Html," }
-            { [Clipboard]::ContainsData("DataInterchangeFormat") }  { [TTClipboard]::_type += "DataInterchangeFormat," }
-            { [Clipboard]::ContainsData("TTObject") }           { [TTClipboard]::_type += "TTObject" }
-            default{ [TTClipboard]::_type += "no-category," }
+            { [Clipboard]::ContainsFileDropList() }             { $type += "FileDropList," }
+            { [Clipboard]::ContainsAudio() }                    { $type += "Audio," }
+            { [Clipboard]::ContainsText() }                     { $type += "Text," }
+            { [Clipboard]::ContainsImage() }                    { $type += "Image," }
+            { [Clipboard]::ContainsData("CSV") }                { $type += "CSV," }
+            { [Clipboard]::ContainsData("Rich Text Format") }   { $type += "Rtf," }
+            { [Clipboard]::ContainsData("HTML Format") }        { $type += "Html," }
+            { [Clipboard]::ContainsData("DataInterchangeFormat") }  { $type += "DataInterchangeFormat," }
+            { [Clipboard]::ContainsData("TTObject") }           { $type += "TTObject" }
+            default{ $type += "no-category," }
         }
 
-        switch( [TTClipboard]::_type ){
-            "Text,"                  { [TTClipboard]::paste_url_text() }
-            "FileDropList,Text,CSV," { [TTClipboard]::paste_outlookmail() }
-            "Text,CSV,"              { [TTClipboard]::paste_outlookmails() } 
-            "FileDropList,Text,"     { [TTClipboard]::paste_outlookschedule() }
-            "Image,"                 { [TTClipboard]::paste_image() } 
-            "Image,Html,"            { [TTClipboard]::paste_image() } 
-            "Text,Rtf,Html,"         { [TTClipboard]::paste_word() } 
-            "FileDropList,"          { [TTClipboard]::paste_files_folders() }
-            "Text,Html,"             { [TTClipboard]::paste_favorites_and_text() }
-            "Text,Image,CSV,Rtf,Html,DataInterchangeFormat," { [TTClipboard]::paste_excelrange() } 
-            "TTObject"               { [TTClipboard]::paste_ttobject() } 
-            "Text,TTObject"          { [TTClipboard]::paste_ttobject_text() } 
-            default                  { Write-Host "not supported: $([TTClipboard]::_type)" }
-        }
+        return $type
     }
-    static [void] paste_ttobject_text(){
-        $text   = [Clipboard]::GetText()
-        $doc    = [TTClipboard]::_target.Document
-        $offset = [TTClipboard]::_target.CaretOffset
-        $modkey = [TTClipboard]::_modkey
-        $key = [TTClipboard]::_key
-        $target = [TTClipboard]::_target 
-        $copied = [TTClipboard]::_copied
-
-        switch( $copied.GetType().Name ){
-            'TTMemo' { 
-                $items = @{
-                    "@[memo:$($copied.MemoID):$text]"     = 'memoid'
-                    "[memo:$($copied.MemoID):$text] $($copied.Title)"  = 'title'
-                }
-                switch( $items[ [string](ShowPopupMenu $items.keys $modkey $key "Memo" $target) ] ){
-                    'memoid' { $doc.Insert( $offset, "[memo:$($copied.MemoID):$text]" ) }
-                    'title'  { $doc.Insert( $offset, "[memo:$($copied.MemoID):$text] $($copied.Title)" ) }
-                }    
-            }
-        }
-    }
-    static [void] paste_ttobject(){
-        $doc    = [TTClipboard]::_target.Document
-        $offset = [TTClipboard]::_target.CaretOffset
-        $modkey = [TTClipboard]::_modkey
-        $key = [TTClipboard]::_key
-        $target = [TTClipboard]::_target 
-        $copied = [TTClipboard]::_copied
-
-        switch( $copied.GetType().Name ){
-            'TTMemo' { 
-                $items = @{
-                    "@[memo:$($copied.MemoID)]"     = 'memoid'
-                    "[memo:$($copied.MemoID)] $($copied.Title)"  = 'title'
-                }
-                switch( $items[ [string](ShowPopupMenu $items.keys $modkey $key "Memo" $target) ] ){
-                    'memoid' { $doc.Insert( $offset, "[memo:$($copied.MemoID)]" ) }
-                    'title'  { $doc.Insert( $offset, "[memo:$($copied.MemoID)] $($copied.Title)" ) }
-                }    
-            }
-        }
-    
-    }
-    static [void] paste_url_text(){
-
-        $text   = [Clipboard]::GetText()
-        $doc    = [TTClipboard]::_target.Document
-        $offset = [TTClipboard]::_target.CaretOffset
-        $modkey = [TTClipboard]::_modkey
-        $key = [TTClipboard]::_key
-        $target = [TTClipboard]::_target 
-
-        if( $text -match "^https?://[^　 \[\],;`&lt;&gt;&quot;&apos;]+"){
-    
-            # url
-            #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-            $items = @{
-                "@そのまま"     = 'raw'
-                "URLデコード"   = 'decode'
-                "# ⇒ [タイトル](URL)"  = 'title'
-            }
-            switch( $items[ [string](ShowPopupMenu $items.keys $modkey $key "URL" $target) ] ){
-                'raw'    { $doc.Insert( $offset, $text ) }
-                'decode' { $doc.Insert( $offset, [System.Web.HttpUtility]::UrlDecode($text) ) }
-                'title'  {
-                    if( ( Invoke-WebRequest $text ).Content -match "\<title\>(.+)\<\/title\>" ){
-                        $text = [System.Web.HttpUtility]::UrlDecode( $text )
-                        $doc.Insert( $offset, "[$($Matches[1])]($text)" )
-                    }else{
-                        $text = [System.Web.HttpUtility]::UrlDecode( $text )
-                        $doc.Insert( $offset, "[NoTitle]($text)" )
-                    }
-                }
-            }
-    
-        }else{
-    
-            # text
-            #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-            $items = @{
-                "@そのまま"     = 'raw'
-                "コメント化"    = 'commentize'
-                "URLデコード"   = 'decode'
-                "URLエンコード" = 'encode'
-            }
-            switch( $items[ [string](ShowPopupMenu $items.keys $modkey $key "Text" $target) ] ){
-                'raw'    { $doc.Insert( $offset, $text ) }
-                'decode' { $doc.Insert( $offset, [System.Web.HttpUtility]::UrlDecode($text) ) }
-                'encode' { $doc.Insert( $offset, [System.Web.HttpUtility]::UrlEncode($text) ) }
-                'commentize' {
-                    $text =  @($text.split("`r`n").where{$_ -ne ""}.foreach{ "; $_" }) -join "`r`n"
-                    $doc.Insert( $offset, $text )
-                }
-            }
-        }
-    }
-    static [void] paste_outlookmail(){
-        [TTClipboard]::paste_outlookmails()
-    }
-    static [void] paste_outlookmails(){
-        $titles = (([Clipboard]::GetText() -replace "`t", ",")).件名
-        $outlook = New-Object -ComObject Outlook.Application
-    
-        try {
-            $fmt = ""
-            $mails = $outlook.ActiveExplorer().Selection
-    
-            for( $i = 1; $i -le $mails.count; $i++ ){
-                $mail = $mails.Item($i)
-                if( $mail.Subject -notin $titles ){ continue }
-    
-                $id    = (Get-Date $mail.ReceivedTime).tostring("yyyy-MM-dd-HHmmss")
-                $title = $mail.Subject
-                $sendername = $mail.Sender.Name
-                $body = @(($mail.body.split("From")[0]).split("`r`n").where{ $_ -ne "" }.foreach{ "; "+$_ }) -join "`r`n"
-    
-                $modkey = [TTClipboard]::_modkey
-                $key = [TTClipboard]::_key
-                $target = [TTClipboard]::_target
-
-                if( $fmt -eq "" ){
-                    $items = @{
-                        "[mail:$($id)]"                = '"[mail:$($id)]"'
-                        "[mail:$($id)]:$sendername"    = '"`r`n[mail:$($id)]:$sendername"'
-                        "⇒ $title[mail:$($id)]"      = '"⇒ $title[mail:$($id)]`r`n"'
-                        "⇒ $title[mail:$($id)]＋本体"  = '"`r`n# ⇒ $title[mail:$($id)]`r`n$body`r`n"'
-                    }
-
-                    $fmt = $items[ [string](ShowPopupMenu $items.keys $modkey $key "メール" $target) ]
-                    if( 0 -eq $fmt.length ){ return }
-                }
-                $target.Document.Insert( $target.CaretOffset, (Invoke-Expression $fmt) )
-    
-                $backupFolderName = $global:TTConfigs.GetChild("OutlookBackupFolder").Value
-                $mailFolderName = $mail.parent.FolderPath.substring(2)
-                foreach( $folder in $outlook.GetNamespace("MAPI").Folders ){
-                    if( ($folder.Name -eq $backupFolderName) -and
-                        ($folder.Name -ne $mailFolderName) ){ $mail.Move( $folder ) } 
-                }
-            }
-        
-        } finally {
-            [void][System.Runtime.Interopservices.Marshal]::ReleaseComObject($outlook)
-        }
-    }
-    static [void] paste_outlookschedule(){ # 未実装
-        $text = [Clipboard]::GetText()                   # 件名（場所）
-        $filedroplist = [Clipboard]::GetFileDropList()   # error
-    }
-    static [void] paste_image(){ # 未実装
-    
-        # $image = [Clipboard]::GetImage()  # image:System.Windows.Interop.InteropBitmap
-    
-        $folder = $global:TTConfigs.GetChild("CaptureFolder").value
-        if( (Test-Path $folder) -eq $false ){ $folder = [Environment]::GetFolderPath('MyPictures') }
-        $folder = $folder + "\thinktank\" + (Get-Date).ToString("yyyy-MM-dd")
-        if( (Test-Path $folder) -eq $false ){ New-Item $folder -ItemType Directory }
-        $filename = $folder + "\" + (Get-Date).ToString("yyyy-MM-dd-HHmmss") + ".png"
-    
-        (Get-Clipboard -Format Image).Save( $filename )
-    
-        [TTClipboard]::_target.Document.Insert( [TTClipboard]::_target.CaretOffset, "$filename`r`n" )
-    }
-    static [void] paste_word(){
-        [TTClipboard]::paste_url_text()
-        # $text = [Clipboard]::GetText()                              # word text
-        # $rtf = [Clipboard]::GetDataObject("Rich Text Format")       # no datd
-        # $html = [Clipboard]::GetDataObject("Html")                  # no data
-    }
-    static [void] paste_files_folders(){ # 未実装
-        $filedroplist = [Clipboard]::GetFileDropList()
-        Write-Host "filedroplist:$filedroplist" # [stringcollection]fullpath
-    }
-    static [void] paste_favorites_and_text(){
-        [TTClipboard]::paste_url_text()
-        # $text = [Clipboard]::GetText()                # ブラウザ text, thinktank text, ブラウザリンク
-        # $html = [Clipboard]::GetDataObject("Html")    # no data
-    }
-    static [void] paste_excelrange(){ # 未実装
-        # $text = [Clipboard]::GetText()
-        # $image = [Clipboard]::GetImage()            # string
-        # $csv = [Clipboard]::GetDataObject("CSV")    # image:System.Windows.Interop.InteropBitmap
-        # $rtf = [Clipboard]::GetDataObject("Rich Text Format")      # no datd
-        # $html = [Clipboard]::GetDataObject("Html")                 # no datd
-        # $dif = [Clipboard]::GetDataObject("DataInterchangeFormat") # no datd
+    static [string]GetText(){
+        return [Clipboard]::GetText()
     }
 
 }
@@ -420,8 +217,8 @@ class TTTagAction{
     }
     [void] url_action(){
         $actions = [hashtable]@{
-            "@URLを開く"        = 'open url'
-            "一つ上のURLを開く" = 'open parent url'
+            "@URLを開く" =          'open url'
+            "一つ上のURLを開く" =   'open parent url'
         }
         $selected = $global:AppMan.PopupMenu.Caption( 'URLを開く' ).Items( $actions.Keys ).Show()
         switch( $actions[$selected] ){
@@ -431,8 +228,8 @@ class TTTagAction{
     }
     [void] path_action(){
         $actions = @{
-            "@ファイルを開く"    = 'open file'
-            "ディレクトリを開く" = 'open directory'
+            "@ファイルを開く" =     'open file'
+            "ディレクトリを開く" =  'open directory'
         }
         $selected = $global:AppMan.PopupMenu.Caption( 'Pathを開く' ).Items( $actions.Keys ).Show()
         switch( $actions[$selected] ){

@@ -930,6 +930,214 @@ class TTEditorController {
     }
     #endregion
 
+    #region paste
+    [bool] paste(){
+        $no = $global:AppMan.Document.CurrentNumber
+        return $this.paste( $no )
+    }
+    [bool] paste( [int]$no ){
+        $editor = $global:AppMan.Document.Editor.Controls[$no-1]
+        $text = [TTClipboard]::GetText()
+
+        switch( [TTClipboard]::DataType() ){
+            "Text,"                  { $this._paste_url_text( $editor, $text ) }
+            "FileDropList,Text,CSV," { $this._paste_outlookmails( $editor, $text ) }
+            "Text,CSV,"              { $this._paste_outlookmails( $editor, $text ) } 
+            "TTObject"               { $this._paste_ttobject( $editor, $text ) } 
+            "Text,TTObject"          { $this._paste_ttobject_text( $editor, $text ) } 
+            "FileDropList,Text,"     { $this._paste_outlookschedule( $editor, $text ) }
+            "Image,"                 { $this._paste_image( $editor, $text ) } 
+            "Image,Html,"            { $this._paste_image( $editor, $text ) } 
+            "Text,Rtf,Html,"         { $this._paste_word( $editor, $text ) } 
+            "FileDropList,"          { $this._paste_files_folders( $editor, $text ) }
+            "Text,Html,"             { $this._paste_favorites_and_text( $editor, $text ) }
+            "Text,Image,CSV,Rtf,Html,DataInterchangeFormat," { $this._paste_excelrange( $editor, $text ) } 
+            default                  { 
+                Write-Host "non supported data"
+                return $false
+            }
+        }
+        return $true
+
+    }
+    [void] _paste_url_text( $editor, $text ){
+        $doc = $editor.Document
+        $cur = $editor.CaretOffset
+
+        if( $text -match "^https?://[^　 \[\],;`&lt;&gt;&quot;&apos;]+"){   #### url
+            $items = @{
+                "@そのまま" =           'raw'
+                "URLデコード" =         'decode'
+                "# ⇒ [タイトル](URL)" = 'title'
+            }
+            $selected = $global:AppMan.PopupMenu.Caption( 'URLをペースト' ).Items( $items.Keys ).Show()
+            switch( $items[$selected] ){
+                'decode' { 
+                    $text = [System.Web.HttpUtility]::UrlDecode($text)
+                }
+                'title'  {
+                    if( ( Invoke-WebRequest $text ).Content -match "\<title\>(?<title>.+)\<\/title\>" ){
+                        $text = "[$($Matches.title)]($text)"
+                    }
+                    $text = [System.Web.HttpUtility]::UrlDecode( $text )
+                }
+            }
+            $doc.Insert( $cur, $text )
+
+        }else{                                                              #### text
+            $items = @{
+                "@そのまま"     = 'raw'
+                "コメント化"    = 'commentize'
+                "URLデコード"   = 'decode'
+                "URLエンコード%"   = 'decode'
+            }
+            $selected = $global:AppMan.PopupMenu.Caption( 'テキストをペースト' ).Items( $items.Keys ).Show()
+            switch( $items[$selected] ){
+                'decode' {
+                    $text = [System.Web.HttpUtility]::UrlDecode($text)
+                }
+                'commentize' {
+                    $text =  @(
+                        $text.split("`r`n").where{$_ -ne ""}.foreach{ "; $_" }
+                    ) -join "`r`n"
+                }
+            }
+            $doc.Insert( $cur, $text )
+
+        }
+        
+    }
+    [void] _paste_outlookmails( $editor, $text ){
+        $doc = $editor.Document
+        $cur = $editor.CaretOffset
+        $titles = (ConvertFrom-Csv ([Clipboard]::GetText() -replace "`t", ",")).件名
+        $outlook = New-Object -ComObject Outlook.Application
+    
+        try {
+            $fmt = ""
+            $mails = $outlook.ActiveExplorer().Selection
+    
+            for( $i = 1; $i -le $mails.count; $i++ ){
+                $mail = $mails.Item($i)
+                if( $mail.Subject -notin $titles ){ continue }
+    
+                $id =           (Get-Date $mail.ReceivedTime).tostring("yyyy-MM-dd-HHmmss")
+                $title =        $mail.Subject
+                $sendername =   $mail.Sender.Name
+                $body = @(($mail.body.split("From")[0]).split("`r`n").where{ $_ -ne "" }.foreach{ "; "+$_ }) -join "`r`n"
+    
+                if( $fmt -eq "" ){
+                    $items = @{
+                        "[mail:$($id)]" =                   '"[mail:$($id)]`r`n"'
+                        "$($sendername):[mail:$($id)]" =    '"`r`n$($sendername):[mail:$($id)]"'
+                        "⇒ $title`\[mail:$($id)]" =          '"⇒ $title`r`n[mail:$($id)]"'
+                        "⇒ $title`\[mail:$($id)]`\本体" =     '"⇒ $title`r`n[mail:$($id)]`r`n$body"'
+                    }
+                    $selected = $global:AppMan.PopupMenu.Caption( 'Outlookメールをペースト' ).Items( $items.Keys ).Show()
+                    $fmt = $items[$selected]
+                    if( 0 -eq $fmt.length ){ return }
+                }
+                $doc.Insert( $cur, (Invoke-Expression $fmt) )
+                $backupFolderName = $global:TTResources.GetChild('Configs').GetChild("OutlookBackupFolder").Value
+                $mailFolderName = $mail.parent.FolderPath.substring(2)
+                foreach( $folder in $outlook.GetNamespace("MAPI").Folders ){
+                    if( ($folder.Name -eq $backupFolderName) -and
+                        ($folder.Name -ne $mailFolderName) ){ $mail.Move( $folder ) } 
+                }
+            }
+        
+        } finally {
+            [void][System.Runtime.Interopservices.Marshal]::ReleaseComObject($outlook)
+        }
+
+    }
+
+    [void] _paste_ttobject( $editor, $text ){
+        $doc    = [TTClipboard]::_target.Document
+        $offset = [TTClipboard]::_target.CaretOffset
+        $target = [TTClipboard]::_target 
+        $copied = [TTClipboard]::_copied
+
+        switch( $copied.GetType().Name ){
+            'TTMemo' { 
+                $items = @{
+                    "@[memo:$($copied.MemoID)]"     = 'memoid'
+                    "[memo:$($copied.MemoID)] $($copied.Title)"  = 'title'
+                }
+                switch( $items[ [string](ShowPopupMenu $items.keys "" "" "Memo" $target) ] ){
+                    'memoid' { $doc.Insert( $offset, "[memo:$($copied.MemoID)]" ) }
+                    'title'  { $doc.Insert( $offset, "[memo:$($copied.MemoID)] $($copied.Title)" ) }
+                }    
+            }
+        }
+    
+    }
+    [void] _paste_ttobject_text( $editor, $text ){
+        $text   = [Clipboard]::GetText()
+        $doc    = [TTClipboard]::_target.Document
+        $offset = [TTClipboard]::_target.CaretOffset
+        $target = [TTClipboard]::_target 
+        $copied = [TTClipboard]::_copied
+
+        switch( $copied.GetType().Name ){
+            'TTMemo' { 
+                $items = @{
+                    "@[memo:$($copied.MemoID):$text]"     = 'memoid'
+                    "[memo:$($copied.MemoID):$text] $($copied.Title)"  = 'title'
+                }
+                switch( $items[ [string](ShowPopupMenu $items.keys "" "" "Memo" $target) ] ){
+                    'memoid' { $doc.Insert( $offset, "[memo:$($copied.MemoID):$text]" ) }
+                    'title'  { $doc.Insert( $offset, "[memo:$($copied.MemoID):$text] $($copied.Title)" ) }
+                }    
+            }
+        }
+
+    }
+    [void] _paste_outlookschedule( $editor, $text ){ # 未実装
+        $text = [Clipboard]::GetText()                   # 件名（場所）
+        $filedroplist = [Clipboard]::GetFileDropList()   # error
+    }
+    [void] _paste_image( $editor, $text ){ # 未実装
+    
+        # $image = [Clipboard]::GetImage()  # image:System.Windows.Interop.InteropBitmap
+    
+        $folder = $global:TTConfigs.GetChild("CaptureFolder").value
+        if( (Test-Path $folder) -eq $false ){ $folder = [Environment]::GetFolderPath('MyPictures') }
+        $folder = $folder + "\thinktank\" + (Get-Date).ToString("yyyy-MM-dd")
+        if( (Test-Path $folder) -eq $false ){ New-Item $folder -ItemType Directory }
+        $filename = $folder + "\" + (Get-Date).ToString("yyyy-MM-dd-HHmmss") + ".png"
+    
+        (Get-Clipboard -Format Image).Save( $filename )
+    
+        [TTClipboard]::_target.Document.Insert( [TTClipboard]::_target.CaretOffset, "$filename`r`n" )
+    }
+    [void] _paste_word( $editor, $text ){
+        $this._paste_url_text( $editor, $text )
+        # $text = [Clipboard]::GetText()                              # word text
+        # $rtf = [Clipboard]::GetDataObject("Rich Text Format")       # no datd
+        # $html = [Clipboard]::GetDataObject("Html")                  # no data
+    }
+    [void] _paste_files_folders( $editor, $text ){ # 未実装
+        # $filedroplist = [Clipboard]::GetFileDropList()
+        # Write-Host "filedroplist:$filedroplist" # [stringcollection]fullpath
+    }
+    [void] _paste_favorites_and_text( $editor, $text ){
+        $this._paste_url_text( $editor, $text )
+        # $text = [Clipboard]::GetText()                # ブラウザ text, thinktank text, ブラウザリンク
+        # $html = [Clipboard]::GetDataObject("Html")    # no data
+    }
+    [void] _paste_excelrange( $editor, $text ){ # 未実装
+        # $text = [Clipboard]::GetText()
+        # $image = [Clipboard]::GetImage()            # string
+        # $csv = [Clipboard]::GetDataObject("CSV")    # image:System.Windows.Interop.InteropBitmap
+        # $rtf = [Clipboard]::GetDataObject("Rich Text Format")      # no datd
+        # $html = [Clipboard]::GetDataObject("Html")                 # no datd
+        # $dif = [Clipboard]::GetDataObject("DataInterchangeFormat") # no datd
+    }
+
+
+    #endrergion
+
     #region move_to, select_to, node_to
     [bool] move_to( [string]$to ){
         $no = $global:AppMan.Document.CurrentNumber

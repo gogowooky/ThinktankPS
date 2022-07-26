@@ -500,81 +500,81 @@ function ttcmd_panel_sort_dsc_1stcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第１カラムで降順ソートする
 
-    $script:appcon.group.sort( $source, 1, 'Descending' )
+    $global:appcon.group.sort( $source, 1, 'Descending' )
 }
 function ttcmd_panel_sort_asc_1stcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第１カラムで昇順ソートする
 
-    $script:appcon.group.sort( $source, 1, 'Ascending' )
+    $global:appcon.group.sort( $source, 1, 'Ascending' )
 }
 function ttcmd_panel_sort_dsc_2ndcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第２カラムで降順ソートする
 
-    $script:appcon.group.sort( $source, 2, 'Descending' )
+    $global:appcon.group.sort( $source, 2, 'Descending' )
 }
 function ttcmd_panel_sort_asc_2ndcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第２カラムで昇順ソートする
 
-    $script:appcon.group.sort( $source, 2, 'Ascending' )
+    $global:appcon.group.sort( $source, 2, 'Ascending' )
 }
 function ttcmd_panel_sort_dsc_3rdcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第３カラムで降順ソートする
 
     
-    $script:appcon.group.sort( $source, 3, 'Descending' )
+    $global:appcon.group.sort( $source, 3, 'Descending' )
 }
 function ttcmd_panel_sort_asc_3rdcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第３カラムで昇順ソートする
 
     
-    $script:appcon.group.sort( $source, 3, 'Ascending' )
+    $global:appcon.group.sort( $source, 3, 'Ascending' )
 }
 function ttcmd_panel_sort_dsc_4thcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第４カラムで降順ソートする
 
     
-    $script:appcon.group.sort( $source, 4, 'Descending' )
+    $global:appcon.group.sort( $source, 4, 'Descending' )
 }
 function ttcmd_panel_sort_asc_4thcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第４カラムで昇順ソートする
 
     
-    $script:appcon.group.sort( $source, 4, 'Ascending' )
+    $global:appcon.group.sort( $source, 4, 'Ascending' )
 }
 function ttcmd_panel_sort_dsc_5thcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第５カラムで降順ソートする
 
     
-    $script:appcon.group.sort( $source, 5, 'Descending' )
+    $global:appcon.group.sort( $source, 5, 'Descending' )
 }
 function ttcmd_panel_sort_asc_5thcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第５カラムで昇順ソートする
 
     
-    $script:appcon.group.sort( $source, 5, 'Ascending' )
+    $global:appcon.group.sort( $source, 5, 'Ascending' )
 }
 function ttcmd_panel_sort_dsc_6thcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第６カラムで降順ソートする
 
     
-    $script:appcon.group.sort( $source, 6, 'Descending' )
+    $global:appcon.group.sort( $source, 6, 'Descending' )
 }
 function ttcmd_panel_sort_asc_6thcolumn( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの第６カラムで昇順ソートする
 
     
-    $script:appcon.group.sort( $source, 6, 'Ascending' )
+    $global:appcon.group.sort( $source, 6, 'Ascending' )
 }
 
 #endregion
@@ -652,6 +652,9 @@ Editor      Alt             Space           ttcmd_editor_tag_invoke
 Editor      Control         Back            ttcmd_editor_history_previous_tocurrenteditor
 Editor      Control, Shift  Back            ttcmd_editor_history_next_tocurrenteditor
 Editor      Alt             T               ttcmd_editor_edit_insert_date
+Editor      Alt             V               ttcmd_editor_edit_insert_clipboard
+
+xEditor      Alt             C               ttcmd_editor_copy_tag_atcursor
 
 xEditor      None            PageUp          ttcmd_editor_scroll_toprevline
 xEditor      None            Next            ttcmd_editor_scroll_tonextline
@@ -659,8 +662,6 @@ xEditor      None            BrowserBack     ttcmd_editor_scroll_toprevline
 xEditor      None            BrowserForward  ttcmd_editor_scroll_tonextline
 
 xEditor      None            Return          ttcmd_editor_scroll_tonewline
-xEditor      Alt             V               ttcmd_editor_edit_insert_clipboard
-xEditor      Alt             C               ttcmd_editor_copy_tag_atcursor
 xEditor      Alt             D1              ttcmd_desk_works_focus_work1
 xEditor      Alt             D2              ttcmd_desk_works_focus_work2
 xEditor      Alt             D3              ttcmd_desk_works_focus_work3
@@ -687,7 +688,13 @@ xEditor      Control, Shift  B               ttcmd_editor_select_toleftchar
 xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
 '@
 
-#region _editor_move/delete_
+#region _editor_move/delete/edit_
+function ttcmd_editor_edit_insert_clipboard( $source, $mod, $key ){
+    #.SYNOPSIS
+    # クリップボードの内容を貼り付ける
+
+    $global:appcon.tools.editor.paste() 
+}
 function ttcmd_editor_move_toprevline( $source, $mod, $key ){
     #.SYNOPSIS
     # カーソルを前行へ移動する
