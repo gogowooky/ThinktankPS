@@ -3,6 +3,34 @@
 
 #region　Model Actions
 #########################################################################################################################
+function ttact_open_memo( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # メモを開く
+    
+    $global:appcon.tools.editor.load( $ttobj.MemoID )
+}
+function ttact_discard_resources( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # 関連リソースを開放する
+
+    $ttobjs.foreach{ $_.$ttobj.DiscardResources() }
+    
+}
+function ttact_select_file( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # 関連ファイルをエクスプローラーで選択する
+
+    $ttobjs.foreach{ Start-Process "explorer.exe" "/select,`"$($_.GetFilename())`"" }
+}
+function ttact_copy_object( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # TTObjectをコピーする
+
+    [TTClipboard]::Copy( [object[]]$ttobjs )
+
+}
+
+
 function ttact_noop( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # 何もしない
@@ -10,33 +38,9 @@ function ttact_noop( $ttobj, $ttobjs ){
     [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_noop" )
 
 }
-function ttact_select_file( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # 関連ファイルをエクスプローラーで選択する
 
-    [TTTool]::debug_message( $ttobj.GetType(), "ttact_select_file" )
 
-    if( ($ttobj -is [TTCollection]) -or
-        ($ttobj -is [TTMemo]) -or
-        ($ttobj -is [TTEditing]) -or 
-        ($ttobj -is [TTConfig]) -or 
-        ($ttobj -is [TTSearchMethod]) -or
-        ($ttobj -is [TTExternalLink])){ 
-            Start-Process "explorer.exe" "/select,`"$($ttobj.GetFilename())`"" 
-    }
-}
-function ttact_discard_resources( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # 関連リソースを開放する
 
-    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_discard_resources" )
-
-    switch( $true ){
-        { $ttobj -is [TTCollection] }{ $ttobj.DiscardResources() }
-        { $ttobj -is [TTMemo] }{ $ttobj.DiscardResources() }
-    }
-    
-}
 function ttact_display_in_shelf( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # Shelfパネルに表示する
@@ -59,13 +63,6 @@ function ttact_display_in_cabinet( $ttobj, $ttobjs ){
     $global:appcon.group.load( 'Cabinet', $ttobj.name ).focus('Cabinet')
 }
 
-function ttact_open_memo( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # メモを開く
-    
-    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_open_memo" )
-    $global:appcon.tools.editor.load( $ttobj.MemoID )
-}
 function ttact_copy_url_toclipboard( $ttobj, $ttobjs ){
     #.SYNOPSIS
     # urlをクリップボードに保存する

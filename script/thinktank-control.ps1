@@ -561,7 +561,28 @@ class TTGroupController {
     }
     #endregion
 
-    #region caption/ keyword(io)/ focus/ invoke_action/ select_actions_then_invoke
+    #region invoke_action/ select_actions_then_invoke
+    [bool] invoke_action( [string]$panel ){
+        $items = $global:AppMan.$panel.SelectedItems()
+        return $items[0].InvokeAction( 'Action', $items )
+    }
+
+    [bool] select_actions_then_invoke( [string]$panel ){
+        $items = $global:AppMan.$panel.SelectedItems()
+
+        $title = "{0}:{1}:アクション選択" -f $global:AppMan.$panel.Caption(), $panel
+        $actions = $items[0].GetActions()
+        $selected = $global:AppMan.PopupMenu.Caption( $title ).Items( $actions.Keys ).Show()
+
+        $selected.foreach{
+            $action = $actions[$_]
+            $items[0].InvokeAction( $action, $items )
+        }
+        return $true
+    }
+    #endregion
+
+    #region caption/ keyword(io)/ focus
     # Library/Index/Shelf/Desk/Cabinet
     [TTGroupController] caption( [string]$panel, [string]$text ){
         $global:AppMan.$panel.Caption( $text )
@@ -604,23 +625,6 @@ class TTGroupController {
         }
 
         return $this
-    }
-    [bool] invoke_action( [string]$panel ){
-        $items = $global:AppMan.$panel.SelectedItems()
-        return $items[0].InvokeAction( 'Action', $items )
-    }
-    [bool] select_actions_then_invoke( [string]$panel ){
-        $items = $global:AppMan.$panel.SelectedItems()
-
-        $title = "{0}:{1}:アクション選択" -f $global:AppMan.$panel.Caption(), $panel
-        $actions = $items[0].GetActions()
-        $selected = $global:AppMan.PopupMenu.Caption( $title ).Items( $actions.Keys ).Show()
-
-        $selected.foreach{
-            $action = $actions[$_]
-            $items[0].InvokeAction( $action, $items )
-        }
-        return $true
     }
     #endregion
 
@@ -954,18 +958,19 @@ class TTEditorController {
         $text = [TTClipboard]::GetText()
 
         switch( [TTClipboard]::DataType() ){
-            "Text,"                  { $this._paste_url_text( $editor, $text ) }
-            "FileDropList,Text,CSV," { $this._paste_outlookmails( $editor, $text ) }
-            "Text,CSV,"              { $this._paste_outlookmails( $editor, $text ) } 
-            "TTObject"               { $this._paste_ttobject( $editor, $text ) } 
-            "Text,TTObject"          { $this._paste_ttobject_text( $editor, $text ) } 
-            "FileDropList,Text,"     { $this._paste_outlookschedule( $editor, $text ) }
-            "Image,"                 { $this._paste_image( $editor, $text ) } 
-            "Image,Html,"            { $this._paste_image( $editor, $text ) } 
-            "Text,Rtf,Html,"         { $this._paste_word( $editor, $text ) } 
-            "FileDropList,"          { $this._paste_files_folders( $editor, $text ) }
-            "Text,Html,"             { $this._paste_favorites_and_text( $editor, $text ) }
-            "Text,Image,CSV,Rtf,Html,DataInterchangeFormat," { $this._paste_excelrange( $editor, $text ) } 
+            "Text,"                  { $this._paste_url_text( $_, $editor, $text ) }
+            "FileDropList,Text,CSV," { $this._paste_outlookmails( $_, $editor, $text ) }
+            "Text,CSV,"              { $this._paste_outlookmails( $_, $editor, $text ) } 
+            "TTObject,"              { $this._paste_ttobject( $_, $editor, $text ) } 
+            "Text,TTObject,"         { $this._paste_ttobject_text( $_, $editor, $text ) } 
+            "TTObjects,"             { $this._paste_ttobjects( $_, $editor, $text ) } 
+            "FileDropList,Text,"     { $this._paste_outlookschedule( $_, $editor, $text ) }
+            "Image,"                 { $this._paste_image( $_, $editor, $text ) } 
+            "Image,Html,"            { $this._paste_image( $_, $editor, $text ) } 
+            "Text,Rtf,Html,"         { $this._paste_word( $_, $editor, $text ) } 
+            "FileDropList,"          { $this._paste_files_folders( $_, $editor, $text ) }
+            "Text,Html,"             { $this._paste_favorites_and_text( $_, $editor, $text ) }
+            "Text,Image,CSV,Rtf,Html,DataInterchangeFormat," { $this._paste_excelrange( $_, $editor, $text ) } 
             default                  { 
                 Write-Host "non supported data"
                 return $false
@@ -974,7 +979,7 @@ class TTEditorController {
         return $true
 
     }
-    [void] _paste_url_text( $editor, $text ){
+    [void] _paste_url_text( $type, $editor, $text ){
         $doc = $editor.Document
         $cur = $editor.CaretOffset
 
@@ -1021,7 +1026,7 @@ class TTEditorController {
         }
         
     }
-    [void] _paste_outlookmails( $editor, $text ){
+    [void] _paste_outlookmails( $type, $editor, $text ){
         $doc = $editor.Document
         $cur = $editor.CaretOffset
         $titles = (ConvertFrom-Csv ([Clipboard]::GetText() -replace "`t", ",")).件名
@@ -1065,53 +1070,75 @@ class TTEditorController {
         }
 
     }
+    [void] _paste_ttobjects( $type, $editor, $text ){
+        $doc =  $editor.Document
+        $cur =  $editor.CaretOffset
+        $objs = [TTClipboard]::_ttobjs
 
-    [void] _paste_ttobject( $editor, $text ){
-        $doc    = [TTClipboard]::_target.Document
-        $offset = [TTClipboard]::_target.CaretOffset
-        $target = [TTClipboard]::_target 
-        $copied = [TTClipboard]::_copied
-
-        switch( $copied.GetType().Name ){
+        switch( $objs[0].GetType().Name ){
             'TTMemo' { 
                 $items = @{
-                    "@[memo:$($copied.MemoID)]"     = 'memoid'
-                    "[memo:$($copied.MemoID)] $($copied.Title)"  = 'title'
+                    "@[memo:$($objs[0].MemoID)]" =                   'memoid'
+                    "[memo:$($objs[0].MemoID)] $($objs[0].Title)"=    'title'
                 }
-                switch( $items[ [string](ShowPopupMenu $items.keys "" "" "Memo" $target) ] ){
-                    'memoid' { $doc.Insert( $offset, "[memo:$($copied.MemoID)]" ) }
-                    'title'  { $doc.Insert( $offset, "[memo:$($copied.MemoID)] $($copied.Title)" ) }
+                $selected = $global:AppMan.PopupMenu.Caption( 'TTMemoをペースト' ).Items( $items.Keys ).Show()
+                switch( $items[$selected] ){
+                    'memoid' { 
+                        $objs.foreach{ $doc.Insert( $cur, "[memo:$($_.MemoID)]`r`n" ) }
+                    } 
+                    'title' {
+                        $objs.foreach{ $doc.Insert( $cur, "[memo:$($_.MemoID)] $($_.Title)`r`n" ) }
+                    }
                 }    
             }
         }
+    }
+    [void] _paste_ttobject( $type, $editor, $text ){
+        # $doc    = [TTClipboard]::_target.Document
+        # $offset = [TTClipboard]::_target.CaretOffset
+        # $target = [TTClipboard]::_target 
+        # $copied = [TTClipboard]::_copied
+
+        # switch( $copied.GetType().Name ){
+        #     'TTMemo' { 
+        #         $items = @{
+        #             "@[memo:$($copied.MemoID)]"     = 'memoid'
+        #             "[memo:$($copied.MemoID)] $($copied.Title)"  = 'title'
+        #         }
+        #         switch( $items[ [string](ShowPopupMenu $items.keys "" "" "Memo" $target) ] ){
+        #             'memoid' { $doc.Insert( $offset, "[memo:$($copied.MemoID)]" ) }
+        #             'title'  { $doc.Insert( $offset, "[memo:$($copied.MemoID)] $($copied.Title)" ) }
+        #         }    
+        #     }
+        # }
     
     }
-    [void] _paste_ttobject_text( $editor, $text ){
-        $text   = [Clipboard]::GetText()
-        $doc    = [TTClipboard]::_target.Document
-        $offset = [TTClipboard]::_target.CaretOffset
-        $target = [TTClipboard]::_target 
-        $copied = [TTClipboard]::_copied
+    [void] _paste_ttobject_text( $type, $editor, $text ){
+        # $text   = [Clipboard]::GetText()
+        # $doc    = [TTClipboard]::_target.Document
+        # $offset = [TTClipboard]::_target.CaretOffset
+        # $target = [TTClipboard]::_target 
+        # $copied = [TTClipboard]::_copied
 
-        switch( $copied.GetType().Name ){
-            'TTMemo' { 
-                $items = @{
-                    "@[memo:$($copied.MemoID):$text]"     = 'memoid'
-                    "[memo:$($copied.MemoID):$text] $($copied.Title)"  = 'title'
-                }
-                switch( $items[ [string](ShowPopupMenu $items.keys "" "" "Memo" $target) ] ){
-                    'memoid' { $doc.Insert( $offset, "[memo:$($copied.MemoID):$text]" ) }
-                    'title'  { $doc.Insert( $offset, "[memo:$($copied.MemoID):$text] $($copied.Title)" ) }
-                }    
-            }
-        }
+        # switch( $copied.GetType().Name ){
+        #     'TTMemo' { 
+        #         $items = @{
+        #             "@[memo:$($copied.MemoID):$text]"     = 'memoid'
+        #             "[memo:$($copied.MemoID):$text] $($copied.Title)"  = 'title'
+        #         }
+        #         switch( $items[ [string](ShowPopupMenu $items.keys "" "" "Memo" $target) ] ){
+        #             'memoid' { $doc.Insert( $offset, "[memo:$($copied.MemoID):$text]" ) }
+        #             'title'  { $doc.Insert( $offset, "[memo:$($copied.MemoID):$text] $($copied.Title)" ) }
+        #         }    
+        #     }
+        # }
 
     }
-    [void] _paste_outlookschedule( $editor, $text ){ # 未実装
+    [void] _paste_outlookschedule( $type, $editor, $text ){ # 未実装
         $text = [Clipboard]::GetText()                   # 件名（場所）
         $filedroplist = [Clipboard]::GetFileDropList()   # error
     }
-    [void] _paste_image( $editor, $text ){ # 未実装
+    [void] _paste_image( $type, $editor, $text ){ # 未実装
     
         # $image = [Clipboard]::GetImage()  # image:System.Windows.Interop.InteropBitmap
     
@@ -1125,22 +1152,22 @@ class TTEditorController {
     
         [TTClipboard]::_target.Document.Insert( [TTClipboard]::_target.CaretOffset, "$filename`r`n" )
     }
-    [void] _paste_word( $editor, $text ){
+    [void] _paste_word( $type, $editor, $text ){
         $this._paste_url_text( $editor, $text )
         # $text = [Clipboard]::GetText()                              # word text
         # $rtf = [Clipboard]::GetDataObject("Rich Text Format")       # no datd
         # $html = [Clipboard]::GetDataObject("Html")                  # no data
     }
-    [void] _paste_files_folders( $editor, $text ){ # 未実装
+    [void] _paste_files_folders( $type, $editor, $text ){ # 未実装
         # $filedroplist = [Clipboard]::GetFileDropList()
         # Write-Host "filedroplist:$filedroplist" # [stringcollection]fullpath
     }
-    [void] _paste_favorites_and_text( $editor, $text ){
+    [void] _paste_favorites_and_text( $type, $editor, $text ){
         $this._paste_url_text( $editor, $text )
         # $text = [Clipboard]::GetText()                # ブラウザ text, thinktank text, ブラウザリンク
         # $html = [Clipboard]::GetDataObject("Html")    # no data
     }
-    [void] _paste_excelrange( $editor, $text ){ # 未実装
+    [void] _paste_excelrange( $type, $editor, $text ){ # 未実装
         # $text = [Clipboard]::GetText()
         # $image = [Clipboard]::GetImage()            # string
         # $csv = [Clipboard]::GetDataObject("CSV")    # image:System.Windows.Interop.InteropBitmap

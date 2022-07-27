@@ -47,7 +47,7 @@ class TTObject {
         $func = Invoke-Expression "[$($this.gettype())]::$name"
         $title = ((Get-Help $func).synopsis)
         $ret = (&$func $this $items)
-        [TTTool]::debug_message( $this, "InvokeAction: @{ $title, $func }" )
+        [TTTool]::debug_message( $this.GetType().Name, "InvokeAction: @{ $title, $func }" )
 
         return $ret
     }

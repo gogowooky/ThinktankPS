@@ -31,6 +31,7 @@
 - 
 
 ## 方針
+- Editorでは編集Ctrl-、モード変更等Alt-、の傾向を持たせる
 - 日付入力（） ⇒まだ途中
 - クリップボード入力　　⇒まだ途中
 - Actionタグ　　⇒まだ途中
@@ -42,6 +43,7 @@
   [memo:xxxx-xx-xx-xxxxxx:keyword]      [go:keyword]        [search:keyword]
 
 ## 不具合
+- TTClipboardにTTObjectをCopyする方法では、複数TTObjectのCopyに対応できない。
 - マウスでMemo選択loadするとEditor2/3が一緒になってしまう。
 - メモ中にThinktank:URI: があるとデータ回収できず落ちる
 - Panel非表示時にtentative表示すると、脱mode後に再非表示されない

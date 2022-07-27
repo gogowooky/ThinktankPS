@@ -95,36 +95,40 @@ class TTTool{
 #region　static TTClipboard
 #########################################################################################################################
 class TTClipboard {
-    static [string] $_type
-    static [object] $_target
-    static [object] $_copied
+    static [object]   $_ttobj
+    static [object[]] $_ttobjs
 
-    static [void]Copy( [string]$text ){                     #### text
+    static [void]Copy( [string]$text ){                       #### text
         [Clipboard]::SetText( $text )    
+    }
+    static [void]Copy( [object[]]$object ){                 #### TTObject[]
+        [Clipboard]::SetData( "TTObjects", $object )
+        [TTClipboard]::_ttobjs = $object
     }
     static [void]Copy( [object]$object ){                   #### TTObject
         [Clipboard]::SetData( "TTObject", $object )
-        [TTClipboard]::_copied = $object
+        [TTClipboard]::_ttobj = $object
     }
     static [void]Copy( [object]$object, [string]$text ){    #### TTObject, text
         $data = [DataObject]::New( "TTObject", $object )
         $data.SetText( $text )
         [Clipboard]::SetDataObject( $data )
-        [TTClipboard]::_copied = $object
+        [TTClipboard]::_ttobj = $object
     }
     static [string]DataType(){
         $type = ''
 
         switch( $true ){
-            { [Clipboard]::ContainsFileDropList() }             { $type += "FileDropList," }
-            { [Clipboard]::ContainsAudio() }                    { $type += "Audio," }
-            { [Clipboard]::ContainsText() }                     { $type += "Text," }
-            { [Clipboard]::ContainsImage() }                    { $type += "Image," }
-            { [Clipboard]::ContainsData("CSV") }                { $type += "CSV," }
-            { [Clipboard]::ContainsData("Rich Text Format") }   { $type += "Rtf," }
-            { [Clipboard]::ContainsData("HTML Format") }        { $type += "Html," }
+            { [Clipboard]::ContainsFileDropList() }                 { $type += "FileDropList," }
+            { [Clipboard]::ContainsAudio() }                        { $type += "Audio," }
+            { [Clipboard]::ContainsText() }                         { $type += "Text," }
+            { [Clipboard]::ContainsImage() }                        { $type += "Image," }
+            { [Clipboard]::ContainsData("CSV") }                    { $type += "CSV," }
+            { [Clipboard]::ContainsData("Rich Text Format") }       { $type += "Rtf," }
+            { [Clipboard]::ContainsData("HTML Format") }            { $type += "Html," }
             { [Clipboard]::ContainsData("DataInterchangeFormat") }  { $type += "DataInterchangeFormat," }
-            { [Clipboard]::ContainsData("TTObject") }           { $type += "TTObject" }
+            { [Clipboard]::ContainsData("TTObject") }               { $type += "TTObject," }
+            { [Clipboard]::ContainsData("TTObjects") }              { $type += "TTObjects," }
             default{ $type += "no-category," }
         }
 

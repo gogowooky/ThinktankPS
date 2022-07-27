@@ -342,19 +342,19 @@ Library     None        Down        ttcmd_panel_move_down
 Library     Shift       Up          ttcmd_panel_move_first
 Library     Shift       Down        ttcmd_panel_move_last
 Library     None        F1          ttcmd_panel_sort_dsc_1stcolumn
-Library     Shift       F1          ttcmd_panel_sort_asc_1stcolumn
 Library     None        F2          ttcmd_panel_sort_dsc_2ndcolumn
-Library     Shift       F2          ttcmd_panel_sort_asc_2ndcolumn
 Library     None        F3          ttcmd_panel_sort_dsc_3rdcolumn
-Library     Shift       F3          ttcmd_panel_sort_asc_3rdcolumn
 Library     None        F4          ttcmd_panel_sort_dsc_4thcolumn
-Library     Shift       F4          ttcmd_panel_sort_asc_4thcolumn
 Library     None        F5          ttcmd_panel_sort_dsc_5thcolumn
-Library     Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Library     None        F6          ttcmd_panel_sort_dsc_6thcolumn
+Library     Shift       F1          ttcmd_panel_sort_asc_1stcolumn
+Library     Shift       F2          ttcmd_panel_sort_asc_2ndcolumn
+Library     Shift       F3          ttcmd_panel_sort_asc_3rdcolumn
+Library     Shift       F4          ttcmd_panel_sort_asc_4thcolumn
+Library     Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Library     Shift       F6          ttcmd_panel_sort_asc_6thcolumn
-Library     Shift       Return      ttcmd_panel_action_select
 Library     None        Return      ttcmd_panel_action_invoke
+Library     Shift       Return      ttcmd_panel_action_select
 '@
 $global:KeyBind_Index = @'
 Index+      Alt         I           ttcmd_panel_focus_index
@@ -377,19 +377,19 @@ Index       None        Down        ttcmd_panel_move_down
 Index       Shift       Up          ttcmd_panel_move_first
 Index       Shift       Down        ttcmd_panel_move_last
 Index       None        F1          ttcmd_panel_sort_dsc_1stcolumn
-Index       Shift       F1          ttcmd_panel_sort_asc_1stcolumn
 Index       None        F2          ttcmd_panel_sort_dsc_2ndcolumn
-Index       Shift       F2          ttcmd_panel_sort_asc_2ndcolumn
 Index       None        F3          ttcmd_panel_sort_dsc_3rdcolumn
-Index       Shift       F3          ttcmd_panel_sort_asc_3rdcolumn
 Index       None        F4          ttcmd_panel_sort_dsc_4thcolumn
-Index       Shift       F4          ttcmd_panel_sort_asc_4thcolumn
 Index       None        F5          ttcmd_panel_sort_dsc_5thcolumn
-Index       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Index       None        F6          ttcmd_panel_sort_dsc_6thcolumn
+Index       Shift       F1          ttcmd_panel_sort_asc_1stcolumn
+Index       Shift       F2          ttcmd_panel_sort_asc_2ndcolumn
+Index       Shift       F3          ttcmd_panel_sort_asc_3rdcolumn
+Index       Shift       F4          ttcmd_panel_sort_asc_4thcolumn
+Index       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Index       Shift       F6          ttcmd_panel_sort_asc_6thcolumn
-Index       Shift       Return      ttcmd_panel_action_select
 Index       None        Return      ttcmd_panel_action_invoke
+Index       Shift       Return      ttcmd_panel_action_select
 '@
 $global:KeyBind_Shelf = @'
 Shelf+      Alt         S           ttcmd_panel_focus_shelf
@@ -412,19 +412,19 @@ Shelf       None        Down        ttcmd_panel_move_down
 Shelf       Shift       Up          ttcmd_panel_move_first
 Shelf       Shift       Down        ttcmd_panel_move_last
 Shelf       None        F1          ttcmd_panel_sort_dsc_1stcolumn
-Shelf       Shift       F1          ttcmd_panel_sort_asc_1stcolumn
 Shelf       None        F2          ttcmd_panel_sort_dsc_2ndcolumn
-Shelf       Shift       F2          ttcmd_panel_sort_asc_2ndcolumn
 Shelf       None        F3          ttcmd_panel_sort_dsc_3rdcolumn
-Shelf       Shift       F3          ttcmd_panel_sort_asc_3rdcolumn
 Shelf       None        F4          ttcmd_panel_sort_dsc_4thcolumn
-Shelf       Shift       F4          ttcmd_panel_sort_asc_4thcolumn
 Shelf       None        F5          ttcmd_panel_sort_dsc_5thcolumn
-Shelf       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Shelf       None        F6          ttcmd_panel_sort_dsc_6thcolumn
+Shelf       Shift       F1          ttcmd_panel_sort_asc_1stcolumn
+Shelf       Shift       F2          ttcmd_panel_sort_asc_2ndcolumn
+Shelf       Shift       F3          ttcmd_panel_sort_asc_3rdcolumn
+Shelf       Shift       F4          ttcmd_panel_sort_asc_4thcolumn
+Shelf       Shift       F5          ttcmd_panel_sort_asc_5thcolumn
 Shelf       Shift       F6          ttcmd_panel_sort_asc_6thcolumn
-Shelf       Shift       Return      ttcmd_panel_action_select
 Shelf       None        Return      ttcmd_panel_action_invoke
+Shelf       Shift       Return      ttcmd_panel_action_select
 '@
 
 #region _panel_move_
