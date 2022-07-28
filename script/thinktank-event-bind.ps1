@@ -1,4 +1,93 @@
-﻿
+﻿#region Key Command Binding
+#########################################################################################################################
+[ScriptBlock] $global:TTPreviewKeyDown = { # Bind to AppMan, PopupMenu, Cabinet
+
+    $source =   [string]($args[0].Name) # ⇒ Application, Cabinet, PopupMenu
+    $mod =      [string]($args[1].KeyboardDevice.Modifiers)
+    $key =      if( $mod -in @('Alt','Alt, Shift') ){ [string]($args[1].SystemKey) }else{ [string]($args[1].Key) }
+    $tttv  =    [TTTentativeKeyBindingMode]::Name
+    $panel =    $global:appcon._get('Focus.Application')
+
+    if( $key.Contains('Alt') -or $key.Contains('Control') ){ return }
+
+    if( $source -eq 'Application' ){        #### Application
+        if( $tttv -ne '' ){                 #### tentative Index/Library/Shelf
+            $panel = $tttv
+            $command = try{ $global:TTKeyEvents["$panel+"][$mod][$key] }catch{ $null }
+
+        }else{                              #### non tentative
+
+            $command = try{ $global:TTKeyEvents['Application'][$mod][$key] }catch{ $null }
+
+            if( 0 -ne $command.length ){    #### Application
+                $panel = $source
+
+            }else{
+                if( $panel -match "(?<panel>Editor|Browser|Grid)[123]" ){
+                    $command = try{ $global:TTKeyEvents[$Matches.panel][$mod][$key] }catch{ $null }
+
+                }elseif( $panel -eq 'Desk' ){
+                    $command = try{ $global:TTKeyEvents['Desk'][$mod][$key] }catch{ $null }
+
+                }else{                      #### normal Index/Library/Shelf
+                    $command = @( "$panel+", $panel ).foreach{
+                        try{ $global:TTKeyEvents[$_][$mod][$key] }catch{ $null }
+                    }.where{ $null -ne $_ }[0]
+                }
+            }
+        }
+        
+    }else{                                  #### PopupMenu / Cabinet 
+        $panel = $source
+        $command = try{ $global:TTKeyEvents[$panel][$mod][$key] }catch{ $null }    
+
+    }
+
+    if( 0 -ne $command.length ){
+        if( $global:TTKeyEventMessage ){
+            Write-Host "PreviewKeyDown source:$source, tentative:$tttv, panel:$panel, mod:$mod, key:$key, command:$command"
+        }
+        switch ( Invoke-Expression "$command '$panel' '$mod' '$key'" ){
+            'cancel' { $args[1].Handled = $false }
+            default { $args[1].Handled = $true }
+        }
+    }else{
+        $args[1].Handled = $false
+    }
+ 
+}
+[ScriptBlock] $global:TTPreviewKeyUp = { # Bind to AppMan, PopupMenu, Cabinet
+    if( [TTTentativeKeyBindingMode]::Check( $args[1].Key ) ){
+        ttcmd_menu_cancel 'PopupMenu' '' ''
+        ttcmd_menu_cancel 'Cabinet' '' ''
+        $args[1].Handled = $True
+    }
+}
+$global:TTKeyEventMessage = $true
+$global:TTKeyEvents = @{}
+$global:TTEventKeys = @{}
+
+function KeyBindingSetup(){
+
+    $keybinds = ( @(  
+        $global:KeyBind_Application,    $global:KeyBind_Cabinet,    $global:KeyBind_Library, 
+        $global:KeyBind_Index,          $global:KeyBind_Shelf,      $global:KeyBind_Misc, 
+        $global:KeyBind_Desk,           $global:KeyBind_Editor,     $global:KeyBind_PopupMenu  ) -join "`n" )
+
+    $keybinds.split("`n").foreach{
+        $kb_fmt = "(?<mode>[^ ]+)\s{2,}(?<mod>[^ ]+( [^ ]+)?)\s{2,}(?<key>[^ ]+)\s{2,}(?<command>[^\s]+)\s*"
+        if( $_ -match $kb_fmt ){
+            $global:TTKeyEvents[$Matches.mode] += @{}
+            $global:TTKeyEvents[$Matches.mode][$Matches.mod] += @{}
+            $global:TTKeyEvents[$Matches.mode][$Matches.mod][$Matches.key] = $Matches.command
+            $global:TTEventKeys[$Matches.command] += @()
+            $global:TTEventKeys[$Matches.command] += @( @{ Mode = $Matches.mode; Key = "[$($Matches.mod)]$($Matches.key)" } )
+        }
+    }
+}
+#endregion###############################################################################################################
+
+
 
 
 
@@ -95,7 +184,106 @@
 [TTEditing]::ActionDiscardResources =  'ttact_discard_resources'
 [TTEditing]::ActionDataLocation =      'ttact_select_file'
 
+
+#region　Model Actions
+#########################################################################################################################
+function ttact_open_memo( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # メモを開く
+    
+    $global:appcon.tools.editor.load( $ttobj.MemoID )
+}
+function ttact_discard_resources( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # 関連リソースを開放する
+
+    $ttobjs.foreach{ $_.$ttobj.DiscardResources() }
+    
+}
+function ttact_select_file( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # 関連ファイルをエクスプローラーで選択する
+
+    $ttobjs.foreach{ Start-Process "explorer.exe" "/select,`"$($_.GetFilename())`"" }
+}
+function ttact_copy_object( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # TTObjectをコピーする
+
+    [TTClipboard]::Copy( [object[]]$ttobjs )
+
+}
+
+
+function ttact_noop( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # 何もしない
+
+    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_noop" )
+
+}
+
+
+
+function ttact_display_in_shelf( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # Shelfパネルに表示する
+
+    [TTTool]::debug_message( $ttobj.gettype(), "ttact_display_in_shelf" )
+    $global:appcon.group.load( 'Shelf', $ttobj.name )
+}
+function ttact_display_in_index( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # Indexパネルに表示する
+
+    [TTTool]::debug_message( $ttobj.gettype(), "ttact_display_in_index" )
+    $global:appcon.group.load( 'Index', $ttobj.name )
+}
+function ttact_display_in_cabinet( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # Cabinetパネルに表示する
+
+    [TTTool]::debug_message( $ttobj.gettype(), "ttact_display_in_cabinet" )
+    $global:appcon.group.load( 'Cabinet', $ttobj.name ).focus('Cabinet')
+}
+
+function ttact_copy_url_toclipboard( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # urlをクリップボードに保存する
+
+    [TTTool]::debug_message( $ttobj.gettype().Index, "ttact_copy_url_toclipboard" )
+    switch( $ttobj.GetType() ){
+        'TTExternalLink' { [TTClipboard]::Copy( $ttobj.Uri ) }
+        'TTSearchMethod' { [TTClipboard]::Copy( $ttobj.Url ) }
+    }
+}
+function ttact_open_url_ex( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # urlを外部ツールで開く
+
+    [TTTool]::debug_message( $ttobj.gettype().Index, "ttact_open_url_ex" )
+    switch( $ttobj.GetType() ){
+        'TTExternalLink' { [TTTool]::open_url( $ttobj.Uri ) }
+        'TTSearchMethod' { [TTTool]::open_url( $ttobj.Url ) }
+    }
+}
+function ttact_open_url( $ttobj, $ttobjs ){
+    #.SYNOPSIS
+    # urlを開く（未実装）
+
+    [TTTool]::debug_message( $ttobj.gettype().Index, "ttact_open_url" )
+    switch( $ttobj.GetType() ){
+        'TTExternalLink' { [TTTool]::open_url( $ttobj.Uri ) }
+        'TTSearchMethod' { [TTTool]::open_url( $ttobj.Url ) }
+    }
+
+}
+
+#endregion###############################################################################################################
+
 #endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+
 
 #region　Model Events Binding
 [ScriptBlock] $global:TTStatus_OnSave = {  $global:appcon.event_save_status( $args ) } 

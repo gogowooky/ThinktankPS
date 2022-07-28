@@ -33,11 +33,8 @@ Add-Type -AssemblyName PresentationFramework, System.Windows.Forms, System.Drawi
 . .\script\thinktank-model.ps1          #　データ管理クラス
 . .\script\thinktank-control.ps1        #　データ-UI連携
 
-. .\script\thinktank-view-bind.ps1      #　.NET Framwork eventとcontrol, Key Eventとcommandをbinding
-
-
-. .\script\thinktank-routing.ps1        #  event-event, event-function ルーティング
-. .\script\thinktank-command.ps1        #　コマンド
+. .\script\thinktank-key-bind.ps1       #　.NET Framwork eventとcontrol, Key Eventとcommandをbinding
+. .\script\thinktank-event-bind.ps1     #  event-event, event-function ルーティング
 
 #endregion###############################################################################################################
 
