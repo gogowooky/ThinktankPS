@@ -957,13 +957,19 @@ class TTEditorsManager : TTToolsManager{
                 $to = if ( $curpos -eq $doc.GetLineByOffset( $curpos ).EndOffset ){ 'documentend' }else{ 'lineend' }
                 return $this.MoveTo( $num, $to )
             }
+            'prevline+' {
+                $editor.LineUp()
+                [EditingCommands]::MoveUpByLine.Execute( $null, $area )
+            }
             'prevline' {
                 [EditingCommands]::MoveUpByLine.Execute( $null, $area )
-                if( [TTEditorsManager]::StayCursor ){ $this.ScrollTo( 'prevline' ) }
+            }
+            'nextline+' {
+                $editor.LineDown()
+                [EditingCommands]::MoveDownByLine.Execute( $null, $area )
             }
             'nextline' {
                 [EditingCommands]::MoveDownByLine.Execute( $null, $area )
-                if( [TTEditorsManager]::StayCursor ){ $this.ScrollTo( 'nextline' ) }
             }
             'prevnode-' {
                 $curlin = $curlin.PreviousLine

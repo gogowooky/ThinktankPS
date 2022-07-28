@@ -122,14 +122,6 @@ function ttcmd_application_textsearch( $source, $mod, $key ){
 
 }
 
-
-
-#endregion###############################################################################################################
-
-
-
-#region　Index
-#########################################################################################################################
 function ttcmd_index_copy_item( $source, $mod, $key ){
     #.SYNOPSIS
     # 選択アイテムをコピーする(index）
@@ -149,8 +141,6 @@ function ttcmd_index_delete_selected( $source, $mod, $key ){
     if( $script:shelf._library_name -eq $script:index._library_name ){ $script:shelf.reload() }
 
 }
-
-
 function ttcmd_shelf_copy_item( $source, $mod, $key ){
     #.SYNOPSIS
     # 選択アイテムをコピーする(shelf）
@@ -314,18 +304,6 @@ function ttcmd_editor_scroll_tonewline( $source, $mod, $key ){
     # 改行する
 
     $script:desk.tool('Editor').scroll_to( 'newline' )
-}
-function ttcmd_editor_scroll_toprevline( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 画面を上げる
-
-    $script:desk.tool('Editor').scroll_to( 'prevline' )
-}
-function ttcmd_editor_scroll_tonextline( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 画面を下げる
-
-    $script:desk.tool('Editor').scroll_to( 'nextline' )
 }
 function ttcmd_editor_select_all( $source, $mod, $key ){
     #.SYNOPSIS

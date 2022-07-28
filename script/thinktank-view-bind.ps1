@@ -688,13 +688,15 @@ Editor      Control         Back            ttcmd_editor_history_previous_tocurr
 Editor      Control, Shift  Back            ttcmd_editor_history_next_tocurrenteditor
 Editor      Alt             T               ttcmd_editor_edit_insert_date
 Editor      Alt             V               ttcmd_editor_edit_insert_clipboard
+Editor      Control, Shift  P               ttcmd_editor_scroll_toprevline
+Editor      Control, Shift  N               ttcmd_editor_scroll_tonextline
+Editor      None            PageUp          ttcmd_editor_scroll_toprevline
+Editor      None            Next            ttcmd_editor_scroll_tonextline
+Editor      None            BrowserBack     ttcmd_editor_scroll_toprevline
+Editor      None            BrowserForward  ttcmd_editor_scroll_tonextline
 
 xEditor      Alt             C               ttcmd_editor_copy_tag_atcursor
 
-xEditor      None            PageUp          ttcmd_editor_scroll_toprevline
-xEditor      None            Next            ttcmd_editor_scroll_tonextline
-xEditor      None            BrowserBack     ttcmd_editor_scroll_toprevline
-xEditor      None            BrowserForward  ttcmd_editor_scroll_tonextline
 
 xEditor      None            Return          ttcmd_editor_scroll_tonewline
 xEditor      Alt             D1              ttcmd_desk_works_focus_work1
@@ -724,6 +726,19 @@ xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
 '@
 
 #region _editor_move/delete/edit_
+function ttcmd_editor_scroll_toprevline( $source, $mod, $key ){
+    #.SYNOPSIS
+    # カーソルを前行へ移動して、画面表示を前方へ移動する
+
+    $global:appcon.tools.editor.move_to( 'prevline+' )
+}
+function ttcmd_editor_scroll_tonextline( $source, $mod, $key ){
+    #.SYNOPSIS
+    # カーソルを次行へ移動して、画面表示を後方へ移動する
+
+    $global:appcon.tools.editor.move_to( 'nextline+' )
+}
+
 function ttcmd_editor_edit_insert_clipboard( $source, $mod, $key ){
     #.SYNOPSIS
     # クリップボードの内容を貼り付ける
