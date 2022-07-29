@@ -13,11 +13,6 @@ using namespace System.Xml
 class TTAppManager {
     #region variables/ new
     [System.Windows.Window]$_window
-    [Grid] $_grid_window_lr
-    [Grid] $_grid_lpanel_ul
-    [Grid] $_grid_rpanel_ul
-    [Grid] $_grid_desk_lr
-    [Grid] $_grid_desk_ul
 
     [TTCabinetManager] $Cabinet
     [TTPopupMenuManager] $PopupMenu
@@ -27,6 +22,11 @@ class TTAppManager {
     [TTDeskManager] $Desk
     [TTDocumentManager] $Document
 
+    [Grid] $_grid_window_lr
+    [Grid] $_grid_lpanel_ul
+    [Grid] $_grid_rpanel_ul
+    [Grid] $_grid_desk_lr
+    [Grid] $_grid_desk_ul
 
     TTAppManager(){
 

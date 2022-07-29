@@ -595,6 +595,7 @@ Editor      Control         A               ttcmd_editor_move_tolinestart
 Editor      Control         E               ttcmd_editor_move_tolineend
 Editor      Control         K               ttcmd_editor_delete_tolineend
 Editor      Control         S               ttcmd_editor_save
+Editor      Alt             Space           ttcmd_editor_tag_invoke
 Editor      Control         Space           ttcmd_editor_tag_invoke
 Editor      Control         Back            ttcmd_editor_history_previous_tocurrenteditor
 Editor      Control, Shift  Back            ttcmd_editor_history_next_tocurrenteditor
@@ -610,8 +611,8 @@ Editor      None            Return          ttcmd_editor_move_tonewline
 Editor      Shift           Return          ttcmd_editor_scroll_tonewline
 Editor      Control         H               ttcmd_editor_edit_backspace
 Editor      Control         D               ttcmd_editor_edit_delete
+Editor      Control         G               ttcmd_editor_new_tocurrenteditor
 
-xEditor      Control         G               ttcmd_editor_new_tocurrenteditor
 
 xEditor      Alt             C               ttcmd_editor_copy_tag_atcursor
 
@@ -635,10 +636,7 @@ function ttcmd_editor_new_tocurrenteditor( $source, $mod, $key ){
     #.SYNOPSIS
     # 新規メモを作成し、カレントエディタに読み込む
 
-    # $index = $script:desk.create_memo()
-    # $tool = $script:app._get( "Desk.CurrentEditor" )
-    # $script:shelf.refresh()
-    # $script:desk.tool( $tool ).load( $index )
+    $global:appcon.tools.editor.create()
 }
 function ttcmd_editor_edit_delete( $source, $mod, $key ){
     #.SYNOPSIS

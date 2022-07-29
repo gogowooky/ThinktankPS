@@ -914,7 +914,7 @@ class TTEditorController {
 
     #endregion
 
-    #region load/ focus/ save
+    #region load/ focus/ save/ create
     [TTEditorController] load( [int]$no, [string]$index ){
         if( $index -in @( 'forward', 'backward' ) ){
             $index = $global:AppMan.Document.Editor.History( $no, $index )
@@ -939,6 +939,22 @@ class TTEditorController {
         $global:AppMan.Document.Editor.Save( $no )
         return $this
 
+    }
+    [TTEditorController] create( [int]$no ){
+        $index = $global:TTResources.GetChild('Memos').CreateChild()
+
+        @('Index','Shelf','Cabinet').where{ 
+            $this.tools.app._get("$_.Resource") -eq 'Memos'
+        }.foreach{
+            $this.tools.app.group.reload($_)
+        } 
+
+        return $this.load( $index ) 
+
+    }
+    [TTEditorController] create(){
+        $no = $global:AppMan.Document.CurrentNumber
+        return $this.create( $no )
     }
 
     #endregion
