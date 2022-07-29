@@ -1,7 +1,7 @@
 ﻿
 
 
-
+using namespace System.Windows.Input
 using namespace System.Windows.Documents
 using namespace System.Windows.Controls
 using namespace System.Windows
@@ -1497,6 +1497,7 @@ class TTPopupMenuManager {
         $this._window.Add_MouseDoubleClick({ $global:AppMan.PopupMenu.Hide($true); $args[1].Handled=$True })
         $this._window.Add_PreviewKeyDown( $global:TTPopup_PreviewKeyDown )
         $this._window.Add_PreviewKeyUp( $global:TTPopup_PreviewKeyUp )
+        $this._window.Add_LostKeyboardFocus({ $global:AppMan.PopupMenu.Hide($false); $args[1].Handled=$True })
         
         $style = [Style]::new()
         $style.Setters.Add( [Setter]::new( [Controls.GridViewColumnHeader]::VisibilityProperty, [Visibility]::Collapsed ) )
@@ -1558,7 +1559,19 @@ class TTPopupMenuManager {
         $this._window.Width = $width * 10 + 15
         $this._window.Height = ($this._list.Items.Count + 1) * 22.5 + 15  
         
-        $this._list.SelectedIndex = 0
+        $this._list.SelectedIndex = -1
+
+        $mod = ''
+        if ( [Keyboard]::IsKeyDown( [Key]::LeftCtrl ) -or [Keyboard]::IsKeyDown( [Key]::RightCtrl )){ 
+            $mod = 'Control' 
+        }elseif ( [Keyboard]::IsKeyDown( [Key]::LeftAlt) -or [Keyboard]::IsKeyDown( [Key]::RightAlt )){
+            $mod = 'Alt'
+        }
+        if( $mod -ne '' ){
+            [TTTentativeKeyBindingMode]::Start( 'PopupMenu', $mod, '' )
+            [TTTentativeKeyBindingMode]::Add_OnExit({ ttcmd_menu_ok 'PopupMenu' '' '' }.GetNewClosure())
+        }
+
         $this._window.ShowDialog()
         return $this._selected
     }

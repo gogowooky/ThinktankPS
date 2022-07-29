@@ -48,8 +48,8 @@
             Write-Host "PreviewKeyDown source:$source, tentative:$tttv, panel:$panel, mod:$mod, key:$key, command:$command"
         }
         switch ( Invoke-Expression "$command '$panel' '$mod' '$key'" ){
-            'cancel' { $args[1].Handled = $false }
-            default { $args[1].Handled = $true }
+            'cancel' {  $args[1].Handled = $false }
+            default {   $args[1].Handled = $true }
         }
     }else{
         $args[1].Handled = $false
@@ -58,8 +58,6 @@
 }
 [ScriptBlock] $global:TTPreviewKeyUp = { # Bind to AppMan, PopupMenu, Cabinet
     if( [TTTentativeKeyBindingMode]::Check( $args[1].Key ) ){
-        ttcmd_menu_cancel 'PopupMenu' '' ''
-        ttcmd_menu_cancel 'Cabinet' '' ''
         $args[1].Handled = $True
     }
 }
