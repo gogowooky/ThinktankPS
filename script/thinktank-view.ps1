@@ -1308,30 +1308,30 @@ class TTEditorsManager : TTToolsManager{
         $this.Controls.WordWrap = $value
         return $this
     }
-    [TTToolsManager] ScrollTo( [int]$num, [string]$to ){            # should be override
-        $editor = $this.Controls[$num]
-        switch( $to ){
-            'nextline' { $editor.LineUp() }
-            'prevline' { $editor.LineDown() }
-        }
-        return $this
-    }
+    # [TTToolsManager] ScrollTo( [int]$num, [string]$to ){            # should be override
+    #     $editor = $this.Controls[$num]
+    #     switch( $to ){
+    #         'nextline' { $editor.LineUp() }
+    #         'prevline' { $editor.LineDown() }
+    #     }
+    #     return $this
+    # }
     [TTDocumentManager] Insert( [int]$num, [string]$text ){
         $editor = $this.Controls[$num]
         $editor.Document.Insert( $editor.CaretOffset, $text )
 
         return $this
     }
-    [TTDocumentManager] Edit( [int]$num, [string]$subject ){
-        $editor = $this.Controls[$num]
+    # [TTDocumentManager] Edit( [int]$num, [string]$subject ){
+    #     $editor = $this.Controls[$num]
         
-        switch( $subject ){
-            'delete'    { [EditingCommands]::Delete.Execute( $null, $editor.TextArea ) }
-            'backspace' { [EditingCommands]::Backspace.Execute( $null, $editor.TextArea ) }
-        }
+    #     switch( $subject ){
+    #         'delete'    { [EditingCommands]::Delete.Execute( $null, $editor.TextArea ) }
+    #         'backspace' { [EditingCommands]::Backspace.Execute( $null, $editor.TextArea ) }
+    #     }
 
-        return $this
-    }
+    #     return $this
+    # }
     [TTDocumentManager] Cursor( [int]$num, [string]$action ){
         $editor = $this.Controls[$num]
 

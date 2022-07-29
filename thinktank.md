@@ -7,6 +7,13 @@
 　https://scrapbox.io/kadoyau/エラー：このオブジェクトは別のスレッドに所有されているため、呼び出しスレッドはこのオブジェクトにアクセスできません
 
 ## action 
+
+C:\Users\shin\Pictures\thinktank\2022-07-29\2022-07-29-100947.png
+C:\Users\shin\Pictures\thinktank\2022-07-29\2022-07-29-101017.png
+D:\tools\PowerShell-7.1.3-win-x64.msi
+D:\tools\VSCodeSetup-x64-1.56.2.exe
+
+
 [_]
 [memo:2022-03-20-092038]
 [memo:2022-03-20-092038:12]
@@ -66,7 +73,7 @@ Thinktank:URI:AvalonEdit, http://avalonedit.net/documentation/, :Program:WPF:Tex
 
 
 ## check
-[_]
+
 ## url
 http://google.com, http://yahoo.com
 Amazon | HG 機動戦士ガンダム 水星の魔女 ダリルバルデ 1/144スケール 色分け済みプラモデル | プラモデル 通販
@@ -80,6 +87,8 @@ c:\windows,c:\windows\addins
 
 Mail Delivery Subsystem:[mail:2022-07-18-221620]
 エポスカード:[mail:2022-07-19-080050]
+
+
 
 
 

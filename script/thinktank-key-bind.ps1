@@ -595,7 +595,7 @@ Editor      Control         A               ttcmd_editor_move_tolinestart
 Editor      Control         E               ttcmd_editor_move_tolineend
 Editor      Control         K               ttcmd_editor_delete_tolineend
 Editor      Control         S               ttcmd_editor_save
-Editor      Alt             Space           ttcmd_editor_tag_invoke
+Editor      Control         Space           ttcmd_editor_tag_invoke
 Editor      Control         Back            ttcmd_editor_history_previous_tocurrenteditor
 Editor      Control, Shift  Back            ttcmd_editor_history_next_tocurrenteditor
 Editor      Alt             T               ttcmd_editor_edit_insert_date
@@ -606,26 +606,19 @@ Editor      None            PageUp          ttcmd_editor_scroll_toprevline
 Editor      None            Next            ttcmd_editor_scroll_tonextline
 Editor      None            BrowserBack     ttcmd_editor_scroll_toprevline
 Editor      None            BrowserForward  ttcmd_editor_scroll_tonextline
+Editor      None            Return          ttcmd_editor_move_tonewline
+Editor      Shift           Return          ttcmd_editor_scroll_tonewline
+Editor      Control         H               ttcmd_editor_edit_backspace
+Editor      Control         D               ttcmd_editor_edit_delete
+
+xEditor      Control         G               ttcmd_editor_new_tocurrenteditor
 
 xEditor      Alt             C               ttcmd_editor_copy_tag_atcursor
 
-
-xEditor      None            Return          ttcmd_editor_scroll_tonewline
-xEditor      Alt             D1              ttcmd_desk_works_focus_work1
-xEditor      Alt             D2              ttcmd_desk_works_focus_work2
-xEditor      Alt             D3              ttcmd_desk_works_focus_work3
 xEditor      Alt             M               ttcmd_desk_focus_menu
 xEditor      Alt             OemBackslash    ttcmd_application_config_editor_wordwrap_toggle
-xEditor      Alt             PageUp          ttcmd_editor_scroll_tonextline
-xEditor      Alt             Next            ttcmd_editor_scroll_roprevline
-xEditor      Control         D1              ttcmd_desk_works_focus_work1
-xEditor      Control         D2              ttcmd_desk_works_focus_work2
-xEditor      Control         D3              ttcmd_desk_works_focus_work3
 xEditor      Control         OemPlus         ttcmd_editor_edit_turn_bullet_norm
 xEditor      Control         I               ttcmd_editor_outline_insert_section
-xEditor      Control         H               ttcmd_editor_edit_backspace
-xEditor      Control         D               ttcmd_editor_edit_delete
-xEditor      Control         G               ttcmd_editor_new_tocurrenteditor
 xEditor      Control         OemBackslash    ttcmd_application_config_editor_wordwrap_toggle
 xEditor      Control         Oem3            ttcmd_application_config_editor_staycursor_toggle
 xEditor      Control, Shift  OemPlus         ttcmd_editor_edit_turn_bullet_rev
@@ -637,7 +630,40 @@ xEditor      Control, Shift  B               ttcmd_editor_select_toleftchar
 xEditor      Control, Shift  F               ttcmd_editor_select_torightchar
 '@
 
-#region _editor_move/delete/edit_
+#region _editor_move/delete/edit/new_
+function ttcmd_editor_new_tocurrenteditor( $source, $mod, $key ){
+    #.SYNOPSIS
+    # 新規メモを作成し、カレントエディタに読み込む
+
+    # $index = $script:desk.create_memo()
+    # $tool = $script:app._get( "Desk.CurrentEditor" )
+    # $script:shelf.refresh()
+    # $script:desk.tool( $tool ).load( $index )
+}
+function ttcmd_editor_edit_delete( $source, $mod, $key ){
+    #.SYNOPSIS
+    # カーソルの右を削除する
+
+    $global:appcon.tools.editor.edit( 'delete' )
+}
+function ttcmd_editor_edit_backspace( $source, $mod, $key ){
+    #.SYNOPSIS
+    # カーソルの左を削除する
+
+    $global:appcon.tools.editor.edit( 'backspace' )
+}
+function ttcmd_editor_scroll_tonewline( $source, $mod, $key ){
+    #.SYNOPSIS
+    # 改行する
+
+    $global:appcon.tools.editor.insert( 'newline+' )
+}
+function ttcmd_editor_move_tonewline( $source, $mod, $key ){
+    #.SYNOPSIS
+    # 改行する
+
+    $global:appcon.tools.editor.insert( 'newline' )
+}
 function ttcmd_editor_scroll_toprevline( $source, $mod, $key ){
     #.SYNOPSIS
     # カーソルを前行へ移動して、画面表示を前方へ移動する
@@ -650,7 +676,6 @@ function ttcmd_editor_scroll_tonextline( $source, $mod, $key ){
 
     $global:appcon.tools.editor.move_to( 'nextline+' )
 }
-
 function ttcmd_editor_edit_insert_clipboard( $source, $mod, $key ){
     #.SYNOPSIS
     # クリップボードの内容を貼り付ける
@@ -1083,21 +1108,6 @@ function ttcmd_editor_focus_currenteditor( $source, $mod, $key ){
     $current = $script:app._get( 'Desk.CurrentEditor' )
     $script:desk.focus( $current )
 }
-function ttcmd_editor_new_tocurrenteditor( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 新規メモを作成し、カレントエディタに読み込む
-
-    $index = $script:desk.create_memo()
-    $tool = $script:app._get( "Desk.CurrentEditor" )
-    $script:shelf.refresh()
-    $script:desk.tool( $tool ).load( $index )
-}
-function ttcmd_editor_scroll_tonewline( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 改行する
-
-    $script:desk.tool('Editor').scroll_to( 'newline' )
-}
 function ttcmd_editor_select_all( $source, $mod, $key ){
     #.SYNOPSIS
     # 全行選択する
@@ -1139,18 +1149,6 @@ function ttcmd_editor_select_toprevline( $source, $mod, $key ){
     # カーソルの前行まで選択する
 
     $script:desk.tool('Editor').select_to( 'prevline', '' )
-}
-function ttcmd_editor_edit_delete( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルの右を削除する
-
-    $script:desk.tool( 'Editor' ).edit( 'delete' )
-}
-function ttcmd_editor_edit_backspace( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソルの左を削除する
-
-    $script:desk.tool( 'Editor' ).edit( 'backspace' )
 }
 function ttcmd_editor_edit_turn_bullet_norm( $source, $mod, $key ){
     #.SYNOPSIS

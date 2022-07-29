@@ -31,16 +31,45 @@
 - 
 
 ## 方針
-- Editorでは編集Ctrl-、モード変更等Alt-、の傾向を持たせる
-- 日付入力（） ⇒まだ途中
-- クリップボード入力　　⇒まだ途中
-- Actionタグ　　⇒まだ途中
-- 全文検索
-- メモタグ, 文書内ジャンプ、全メモ検索でも同じになるように
+### Editorでは編集Ctrl-、モード変更等Alt-、の傾向を持たせる
+### 日付入力（） ⇒まだ途中
+  年、月、日をNon-Menuで変更（tentative-mode?）
+  曜日対応
+  時間対応
+
+### クリップボード入力　　⇒まだ途中
+　クリップボード画像
+　画僧ファイル→phopto
+　Memo以外のCopy → Search, 
+
+### Actionタグ　　⇒まだ途中
+・ メモタグ, 文書内ジャンプ、全メモ検索でも同じになるように
   [memo:xxxx-xx-xx-xxxxxx]          
   [memo:xxxx-xx-xx-xxxxxx:30:12]        [go:30]
-  [memo:xxxx-xx-xx-xxxxxx:head:keyword] [go:head:keyword]   [search:head:keyword]
-  [memo:xxxx-xx-xx-xxxxxx:keyword]      [go:keyword]        [search:keyword]
+  [memo:xxxx-xx-xx-xxxxxx:head:keyword] [go:head:keyword]   
+  [memo:xxxx-xx-xx-xxxxxx:keyword]      [go:keyword]        
+　[memo:keyword]
+　[memo:head:keyword]
+
+・ Ctrl+SpaceでOnCursorでタグがない場合、キーワードを拾って検索サイトのメニューを出す
+
+### キーワード取得
+　　
+
+
+### 全文検索
+　memoに結果を残すと全文検索時にヒットしまくって面倒だな、半面、Editorで開いて書き込めるのは便利装、タイトルで対象から外すか
+
+Thinktank:SEARCH:キーワード
+===============================================================
+SearchDate: xxxx-xx-xx-xxxxxx
+
+[memo:xxxx-xx-xx-xxxxxx] Title Snipet 
+[memo:xxxx-xx-xx-xxxxxx] Title Snipet 
+
+### 検索結果取り込み
+　 
+
 
 ## 不具合
 - TTClipboardにTTObjectをCopyする方法では、複数TTObjectのCopyに対応できない。

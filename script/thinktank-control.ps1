@@ -5,6 +5,8 @@ using namespace System.Windows.Controls
 using namespace System.Windows 
 using namespace System.Xml
 using namespace System.Windows.Input
+using namespace System.Windows.Documents
+
 
 class TTApplicationController {
     #region variants/ new/ default/ initialize_application
@@ -967,9 +969,9 @@ class TTEditorController {
             "FileDropList,Text,"     { $this._paste_outlookschedule( $_, $editor, $text ) }
             "Image,"                 { $this._paste_image( $_, $editor, $text ) } 
             "Image,Html,"            { $this._paste_image( $_, $editor, $text ) } 
-            "Text,Rtf,Html,"         { $this._paste_word( $_, $editor, $text ) } 
+            "Text,Rtf,Html,"         { $this._paste_url_text( $_, $editor, $text ) } # word
             "FileDropList,"          { $this._paste_files_folders( $_, $editor, $text ) }
-            "Text,Html,"             { $this._paste_favorites_and_text( $_, $editor, $text ) }
+            "Text,Html,"             { $this._paste_url_text( $_, $editor, $text ) } # favorite
             "Text,Image,CSV,Rtf,Html,DataInterchangeFormat," { $this._paste_excelrange( $_, $editor, $text ) } 
             default                  { 
                 Write-Host "non supported data"
@@ -1113,7 +1115,7 @@ class TTEditorController {
         # }
     
     }
-    [void] _paste_ttobject_text( $type, $editor, $text ){
+    [void] _paste_ttobject_text( $type, $editor, $text ){ # メモと引用テキスト
         # $text   = [Clipboard]::GetText()
         # $doc    = [TTClipboard]::_target.Document
         # $offset = [TTClipboard]::_target.CaretOffset
@@ -1138,11 +1140,11 @@ class TTEditorController {
         $text = [Clipboard]::GetText()                   # 件名（場所）
         $filedroplist = [Clipboard]::GetFileDropList()   # error
     }
-    [void] _paste_image( $type, $editor, $text ){ # 未実装
+    [void] _paste_image( $type, $editor, $text ){ # photoタグとの運用を考える
     
         # $image = [Clipboard]::GetImage()  # image:System.Windows.Interop.InteropBitmap
     
-        $folder = $global:TTConfigs.GetChild("CaptureFolder").value
+        $folder = $global:TTResources.GetChild('Configs').GetChild("CaptureFolder").value
         if( (Test-Path $folder) -eq $false ){ $folder = [Environment]::GetFolderPath('MyPictures') }
         $folder = $folder + "\thinktank\" + (Get-Date).ToString("yyyy-MM-dd")
         if( (Test-Path $folder) -eq $false ){ New-Item $folder -ItemType Directory }
@@ -1150,22 +1152,15 @@ class TTEditorController {
     
         (Get-Clipboard -Format Image).Save( $filename )
     
-        [TTClipboard]::_target.Document.Insert( [TTClipboard]::_target.CaretOffset, "$filename`r`n" )
-    }
-    [void] _paste_word( $type, $editor, $text ){
-        $this._paste_url_text( $editor, $text )
-        # $text = [Clipboard]::GetText()                              # word text
-        # $rtf = [Clipboard]::GetDataObject("Rich Text Format")       # no datd
-        # $html = [Clipboard]::GetDataObject("Html")                  # no data
+        $editor.Document.Insert( $editor.CaretOffset, "$filename`r`n" )
     }
     [void] _paste_files_folders( $type, $editor, $text ){ # 未実装
-        # $filedroplist = [Clipboard]::GetFileDropList()
+        
+        $filedroplist = [Clipboard]::GetFileDropList()
+        $filedroplist.foreach{
+            $editor.Document.Insert( $editor.CaretOffset, "$_`r`n" )
+        }
         # Write-Host "filedroplist:$filedroplist" # [stringcollection]fullpath
-    }
-    [void] _paste_favorites_and_text( $type, $editor, $text ){
-        $this._paste_url_text( $editor, $text )
-        # $text = [Clipboard]::GetText()                # ブラウザ text, thinktank text, ブラウザリンク
-        # $html = [Clipboard]::GetDataObject("Html")    # no data
     }
     [void] _paste_excelrange( $type, $editor, $text ){ # 未実装
         # $text = [Clipboard]::GetText()
@@ -1176,8 +1171,42 @@ class TTEditorController {
         # $dif = [Clipboard]::GetDataObject("DataInterchangeFormat") # no datd
     }
 
+    #endregion
 
-    #endrergion
+    #region insert/ edit
+    [bool] edit( [string]$target ){
+        $no = $global:AppMan.Document.CurrentNumber
+        return $this.edit( $no, $target )
+    }
+    [bool] edit( [int]$no, [string]$target ){
+        $editor = $global:AppMan.Document.Editor.Controls[$no-1]
+
+        switch( $target ){
+            'delete'    { [EditingCommands]::Delete.Execute( $null, $editor.TextArea ) }
+            'backspace' { [EditingCommands]::Backspace.Execute( $null, $editor.TextArea ) }
+        }
+        return $true
+    }
+    [bool] insert( [string]$target ){
+        $no = $global:AppMan.Document.CurrentNumber
+        return $this.insert( $no, $target )
+    }
+    [bool] insert( [int]$no, [string]$target ){
+        $editor = $global:AppMan.Document.Editor.Controls[$no-1]
+        $doc = $editor.Document
+        $cur = $editor.CaretOffset
+
+        switch( $target ){
+            'clipboard' { return $this.paste( $no ) }
+            'newline' { $doc.Insert( $cur, "`r`n" ) }
+            'newline+' { $editor.LineDown(); $doc.Insert( $cur, "`r`n" ) }
+        }
+
+        return $true
+
+    }
+
+    #endregion
 
     #region move_to, select_to, node_to
     [bool] move_to( [string]$to ){
