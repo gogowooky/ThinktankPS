@@ -40,9 +40,16 @@ class TTTool{
     
     }
     static [string]index_to_filepath( [string]$index ){
-        switch -wildcard ( $index ){
-            "thinktank*" { return "$global:TTRootDirPath\thinktank.md" }
-            default      { return "$global:TTMemoDirPath\$index.txt" }
+        switch -regex ( $index ){
+            "thinktank" { 
+                return "$global:TTRootDirPath\thinktank.md"
+            }
+            "(?<num>\d{4}\-\d{2}\-\d{2]\-\d{6})" { 
+                return "$global:TTMemoDirPath\$($Matches.num).txt"
+            }
+            default {
+                return "$global:TTMemoDirPath\$index"
+            }
         }
         return ""
     }
@@ -185,7 +192,7 @@ class TTTagAction{
         return $null
         
     }
-    [void] DoAction(){ 
+    [void] invoke(){ 
         $this.invoke( $this._editor.CaretOffset )
     }
     [void] invoke( $line, $column ){
@@ -197,20 +204,20 @@ class TTTagAction{
         foreach( $tag in $this._tags ){
             if( $null -eq $this.regex_at( $tag.regex ) ){ continue }
             switch( $tag.tag ){
-                'date'  { $this.date_action(); break }
-                'check' { $this.check_action(); break }
-                'url'   { $this.url_action(); break }
-                'path'  { $this.path_action(); break }
-                'tag'   { $this.tag_action(); break }
+                'date'  { $this.date_tag(); break }
+                'check' { $this.check_tag(); break }
+                'url'   { $this.url_tag(); break }
+                'path'  { $this.path_tag(); break }
+                'tag'   { $this.thinktank_tag(); break }
             }
         }
     }
 
 
-    [void] date_action(){ # 未実装
+    [void] date_tag(){ # 未実装
         return
     }
-    [void] check_action(){
+    [void] check_tag(){
         $ma = $this._ma
         $offset = $this._offset
         $editor = $this._editor
@@ -219,7 +226,7 @@ class TTTagAction{
         $editor.Document.Replace( $curline.offset + $ma.Index, 3, @{"[o]"="[x]";"[x]"="[_]";"[_]"="[o]"}[ $ma.Value ] )
         $editor.CaretOffset = $offset
     }
-    [void] url_action(){
+    [void] url_tag(){
         $actions = [hashtable]@{
             "@URLを開く" =          'open url'
             "一つ上のURLを開く" =   'open parent url'
@@ -230,7 +237,7 @@ class TTTagAction{
             'open parent url' { [TTTool]::open_url( (Split-Path $this._ma.Value -Parent) ) }
         }
     }
-    [void] path_action(){
+    [void] path_tag(){
         $actions = @{
             "@ファイルを開く" =     'open file'
             "ディレクトリを開く" =  'open directory'
@@ -242,7 +249,7 @@ class TTTagAction{
         }
 
     }
-    [void] tag_action(){
+    [void] thinktank_tag(){
         $tag   = $this._ma.groups['tag'].Value
         $param = $this._ma.groups['param'].Value
 
@@ -251,11 +258,11 @@ class TTTagAction{
         switch ($search.Url){
             "thinktank_tag" {
                 switch( $tag ){
-                    'Route' { [TTTagAction]::route_tag( $param ); return }
-                    'memo'  { [TTTagAction]::memo_tag( $param ); return }
-                    'mail'  { [TTTagAction]::mail_tag( $param ); return }
-                    'ref'   { [TTTagAction]::ref_tag( $param ); return }
-                    'photo' { [TTTagAction]::photo_tag( $param ); return }
+                    'Route' { [TTTagAction]::tttag_route( $param ); return }
+                    'memo'  { [TTTagAction]::tttag_memo( $param ); return }
+                    'mail'  { [TTTagAction]::tttag_mail( $param ); return }
+                    'ref'   { [TTTagAction]::tttag_ref( $param ); return }
+                    'photo' { [TTTagAction]::tttag_photo( $param ); return }
                 }
             }
             default {
@@ -265,7 +272,7 @@ class TTTagAction{
     }
 
 
-    static [void] route_tag( $param ){
+    static [void] tttag_route( $param ){
         if( $param.Trim() -eq "" ){ return }
         $dest = ""
         $waypnt = ""
@@ -288,7 +295,7 @@ class TTTagAction{
         [TTTool]::open_url( "https://www.google.com/maps/dir/?api=1&origin=$orig&destination=$dest&travelmode=driving&dir_action=navigate$waypnt" ) 
    
     }
-    static [void] mail_tag( $param ){
+    static [void] tttag_mail( $param ){
         if( $param -eq "" ){ return }
     
         $outlook = New-Object -ComObject Outlook.Application
@@ -329,7 +336,7 @@ class TTTagAction{
         }
     
     }
-    static [void] memo_tag( $param ){ # 中途
+    static [void] tttag_memo( $param ){ # 中途
 
         switch -regex ( $param ){
             # [memo:xxxx-xx-xx-xxxxxx] MemoIDを開く
@@ -397,12 +404,12 @@ class TTTagAction{
 
         return
     }
-    static [void] ref_tag( $param ){ # 未実装 
-        Write-Host "ref_tag $param"
+    static [void] tttag_ref( $param ){ # 未実装 
+        Write-Host "tttag_ref $param"
         return
     }
-    static [void] photo_tag( $param ){ # 未実装
-        Write-Host "photo_tag $param"
+    static [void] tttag_photo( $param ){ # 未実装
+        Write-Host "tttag_photo $param"
         return
     }
    

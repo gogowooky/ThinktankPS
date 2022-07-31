@@ -46,6 +46,7 @@
 ・ メモタグ, 文書内ジャンプ、全メモ検索でも同じになるように
   [memo:xxxx-xx-xx-xxxxxx]          
   [memo:xxxx-xx-xx-xxxxxx:30:12]        [go:30]
+　　カーソル位置まで指定するのはやめるか、、
   [memo:xxxx-xx-xx-xxxxxx:head:keyword] [go:head:keyword]   
   [memo:xxxx-xx-xx-xxxxxx:keyword]      [go:keyword]        
 　[memo:keyword]
@@ -71,6 +72,7 @@ SearchDate: xxxx-xx-xx-xxxxxx
 
 
 ## 不具合
+- PopupMenu終了時にエラーでる、
 - メモ削除でエラー
 - マウスでMemo選択loadするとEditor2/3が一緒になってしまう。
 - メモ中にThinktank:URI: があるとデータ回収できず落ちる

@@ -162,6 +162,26 @@ class TTCollection : TTObject {
         if( $this.OnChange ){ &($this.OnChange) $this }
         return $true
     }
+    # [object[]] ConfigLines( [string]$tag ) {
+    #     $lines = @(
+    #         Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
+    #         Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
+    #         Select-String "^Thinktank:$tag" | `
+    #         Select-Object -Property Filename, LineNumber, Line
+    #     )
+
+    #     ForEach ( $line in $lines ) {
+    #         $file = Get-Item -Path ([TTTool]::index_to_filepath( $line.Filename ))
+    #         $line.Line -match "Thinktank:設定(@(?<pcname>.*))?:(?<name>[^,@]+)\s*,\s*(?<description>[^,]+)\s*,\s*(?<value>[^,]+)\s*"
+    #         $ma = $Matches
+    #         if ( 0 -lt $ma.pcname.length ) {
+    #             if ( $ma.pcname.Trim() -ne $Env:COMPUTERNAME ) { continue }
+    #         }else {
+    #             if ( $this.children.contains($ma.name.Trim()) ) { continue }
+    #         }
+    #     }
+    # }
+
     [void] AddChild( $item ) {      # should be override
         $child = ( $item -as $this.ChildType )
         $this.children[ $child.$($child.GetDictionary().Index) ] = $child
@@ -465,19 +485,18 @@ class TTConfigs: TTCollection {
             Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
                 Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
                 Select-String "^Thinktank:設定" | `
-                Select-Object -Property Filename, LineNumber, Matches, Line
+                Select-Object -Property Filename, LineNumber, Line
         )
 
         if ( 0 -eq $lines.Count ) { return $false }
 
         ForEach ( $line in $lines ) {
             $file = Get-Item -Path ([TTTool]::index_to_filepath( $line.Filename ))
-            $line.Line -match "Thinktank:設定@?(?<pcname>.*)?:(?<name>[^,@]+)\s*,\s*(?<description>[^,]+)\s*,\s*(?<value>[^,]+)\s*"
+            $line.Line -match "Thinktank:設定(@(?<pcname>.*))?:(?<name>[^,@]+)\s*,\s*(?<description>[^,]+)\s*,\s*(?<value>[^,]+)\s*"
             $ma = $Matches
             if ( 0 -lt $ma.pcname.length ) {
                 if ( $ma.pcname.Trim() -ne $Env:COMPUTERNAME ) { continue }
-            }
-            else {
+            }else {
                 if ( $this.children.contains($ma.name.Trim()) ) { continue }
             }
 
@@ -487,7 +506,7 @@ class TTConfigs: TTCollection {
             $child.PCName = ($ma.pcname + "").Trim()
             $child.Description = $ma.description.Trim()
             $child.UpdateDate = $file.LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
-            $child.MemoPos = ([String]::Format( "{0}:{1}:{2}", $file.BaseName, $line.LineNumber, $line.Matches[0].Index ))
+            $child.MemoPos = "$($file.BaseName):$($line.LineNumber)"
             $this.AddChild( $child )
         }
 
@@ -847,7 +866,7 @@ class TTSearchMethods: TTCollection {
             Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
                 Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
                 Select-String "^Thinktank:検索:" | `
-                Select-Object -Property Filename, LineNumber, Matches, Line
+                Select-Object -Property Filename, LineNumber, Line
         )
 
         if ( 0 -Lt $lines.Count ) {
@@ -862,7 +881,7 @@ class TTSearchMethods: TTCollection {
                 $child.Url = $ma.url.Trim()
                 $child.Category = $ma.catalog.Trim()
                 $child.UpdateDate = $file.LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
-                $child.MemoPos = ([String]::Format( "{0}:{1}:{2}", $file.BaseName, $line.LineNumber, $line.Matches[0].Index ))
+                $child.MemoPos = "$($file.BaseName):$($line.LineNumber)"
                 $this.AddChild( $child )
             }
 
@@ -1032,7 +1051,7 @@ class TTExternalLinks: TTCollection {
             Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
                 Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
                 Select-String "^Thinktank:URI:" | `
-                Select-Object -Property Filename, LineNumber, Matches, Line
+                Select-Object -Property Filename, LineNumber, Line
         )
         if ( 0 -Lt $lines.Count ) {
             foreach ( $line in $lines ) {
@@ -1045,7 +1064,7 @@ class TTExternalLinks: TTCollection {
                 $child.Uri = $ma.uri.Trim()
                 $child.Category = $ma.shortcut.Trim()
                 $child.UpdateDate = $file.LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
-                $child.MemoPos = ([String]::Format( "{0}:{1}:{2}", $file.BaseName, $line.LineNumber, $line.Matches[0].Index ))
+                $child.MemoPos = "$($file.BaseName):$($line.LineNumber)"
                 $this.AddChild( $child )
             }
 
@@ -1171,7 +1190,7 @@ class TTMemos: TTCollection {
         $lines = @(
             Get-ChildItem -Path @( "$global:TTRootDirPath\thinktank.md" ) | `
                 Select-String "^Thinktank@?(?<pcname>.*)?:Keywords:" | `
-                Select-Object -Property Filename, LineNumber, Matches, Line
+                Select-Object -Property Filename, LineNumber, Line
         )
 
         if ( 0 -Lt $lines.Count ) {

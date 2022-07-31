@@ -755,7 +755,7 @@ function ttcmd_editor_tag_invoke( $source, $mod, $key ){
 
     }else{
         $current_editor = $global:AppMan.Document.Editor.Controls[$global:AppMan.Document.CurrentNumber-1]
-        [TTTagAction]::New( $current_editor ).DoAction()
+        [TTTagAction]::New( $current_editor ).invoke()
         
     }
 

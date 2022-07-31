@@ -1715,7 +1715,7 @@ class TTDesk{
         $lines = @(
             Get-ChildItem -Path @( "$global:TTRootDirPath\thinktank.md" ) | `
                 Select-String "^Thinktank@?(?<pcname>.*)?:Keywords:" | `
-                Select-Object -Property Filename, LineNumber, Matches, Line
+                Select-Object -Property Filename, LineNumber, Line
         )
 
         if ( 0 -Lt $lines.Count ) {

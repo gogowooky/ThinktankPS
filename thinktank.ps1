@@ -46,7 +46,7 @@ $global:TTMemoDirPath =     $global:TTRootDirPath + "\text"
 $lines = @(
     Get-ChildItem -Path "$global:TTRootDirPath\thinktank.md" | `
     Select-String "^Thinktank:設定@?(?<pcname>.*)?:MemoFolder" | `
-    Select-Object -Property Filename, LineNumber, Matches, Line
+    Select-Object -Property Filename, LineNumber, Line
 )
 foreach ( $line in $lines ) {
     [void]( $line.Line -match "Thinktank:設定(@(?<pcname>[^:]+)\s*)?:MemoFolder,\s*(?<description>[^,]+)\s*,\s*(?<value>[^,]+)\s*" )
@@ -117,16 +117,16 @@ function TTTimerResistEvent( [string]$name, [long]$countdown, [long]$rewind, [Sc
 }
 #endregion###############################################################################################################
 
-#　セットアップ
+# セットアップ
 KeyBindingSetup
 
-#　View
+# View
 $global:AppMan =        [TTAppManager]::new()
 
-#　Model
+# Model
 $global:TTResources =   [TTResources]::new().Initialize()
 
-#　Control
+# Control
 $global:datetag =       [TTTagFormat]::new()
 $global:appcon =        [TTApplicationController]::new()
 

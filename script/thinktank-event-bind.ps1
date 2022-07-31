@@ -48,8 +48,8 @@
             Write-Host "PreviewKeyDown source:$source, tentative:$tttv, panel:$panel, mod:$mod, key:$key, command:$command"
         }
         switch ( Invoke-Expression "$command '$panel' '$mod' '$key'" ){
-            'cancel' {  $args[1].Handled = $false }
-            default {   $args[1].Handled = $true }
+            'cancel' { $args[1].Handled = $false }
+            default { $args[1].Handled = $true }
         }
     }else{
         $args[1].Handled = $false
@@ -118,6 +118,7 @@ function KeyBindingSetup(){
 [ScriptBlock] $global:TTMenu_LostFocus =        {}
 [ScriptBlock] $global:TTWindow_GotFocus =       {}   # application制御
 [ScriptBlock] $global:TTWindow_LostFocus =      {}
+
 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
