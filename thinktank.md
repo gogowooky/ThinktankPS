@@ -128,16 +128,16 @@ Thinktank:レコード:
 (空行)
 
 ## 設定
-Thinktank:設定:OutlookBackupFolder, 					引用メールの保存先フォルダ, 個人用フォルダ (2019-01-)
-Thinktank:設定:PhotoFolder,						写真フォルダ, 個人用フォルダ (2019-01-)
+Thinktank:設定:OutlookBackupFolder, 			    引用メールの保存先フォルダ, 個人用フォルダ (2019-01-)
+Thinktank:設定:PhotoFolder,						    写真フォルダ, 個人用フォルダ (2019-01-)
 Thinktank:設定:PDFFolder, 							PDFフォルダ, 個人用フォルダ (2019-01-)
 Thinktank:設定:CaptureFolder, 						クリップボード画像の保存先フォルダ, MyPicture
 Thinktank:設定:CaptureFolder, 						メモフォルダ, MyPictures
-Thinktank:設定@LAPTOP-5FOVA1SU:OutlookBackupFolder,		引用メールの保存先フォルダ, 個人用フォルダ (2019-01-)
+Thinktank:設定@LAPTOP-5FOVA1SU:OutlookBackupFolder,	引用メールの保存先フォルダ, 個人用フォルダ (2019-01-)
 Thinktank:設定@LAPTOP-5FOVA1SU:PhotoFolder,			写真フォルダ, C:\Users\shin\Pictures\thinktank
 Thinktank:設定@LAPTOP-5FOVA1SU:MemoFolder, 			メモフォルダ, C:\Users\shin\Documents\Thinktank
 Thinktank:設定@HPH1N0299:MemoFolder, 				メモフォルダ, C:\TEMP\Remote\Thinktank\original.txt
-Thinktank:設定@HPH1N0299:OutlookBackupFolder, 			引用メールの保存先フォルダ, 個人用フォルダ (2021-02-)
+Thinktank:設定@HPH1N0299:OutlookBackupFolder, 		引用メールの保存先フォルダ, 個人用フォルダ (2021-02-)
 Thinktank:設定:Window,                      max
 Thinktank:設定:Layout.Guide.Width,          12
 Thinktank:設定:Layout.Library.Height,       25

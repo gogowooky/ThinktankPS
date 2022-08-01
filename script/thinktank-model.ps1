@@ -172,7 +172,7 @@ class TTCollection : TTObject {
 
         ).foreach{
 
-            if( $_.Line -match "^Thinktank:$tag(@.*(?<pcname>[^,@:]+).*)?:\s*(?<name>[^,@]+)\s*,\s*(?<value>.*)\s*$" ){
+            if( $_.Line -match "^Thinktank:$tag\s*(@(?<pcname>[^,@:]+)\s*)?:\s*(?<name>[^,@]+)\s*,\s*(?<value>.*)\s*$" ){
                 if( (($null -eq $Matches.pcname) -and (-not $lines.contains( $Matches.name ))) -or
                     ($Env:COMPUTERNAME -eq $Matches.pcname) ){
                     $lines += [psobject]@{
@@ -443,44 +443,44 @@ class TTConfigs: TTCollection {
         $this.Description   = "設定値"
     }
     [void] Initialize(){
-        ([TTCollection]$this).Initialize()
 
         $this.AddChild( [TTConfig]@{ Name = "RootFolder"
             Description = "ルートフォルダ"
             Value = $global:TTRootDirPath
-            MemoPos = "thinktank-modes.ps1"
+            MemoPos = "thinktank-model.ps1"
             UpdateDate = "1970-03-11-000000"
         })
         $this.AddChild( [TTConfig]@{ Name = "MemoFolder"
             Description = "メモフォルダ"
             Value = $global:TTMemoDirPath
-            MemoPos = "thinktank-modes.ps1"
+            MemoPos = "thinktank-model.ps1"
             UpdateDate = "1970-03-11-000000"
         })
         $this.AddChild( [TTConfig]@{ Name = "CacheFolder"
             Description = "キャッシュフォルダ"
             Value = $global:TTCacheDirPath
-            MemoPos = "thinktank-modes.ps1"
+            MemoPos = "thinktank-model.ps1"
             UpdateDate = "1970-03-11-000000"
         })
         $this.AddChild( [TTConfig]@{ Name = "BackupFolder"
             Description = "バックアップフォルダ"
             Value = $global:TTBackupDirPath
-            MemoPos = "thinktank-modes.ps1"
+            MemoPos = "thinktank-model.ps1"
             UpdateDate = "1970-03-11-000000"
         })
         $this.AddChild( [TTConfig]@{ Name = "ScriptFolder"
             Description = "スクリプトアップフォルダ"
             Value = $global:TTScriptDirPath
-            MemoPos = "thinktank-modes.ps1"
+            MemoPos = "thinktank-model.ps1"
             UpdateDate = "1970-03-11-000000"
         })
+
+        ([TTCollection]$this).Initialize()
 
     }
     [bool] Update() {
 
-        $configs = $this.ConfigLines("設定")
-        $configs.foreach{
+        $this.ConfigLines("設定").foreach{
             $file = Get-Item -Path ([TTTool]::index_to_filepath($_.filename))
             $description, $value = $_.value -split ',' 
 
