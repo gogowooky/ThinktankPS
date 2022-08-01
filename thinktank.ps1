@@ -44,37 +44,38 @@ Add-Type -AssemblyName PresentationFramework, System.Windows.Forms, System.Drawi
 $global:TTRootDirPath =     $PSScriptRoot
 $global:TTScriptDirPath =   $global:TTRootDirPath + "\script"
 $global:TTMemoDirPath =     $global:TTRootDirPath + "\text"
-$lines = @(
-    Get-ChildItem -Path "$global:TTRootDirPath\thinktank.md" | `
+
+$lines = @(  Get-ChildItem -Path "$global:TTRootDirPath\thinktank.md" | `
     Select-String "^Thinktank:設定@?(?<pcname>.*)?:MemoFolder" | `
-    Select-Object -Property Filename, LineNumber, Line
+    Select-Object -Property Line
 )
-foreach ( $line in $lines ) {
-    [void]( $line.Line -match "Thinktank:設定(@(?<pcname>[^:]+)\s*)?:MemoFolder,\s*(?<description>[^,]+)\s*,\s*(?<value>[^,]+)\s*" )
-    if ( $null -eq $Matches.pcname ) {
-        $global:TTMemoDirPath = $Matches.value
-    }else{
-        if ( $Env:COMPUTERNAME -eq $Matches.pcname ) { 
+foreach( $line in $lines ){
+    if( $line.Line -match "Thinktank:設定\s*(@(?<pcname>[^:]+)\s*)?:\s*MemoFolder,\s*(?<description>[^,]+)\s*,\s*(?<value>[^,]+)\s*" ){
+        if ( $null -eq $Matches.pcname ) {
             $global:TTMemoDirPath = $Matches.value
-            break
-        }
+        }else{
+            if ( $Env:COMPUTERNAME -eq $Matches.pcname ) { 
+                $global:TTMemoDirPath = $Matches.value
+                break
+            }
+        }    
     }
 }
 
 [void]( $myInvocation.MyCommand.Name -match 'thinktank(?<num>.?)\.ps1' )
-$global:TTCacheDirPath = "$($global:TTMemoDirPath)\cache" + $Matches.num
-$global:TTBackupDirPath = "$($global:TTMemoDirPath)\backup"
-[void]( New-Item $global:TTMemoDirPath -ItemType Directory -Force )
-[void]( New-Item $global:TTCacheDirPath -ItemType Directory -Force )
-[void]( New-Item $global:TTBackupDirPath -ItemType Directory -Force )
+$global:TTCacheDirPath =    "$($global:TTMemoDirPath)\cache" + $Matches.num
+$global:TTBackupDirPath =   "$($global:TTMemoDirPath)\backup"
+[void]( New-Item $global:TTMemoDirPath      -ItemType Directory -Force )
+[void]( New-Item $global:TTCacheDirPath     -ItemType Directory -Force )
+[void]( New-Item $global:TTBackupDirPath    -ItemType Directory -Force )
 
 #endregion###############################################################################################################
 
 #region timer セットアップ 
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 $global:TTTimerExpiredMessage = $false
-$global:TTTimerResistMessage = $false
-$global:TTTimerRunDirect = $false
+$global:TTTimerResistMessage =  $false
+$global:TTTimerRunDirect =      $false
 $global:tt_mutex = $false
 $global:tt_tasks = @{}
 $global:tt_timer = [System.Windows.Threading.DispatcherTimer]::new()

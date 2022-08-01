@@ -480,7 +480,7 @@ class TTConfigs: TTCollection {
     }
     [bool] Update() {
 
-        $this.ConfigLines("設定").foreach{
+        $count = $this.ConfigLines("設定").foreach{
             $file = Get-Item -Path ([TTTool]::index_to_filepath($_.filename))
             $description, $value = $_.value -split ',' 
 
@@ -491,44 +491,16 @@ class TTConfigs: TTCollection {
             $child.UpdateDate = $file.LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
             $child.MemoPos = "$($file.BaseName):$($_.linenumber)"
             $this.AddChild( $child )
+        }.count
+
+        if( 0 -lt $count ){
+            $this.UpdateDate = ( Get-Date -Format "yyyy-MM-dd-HHmmss")
+
+            if( $this.OnUpdate ){ &$this.OnUpdate $this }
+            if( $this.OnChange ){ &$this.OnChange $this }
         }
 
-        return $true
-
-        $lines = @(
-            Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
-                Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
-                Select-String "^Thinktank:設定" | `
-                Select-Object -Property Filename, LineNumber, Line
-        )
-
-        if ( 0 -eq $lines.Count ) { return $false }
-
-        ForEach ( $line in $lines ) {
-            $file = Get-Item -Path ([TTTool]::index_to_filepath( $line.Filename ))
-            $line.Line -match "Thinktank:設定(@(?<pcname>.*))?:(?<name>[^,@]+)\s*,\s*(?<description>[^,]+)\s*,\s*(?<value>[^,]+)\s*"
-            $ma = $Matches
-            if ( 0 -lt $ma.pcname.length ) {
-                if ( $ma.pcname.Trim() -ne $Env:COMPUTERNAME ) { continue }
-            }else {
-                if ( $this.children.contains($ma.name.Trim()) ) { continue }
-            }
-
-            $child = New-Object -TypeName $this.ChildType
-            $child.Name = $ma.name.Trim()
-            $child.Value = $ma.value.Trim()
-            $child.PCName = ($ma.pcname + "").Trim()
-            $child.Description = $ma.description.Trim()
-            $child.UpdateDate = $file.LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
-            $child.MemoPos = "$($file.BaseName):$($line.LineNumber)"
-            $this.AddChild( $child )
-        }
-
-        $this.UpdateDate = ( Get-Date -Format "yyyy-MM-dd-HHmmss")
-
-        if( $this.OnUpdate ){ &$this.OnUpdate $this }
-        if( $this.OnChange ){ &$this.OnChange $this }
-    return $true
+        return $true    
 
     }
     #endregion ----------------------------------------------------------------------------------------------------------
@@ -717,27 +689,28 @@ class TTCommands: TTCollection {
 
     }
     [bool] Update() {
-        $lines = @(
+
+        $count = @(
             Get-ChildItem -path function: | `
             ForEach-Object { $_.Name } | `
             Where-Object { $_ -like "ttcmd_*" }
-        )
+        ).foreach{
+            $child = [TTCommand]::New()
+            $child.Name = $_
+            $child.Description = ( Get-Help $_ | foreach-Object { $_.synopsis.split('|')[0] } )
+            $this.AddChild( $child ) 
+        }.count
 
-        if ( 0 -Lt $lines.Count ) {
-            ForEach ( $line in $lines ) {
-                $child = [TTCommand]::New()
-                $child.Name = $line
-                $child.Description = ( Get-Help $line | foreach-Object { $_.synopsis.split('|')[0] } )
-                $this.AddChild( $child ) 
-            }
+        if( 0 -lt $count ){
             $this.UpdateDate = ( Get-Date -Format "yyyy-MM-dd-HHmmss")
+
             if( $this.OnUpdate ){ &$this.OnUpdate $this }
             if( $this.OnChange ){ &$this.OnChange $this }
-                return $true
-
-        } else {
-            return $false
+   
         }
+
+        return $true
+        
     }
     [void] DeleteChild( $name ) {
         return
