@@ -58,6 +58,8 @@
 }
 [ScriptBlock] $global:TTPreviewKeyUp = { # Bind to AppMan, PopupMenu, Cabinet
     if( [TTTentativeKeyBindingMode]::Check( $args[1].Key ) ){
+        ttcmd_menu_cancel 'PopupMenu' '' ''
+        ttcmd_menu_cancel 'Cabinet' '' ''
         $args[1].Handled = $True
     }
 }

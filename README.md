@@ -69,11 +69,16 @@ SearchDate: xxxx-xx-xx-xxxxxx
 [memo:xxxx-xx-xx-xxxxxx] Title Snipet 
 
 ### 検索結果取り込み
+　 
 
 
 ## 不具合
+<<<<<<< HEAD
 - PopupMenu終了時にエラーでる、
 - メモ削除でエラー
+=======
+- TTClipboardにTTObjectをCopyする方法では、複数TTObjectのCopyに対応できない。
+>>>>>>> parent of bb10777... 220729: PopupMenu tentative化
 - マウスでMemo選択loadするとEditor2/3が一緒になってしまう。
 - メモ中にThinktank:URI: があるとデータ回収できず落ちる
 - Panel非表示時にtentative表示すると、脱mode後に再非表示されない
@@ -81,8 +86,6 @@ SearchDate: xxxx-xx-xx-xxxxxx
 
 # STATUS 
 ## 対応済・修正済
-- PopupMenuはtentativeモード化した、tentative Library/Index/Shelf時にtentativeの再入になるが、まとめてcancelされてよし、とする
-
 - PopupMenu, Cabinetで、Alt-ESCで終了するよう設定すること
 　Alt-ESCはタスク切替のシステムショートカットで、キー入力に入ってこない。
 　Applicationレベルで定義しても同じ、調べるとUser32.Dllを書き換えるとか出てくる
