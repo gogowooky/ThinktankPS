@@ -1,4 +1,4 @@
-#region Event Binding
+﻿#region Event Binding
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 [ScriptBlock] $global:TTStatus_OnSave = {  $global:appcon.event_save_status( $args ) } 
