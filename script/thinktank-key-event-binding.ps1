@@ -5,19 +5,6 @@
 
 
 
-#region debug, development
-#########################################################################################################################
-function ttcmd_application_noop( $source, $mod, $key ){
-    #.SYNOPSIS
-    # ダミーコマンド
-    $tttv = [TTTentativeKeyBindingMode]::Name
-    $panel =    $global:appcon._get('Focus.Application')
-
-    Write-Host "ttcmd_application_noop source:$source, tentative:$tttv, panel:$panel, mod:$mod, key:$key, command:$command"
-    return
-}
-#endregion###############################################################################################################
-
 
 
 
@@ -229,6 +216,15 @@ function ttcmd_application_help_breifing( $source, $mod, $key ){
 
 #endregion
 
+function ttcmd_application_noop( $source, $mod, $key ){
+    #.SYNOPSIS
+    # ダミーコマンド
+    $tttv = [TTTentativeKeyBindingMode]::Name
+    $panel =    $global:appcon._get('Focus.Application')
+
+    Write-Host "ttcmd_application_noop source:$source, tentative:$tttv, panel:$panel, mod:$mod, key:$key, command:$command"
+    return
+}
 #endregion###############################################################################################################
 
 #region Library/Index/Shelf
@@ -575,7 +571,6 @@ function ttcmd_application_border_indesk_right( $source, $mod, $key ){
 
 #endregion###############################################################################################################
 
-
 #region Editor
 #########################################################################################################################
 $global:KeyBind_Editor = @'
@@ -610,8 +605,8 @@ Editor      None            BrowserForward  ttcmd_editor_scroll_tonextline
 Editor      None            Return          ttcmd_editor_move_tonewline
 Editor      Shift           Return          ttcmd_editor_scroll_tonewline
 Editor      Control         H               ttcmd_editor_edit_backspace
-Editor      Control         D               ttcmd_editor_edit_delete
 Editor      Control         G               ttcmd_editor_new_tocurrenteditor
+Editor      Control         D               ttcmd_editor_edit_delete
 
 
 xEditor      Alt             C               ttcmd_editor_copy_tag_atcursor
@@ -828,7 +823,6 @@ function ttcmd_editor_outline_collapse_section( $source, $mod, $key ){
 
 #endregion###############################################################################################################
 
-
 #region Cabinet
 #########################################################################################################################
 $global:KeyBind_Cabinet = @'
@@ -853,23 +847,32 @@ Cabinet         Shift           Return      ttcmd_panel_action_invoke
 
 #endregion###############################################################################################################
 
-
 #region PopupMenu
 #########################################################################################################################
 $global:KeyBind_PopupMenu = @'
 PopupMenu   Alt             P           ttcmd_menu_move_up
+PopupMenu   Control         P           ttcmd_menu_move_up
 PopupMenu   Alt             N           ttcmd_menu_move_down
+PopupMenu   Control         N           ttcmd_menu_move_down
 PopupMenu   Alt, Shift      P           ttcmd_menu_move_first
+PopupMenu   Control, Shift  P           ttcmd_menu_move_first
 PopupMenu   Alt, Shift      N           ttcmd_menu_move_last
+PopupMenu   Control, Shift  N           ttcmd_menu_move_last
 PopupMenu   None            Up          ttcmd_menu_move_up
 PopupMenu   None            Down        ttcmd_menu_move_down
 PopupMenu   Shift           Up          ttcmd_menu_move_first
 PopupMenu   Shift           Down        ttcmd_menu_move_last
 popupMenu   Alt             Q           ttcmd_menu_cancel
+popupMenu   Control         Q           ttcmd_menu_cancel
 PopupMenu   None            Escape      ttcmd_menu_cancel
+PopupMenu   Alt             Escape      ttcmd_menu_cancel
+PopupMenu   Control         Escape      ttcmd_menu_cancel
+PopupMenu   None            Space       ttcmd_menu_ok
 PopupMenu   Alt             Space       ttcmd_menu_ok
-PopupMenu   Alt             Return      ttcmd_menu_ok
+PopupMenu   Control         Space       ttcmd_menu_ok
 PopupMenu   None            Return      ttcmd_menu_ok
+PopupMenu   Alt             Return      ttcmd_menu_ok
+PopupMenu   Control         Return      ttcmd_menu_ok
 '@
 
 function ttcmd_menu_move_up( $source, $mod, $key ){

@@ -1,4 +1,9 @@
-﻿#region Key Event
+﻿
+
+
+
+
+#region Key Event
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 [ScriptBlock] $global:TTPreviewKeyDown = { # Bind to AppMan, PopupMenu, Cabinet
 
@@ -58,8 +63,6 @@
 }
 [ScriptBlock] $global:TTPreviewKeyUp = { # Bind to AppMan, PopupMenu, Cabinet
     if( [TTTentativeKeyBindingMode]::Check( $args[1].Key ) ){
-        ttcmd_menu_cancel 'PopupMenu' '' ''
-        ttcmd_menu_cancel 'Cabinet' '' ''
         $args[1].Handled = $True
     }
 }
@@ -115,7 +118,7 @@ function KeyBindingSetup(){
 [ScriptBlock] $global:TTDataGrid_GotFocus = { $args[1].Handled = $global:appcon.event_refocus( $args ) }
 
 
-[ScriptBlock] $global:TextEditors_GotFocus =    { $global:appcon.tools.editor.on_focus( $args ) }
+[ScriptBlock] $global:TextEditors_GotFocus =    { $global:appcon.tools.editor.event_setup_after_focus_changes( $args ) }
 [ScriptBlock] $global:TTMenu_GotFocus =         {}     # menu制御
 [ScriptBlock] $global:TTMenu_LostFocus =        {}
 [ScriptBlock] $global:TTWindow_GotFocus =       {}   # application制御
@@ -127,7 +130,7 @@ function KeyBindingSetup(){
 #region Mouse Click Events
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 [ScriptBlock] $global:TTDataGrid_PreviewMouseDown =     { $global:appcon.group.event_select_datagrid_item_by_mouse( $args ) }
-[ScriptBlock] $global:TextEditors_PreviewMouseDown =    { $global:appcon.tools.editor.on_previewmousedown( $args ) }
+[ScriptBlock] $global:TextEditors_PreviewMouseDown =    { $global:appcon.tools.editor.event_invoke_actions( $args ) }
 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -135,20 +138,20 @@ function KeyBindingSetup(){
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 [ScriptBlock] $global:TTPanel_SizeChanged = { $global:appcon.event_set_border( $args ) }
 
-# [ScriptBlock] $global:TTPanelTool_GotFocus =    { $args[1].Handled = $global:appcon.set_gotfocus_status( $args ) }
-# [ScriptBlock] $global:TTPanelTool_LostFocus =   { $args[1].Handled = $global:appcon.set_lostfocus_status( $args ) }
-
 [ScriptBlock] $global:TTPanel_TextChanged_ToExtract =   { $global:appcon.group.event_extract_datagrid_items( $args ) }
 [ScriptBlock] $global:TTDesk_TextChanged_ToHighlight =  { $global:appcon.group.event_highlight_text_on_editor( $args ) }
 
 [ScriptBlock] $global:TTDataGrid_Sorting =          { $global:appcon.group.event_sort_datagrid( $args ) }
 [ScriptBlock] $global:TTDataGrid_SelectionChanged = { $global:appcon.group.event_selection_change_datagrid( $args ) }
 
+# [ScriptBlock] $global:TTPanelTool_GotFocus =    { $args[1].Handled = $global:appcon.set_gotfocus_status( $args ) }
+# [ScriptBlock] $global:TTPanelTool_LostFocus =   { $args[1].Handled = $global:appcon.set_lostfocus_status( $args ) }
+
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 #region TextEditor related Events
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-[ScriptBlock] $global:TextEditors_TextChanged =        { $global:appcon.tools.editor.on_textchanged( $args ) }
+[ScriptBlock] $global:TextEditors_TextChanged =        { $global:appcon.tools.editor.event_auto_save_after_text_change( $args ) }
 [ScriptBlock] $global:TextEditors_PreviewDrop =        { $global:appcon.tools.editor.on_previewdrop( $args ) }
 
 [ScriptBlock] [TTEditorsManager]::OnSave = { $global:appcon.tools.editor.on_save( $args ) }
@@ -156,152 +159,6 @@ function KeyBindingSetup(){
 
 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-#region Event Binding
-#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-[ScriptBlock] $global:TTStatus_OnSave = {  $global:appcon.event_save_status( $args ) } 
-
-#region　Model Action-Command Binding
-[TTMemo]::Action =                  'ttact_open_memo'
-[TTMemo]::ActionDiscardResources =  'ttact_discard_resources'
-[TTMemo]::ActionOpen =              'ttact_open_memo'
-[TTMemo]::ActionDataLocation =      'ttact_select_file'
-[TTMemo]::ActionToClipboard =       'ttact_copy_object'
-
-[TTCollection]::Action =                    'ttact_display_in_shelf'
-[TTCollection]::ActionDiscardResources =    'ttact_discard_resources'
-[TTCollection]::ActionToShelf =             'ttact_display_in_shelf'
-[TTCollection]::ActionToIndex =             'ttact_display_in_index'
-[TTCollection]::ActionToCabinet =           'ttact_display_in_cabinet'
-[TTCollection]::ActionDataLocaiton =        'ttact_select_file'
-
-[TTConfig]::Action =                    'ttact_noop'
-[TTConfig]::ActionDiscardResources =    'ttact_noop'
-[TTConfig]::ActionDataLocaiton =        'ttact_noop'
-
-[TTState]::Action =                     'ttact_noop'
-[TTState]::ActionDiscardResources =     'ttact_noop'
-[TTState]::ActionFilter =               'ttact_noop'
-[TTCommand]::Action =                   'ttact_noop'
-[TTCommand]::ActionDiscardResources =   'ttact_noop'
-[TTCommand]::ActionInvokeCommand =      'ttact_noop'
-[TTSearchMethod]::Action =                  'ttact_noop'
-[TTSearchMethod]::ActionDiscardResources =  'ttact_noop'
-[TTSearchMethod]::ActionDataLocation =      'ttact_noop'
-[TTSearchMethod]::ActionToEditor =          'ttact_noop'
-[TTSearchMethod]::ActionOpenUrl =           'ttact_open_url'
-[TTSearchMethod]::ActionOpenUrlEx =         'ttact_open_url_ex'
-[TTSearchMethod]::ActionToClipboard =       'ttact_copy_url_toclipboard'
-[TTExternalLink]::Action =                  'ttact_noop'
-[TTExternalLink]::ActionDiscardResources =  'ttact_noop'
-[TTExternalLink]::ActionDataLocation =      'ttact_noop'
-[TTExternalLink]::ActionOpenUrl =           'ttact_open_url'
-[TTExternalLink]::ActionOpenUrlEx =         'ttact_open_url_ex'
-[TTExternalLink]::ActionToClipboard =       'ttact_copy_url_toclipboard'
-[TTEditing]::Action =                  'ttact_open_memo'
-[TTEditing]::ActionDiscardResources =  'ttact_discard_resources'
-[TTEditing]::ActionDataLocation =      'ttact_select_file'
-
-
-#region　Model Actions
-#########################################################################################################################
-function ttact_open_memo( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # メモを開く
-    
-    $global:appcon.tools.editor.load( $ttobj.MemoID )
-}
-function ttact_discard_resources( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # 関連リソースを開放する
-
-    $ttobjs.foreach{ $_.$ttobj.DiscardResources() }
-    
-}
-function ttact_select_file( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # 関連ファイルをエクスプローラーで選択する
-
-    $ttobjs.foreach{ Start-Process "explorer.exe" "/select,`"$($_.GetFilename())`"" }
-}
-function ttact_copy_object( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # TTObjectをコピーする
-
-    [TTClipboard]::Copy( [object[]]$ttobjs )
-
-}
-
-
-function ttact_noop( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # 何もしない
-
-    [TTTool]::debug_message( $ttobj.GetDictionary().Index, "ttact_noop" )
-
-}
-
-
-
-function ttact_display_in_shelf( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # Shelfパネルに表示する
-
-    [TTTool]::debug_message( $ttobj.gettype(), "ttact_display_in_shelf" )
-    $global:appcon.group.load( 'Shelf', $ttobj.name )
-}
-function ttact_display_in_index( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # Indexパネルに表示する
-
-    [TTTool]::debug_message( $ttobj.gettype(), "ttact_display_in_index" )
-    $global:appcon.group.load( 'Index', $ttobj.name )
-}
-function ttact_display_in_cabinet( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # Cabinetパネルに表示する
-
-    [TTTool]::debug_message( $ttobj.gettype(), "ttact_display_in_cabinet" )
-    $global:appcon.group.load( 'Cabinet', $ttobj.name ).focus('Cabinet')
-}
-
-function ttact_copy_url_toclipboard( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # urlをクリップボードに保存する
-
-    [TTTool]::debug_message( $ttobj.gettype().Index, "ttact_copy_url_toclipboard" )
-    switch( $ttobj.GetType() ){
-        'TTExternalLink' { [TTClipboard]::Copy( $ttobj.Uri ) }
-        'TTSearchMethod' { [TTClipboard]::Copy( $ttobj.Url ) }
-    }
-}
-function ttact_open_url_ex( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # urlを外部ツールで開く
-
-    [TTTool]::debug_message( $ttobj.gettype().Index, "ttact_open_url_ex" )
-    switch( $ttobj.GetType() ){
-        'TTExternalLink' { [TTTool]::open_url( $ttobj.Uri ) }
-        'TTSearchMethod' { [TTTool]::open_url( $ttobj.Url ) }
-    }
-}
-function ttact_open_url( $ttobj, $ttobjs ){
-    #.SYNOPSIS
-    # urlを開く（未実装）
-
-    [TTTool]::debug_message( $ttobj.gettype().Index, "ttact_open_url" )
-    switch( $ttobj.GetType() ){
-        'TTExternalLink' { [TTTool]::open_url( $ttobj.Uri ) }
-        'TTSearchMethod' { [TTTool]::open_url( $ttobj.Url ) }
-    }
-
-}
-
-#endregion###############################################################################################################
-
-#endregion'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 
 

@@ -1,11 +1,16 @@
 ﻿
 
 
+
+
 using namespace System.Windows.Controls
 using namespace System.Windows 
 using namespace System.Xml
 using namespace System.Windows.Input
 using namespace System.Windows.Documents
+
+
+
 
 
 class TTApplicationController {
@@ -1256,20 +1261,20 @@ class TTEditorController {
     #endregion
 
     #region event
-    [bool] on_textchanged( $params ){
+    [bool] event_auto_save_after_text_change( $params ){
 
         $editor = $params[0]
         $num = [int][string]($editor.Name[-1])
 
         if( $global:AppMan.Document.Editor.UpdateFolding($num) ){
-            TTTimerResistEvent "on_textchanged(Editor$num)" 10 0 { 
+            TTTimerResistEvent "event_auto_save_after_text_change(Editor$num)" 10 0 { 
                 $global:appcon.tools.editor.save($num)
             }.GetNewClosure()
         }
 
         return $true
     }
-    [bool] on_focus( $params ){
+    [bool] event_setup_after_focus_changes( $params ){
 
         return $true
 
@@ -1293,7 +1298,7 @@ class TTEditorController {
         return $true
 
     }
-    [bool] on_previewmousedown( $params ){
+    [bool] event_invoke_actions( $params ){
         $editor =   $params[0]
         $mouse =    $params[1]
     

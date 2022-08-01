@@ -162,26 +162,31 @@ class TTCollection : TTObject {
         if( $this.OnChange ){ &($this.OnChange) $this }
         return $true
     }
-    # [object[]] ConfigLines( [string]$tag ) {
-    #     $lines = @(
-    #         Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
-    #         Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
-    #         Select-String "^Thinktank:$tag" | `
-    #         Select-Object -Property Filename, LineNumber, Line
-    #     )
+    [psobject[]] ConfigLines( [string]$tag ) {
+        $lines = @()
 
-    #     ForEach ( $line in $lines ) {
-    #         $file = Get-Item -Path ([TTTool]::index_to_filepath( $line.Filename ))
-    #         $line.Line -match "Thinktank:設定(@(?<pcname>.*))?:(?<name>[^,@]+)\s*,\s*(?<description>[^,]+)\s*,\s*(?<value>[^,]+)\s*"
-    #         $ma = $Matches
-    #         if ( 0 -lt $ma.pcname.length ) {
-    #             if ( $ma.pcname.Trim() -ne $Env:COMPUTERNAME ) { continue }
-    #         }else {
-    #             if ( $this.children.contains($ma.name.Trim()) ) { continue }
-    #         }
-    #     }
-    # }
+        @(  Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
+            Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
+            Select-String "^Thinktank:$tag" | `
+            Select-Object -Property Filename, LineNumber, Line
 
+        ).foreach{
+
+            if( $_.Line -match "^Thinktank:$tag(@.*(?<pcname>[^,@:]+).*)?:\s*(?<name>[^,@]+)\s*,\s*(?<value>.*)\s*$" ){
+                if( (($null -eq $Matches.pcname) -and (-not $lines.contains( $Matches.name ))) -or
+                    ($Env:COMPUTERNAME -eq $Matches.pcname) ){
+                    $lines += [psobject]@{
+                        name = $Matches.name
+                        value = $Matches.value
+                        filename = $_.Filename
+                        linenumber = $_.LineNumber
+                    }
+                }
+            }
+        }
+        
+        return $lines
+    }
     [void] AddChild( $item ) {      # should be override
         $child = ( $item -as $this.ChildType )
         $this.children[ $child.$($child.GetDictionary().Index) ] = $child
@@ -388,7 +393,6 @@ class TTConfig : TTObject {
 
     [string]$Description
     [string]$Value
-    [string]$PCName
     [string]$MemoPos
     [string]$UpdateDate
 
@@ -397,7 +401,6 @@ class TTConfig : TTObject {
             Name        = "名前"
             Description = "説明"
             Value       = "設定値"
-            PCName      = "PC名"
             MemoPos     = "記載場所"
             UpdateDate  = "更新日"
             Index       = "Name"
@@ -445,41 +448,52 @@ class TTConfigs: TTCollection {
         $this.AddChild( [TTConfig]@{ Name = "RootFolder"
             Description = "ルートフォルダ"
             Value = $global:TTRootDirPath
-            PCName = ""
             MemoPos = "thinktank-modes.ps1"
             UpdateDate = "1970-03-11-000000"
         })
         $this.AddChild( [TTConfig]@{ Name = "MemoFolder"
             Description = "メモフォルダ"
             Value = $global:TTMemoDirPath
-            PCName = ""
             MemoPos = "thinktank-modes.ps1"
             UpdateDate = "1970-03-11-000000"
         })
         $this.AddChild( [TTConfig]@{ Name = "CacheFolder"
             Description = "キャッシュフォルダ"
             Value = $global:TTCacheDirPath
-            PCName = ""
             MemoPos = "thinktank-modes.ps1"
             UpdateDate = "1970-03-11-000000"
         })
         $this.AddChild( [TTConfig]@{ Name = "BackupFolder"
             Description = "バックアップフォルダ"
             Value = $global:TTBackupDirPath
-            PCName = ""
             MemoPos = "thinktank-modes.ps1"
             UpdateDate = "1970-03-11-000000"
         })
         $this.AddChild( [TTConfig]@{ Name = "ScriptFolder"
             Description = "スクリプトアップフォルダ"
             Value = $global:TTScriptDirPath
-            PCName = ""
             MemoPos = "thinktank-modes.ps1"
             UpdateDate = "1970-03-11-000000"
         })
 
     }
     [bool] Update() {
+
+        $configs = $this.ConfigLines("設定")
+        $configs.foreach{
+            $file = Get-Item -Path ([TTTool]::index_to_filepath($_.filename))
+            $description, $value = $_.value -split ',' 
+
+            $child = New-Object -TypeName $this.ChildType
+            $child.Name = $_.name
+            $child.Value = $value
+            $child.Description = $description
+            $child.UpdateDate = $file.LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
+            $child.MemoPos = "$($file.BaseName):$($_.linenumber)"
+            $this.AddChild( $child )
+        }
+
+        return $true
 
         $lines = @(
             Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `

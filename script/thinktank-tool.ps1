@@ -44,7 +44,7 @@ class TTTool{
             "thinktank" { 
                 return "$global:TTRootDirPath\thinktank.md"
             }
-            "(?<num>\d{4}\-\d{2}\-\d{2]\-\d{6})" { 
+            "(?<num>\d{4}\-\d{2}\-\d{2}\-\d{6})" { 
                 return "$global:TTMemoDirPath\$($Matches.num).txt"
             }
             default {
