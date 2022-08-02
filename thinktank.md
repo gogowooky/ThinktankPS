@@ -9,7 +9,8 @@ Thinktank。　考え（Think）を蓄えるもの（tank）。
 目的は、記憶をたぐりよせるためのきっかけ、を複数提供することです。
 そのために、
 　テキスト、イメージ、リンク、をタイムスタンプ付で記録します。
-　
+
+
 ### 管理
 テキスト：プレーンテキストのみを対象
 　メモ
@@ -180,34 +181,34 @@ Thinktank:URI:System.Windows.Controls, https://docs.microsoft.com/ja-jp/dotnet/a
 Thinktank:URI:AvalonEdit, http://avalonedit.net/documentation/, Program:WPF:TextEditor
 
 ## 検索サイト
-Thinktank:検索:グーグル検索 [Google], http://www.google.co.jp/search?q=[param], Google:Japan
-Thinktank:検索:グーグル検索（英） [GoogleE], http://www.google.co.jp/search?q=[param]&lr=lang_en, Google:English
-Thinktank:検索:グーグル英訳 [GoogleJE], https://translate.google.com/?hl=ja#view=home&op=translate&sl=ja&tl=en&text=[param], Google:JE
-Thinktank:検索:グーグル和訳 [GoogleEJ], https://translate.google.com/?hl=ja#view=home&op=translate&sl=en&tl=ja&text=[param], Google:EJ
-Thinktank:検索:グーグル中訳 [GoogleJC], https://translate.google.com/?hl=ja#view=home&op=translate&sl=ja&tl=zh-CN&text=[param], Google:JC
-Thinktank:検索:グーグルマップ検索 [GoogleMap], https://www.google.co.jp/maps/place/[param], Google:Map:Japan
-Thinktank:検索:グーグルスカラー [GScholar], https://scholar.google.co.jp/scholar?q=[param], Google:Scholar
-Thinktank:検索:Youtube [Youtube], https://www.youtube.com/results?search_query=[param], Youtube
-Thinktank:検索:Pubmed検索 [Pubmed], https://pubmed.ncbi.nlm.nih.gov/?term=[param], Science:Clinical:Pubmed
-Thinktank:検索:Yahoo検索 [Yahoo], https://search.yahoo.co.jp/search?p=[param], Yahoo:Japan
-Thinktank:検索:国立保健医療科学院 [NIPH], https://rctportal.niph.go.jp/s/result?q=[param]&t=chiken, Clinical:Trials:NIPH
-Thinktank:検索:ClinicalTrials.gov [CTG], https://clinicaltrials.gov/ct2/results?cond=[param]&term=&cntry=&state=&city=&dist=, Clinical:Trials:CTG
-Thinktank:検索:コルテリス [Cortellis], https://www.cortellis.com/intelligence/qsearch/[param]?indexBased=true&searchCategory=ALL, Clinical:Database:Cortellis
-Thinktank:検索:医薬品医療機器総合機構 [PMDA], https://ss.pmda.go.jp/ja_all/search.x?q=[param]&ie=UTF-8&page=1, Clinical:Database:PMDA
-Thinktank:検索:日本学術振興会 科研費 [KAKEN], https://kaken.nii.ac.jp/ja/search/?kw=[param], Clinical:Database:KAKEN
-Thinktank:検索:欧州医薬品庁 [EMA], https://www.clinicaltrialsregister.eu/ctr-search/search?query=[param], Clinical:Trials:EMA
-Thinktank:検索:科学技術振興機構 [JST], https://www.jstage.jst.go.jp/result/global/-char/ja?globalSearchKey=[param], Clinical:Database:JStage
-Thinktank:検索:PubMed Central [PMC], https://www.ncbi.nlm.nih.gov/pmc/?term=[param], Clinical:Database:PMC
-Thinktank:検索:厚生労働省 [MHLW], https://www.mhlw.go.jp/search.html?q=[param], Clinical:Database:MHLW
-Thinktank:検索:厚労省科研DB [MHLWG], https://mhlw-grants.niph.go.jp/search?kywd=[param], Clinical:Database:MHLWGrants
-Thinktank:検索:Spotify [Spotify], https://open.spotify.com/search/[param], Music:Spotify
-Thinktank:検索:ウィキペディア [Wikipedia], https://ja.wikipedia.org/wiki/[param], Wikipedia:Japan
-Thinktank:検索:ウィキペディア（英） [WikipediaE], https://en.wikipedia.org/wiki/[param], Wikipedia:English
-Thinktank:検索:.NET API Browser [NET], https://docs.microsoft.com/ja-jp/dotnet/api/?view=net-5.0&term=[param], Program:Microsoft:.NET :API
-Thinktank:検索:Outlook, https://docs.microsoft.com/ja-jp/search/?search=[param]&category=outlook, Program:Microsoft:Outlook:VBA
-Thinktank:検索:Excel, https://docs.microsoft.com/ja-jp/search/?search=[param]&category=excel, Program:Microsoft:Excel:VBA
-Thinktank:検索:Word, https://docs.microsoft.com/ja-jp/search/?search=[param]&category=word, Program:Microsoft:Word:VBA
-Thinktank:検索:Object, https://docs.microsoft.com/ja-jp/search/?search=[param]&category=objects-visual-basic-for-applications, Program:Microsoft:Object:VBA
+Thinktank:検索:Google,      グーグル検索,           http://www.google.co.jp/search?q=[param], Google:Japan
+Thinktank:検索:GoogleE,     グーグル検索（英）,     http://www.google.co.jp/search?q=[param]&lr=lang_en, Google:English
+Thinktank:検索:GoogleJE,    グーグル英訳,           https://translate.google.com/?hl=ja#view=home&op=translate&sl=ja&tl=en&text=[param], Google:JE
+Thinktank:検索:GoogleEJ,    グーグル和訳,           https://translate.google.com/?hl=ja#view=home&op=translate&sl=en&tl=ja&text=[param], Google:EJ
+Thinktank:検索:GoogleJC,    グーグル中訳,           https://translate.google.com/?hl=ja#view=home&op=translate&sl=ja&tl=zh-CN&text=[param], Google:JC
+Thinktank:検索:GoogleMap,   グーグルマップ検索,     https://www.google.co.jp/maps/place/[param], Google:Map:Japan
+Thinktank:検索:GScholar,    グーグルスカラー,       https://scholar.google.co.jp/scholar?q=[param], Google:Scholar
+Thinktank:検索:Youtube,     Youtube,                https://www.youtube.com/results?search_query=[param], Youtube
+Thinktank:検索:Pubmed,      Pubmed検索,             https://pubmed.ncbi.nlm.nih.gov/?term=[param], Science:Clinical:Pubmed
+Thinktank:検索:Yahoo,       Yahoo検索,              https://search.yahoo.co.jp/search?p=[param], Yahoo:Japan
+Thinktank:検索:NIPH,        国立保健医療科学院,     https://rctportal.niph.go.jp/s/result?q=[param]&t=chiken, Clinical:Trials:NIPH
+Thinktank:検索:CTG,         ClinicalTrials.gov,     https://clinicaltrials.gov/ct2/results?cond=[param]&term=&cntry=&state=&city=&dist=, Clinical:Trials:CTG
+Thinktank:検索:Cortellis,   コルテリス,             https://www.cortellis.com/intelligence/qsearch/[param]?indexBased=true&searchCategory=ALL, Clinical:Database:Cortellis
+Thinktank:検索:PMDA,        医薬品医療機器総合機構,  https://ss.pmda.go.jp/ja_all/search.x?q=[param]&ie=UTF-8&page=1, Clinical:Database:PMDA
+Thinktank:検索:KAKEN,       日本学術振興会 科研費,   https://kaken.nii.ac.jp/ja/search/?kw=[param], Clinical:Database:KAKEN
+Thinktank:検索:EMA,         欧州医薬品庁,           https://www.clinicaltrialsregister.eu/ctr-search/search?query=[param], Clinical:Trials:EMA
+Thinktank:検索:JST,         科学技術振興機構,       https://www.jstage.jst.go.jp/result/global/-char/ja?globalSearchKey=[param], Clinical:Database:JStage
+Thinktank:検索:PMC,         PubMed Central,         https://www.ncbi.nlm.nih.gov/pmc/?term=[param], Clinical:Database:PMC
+Thinktank:検索:MHLW,        厚生労働省,             https://www.mhlw.go.jp/search.html?q=[param], Clinical:Database:MHLW
+Thinktank:検索:MHLWG,       厚労省科研DB,           https://mhlw-grants.niph.go.jp/search?kywd=[param], Clinical:Database:MHLWGrants
+Thinktank:検索:Spotify,     Spotify,                https://open.spotify.com/search/[param], Music:Spotify
+Thinktank:検索:Wikipedia,   ウィキペディア,         https://ja.wikipedia.org/wiki/[param], Wikipedia:Japan
+Thinktank:検索:WikipediaE,  ウィキペディア（英）,   https://en.wikipedia.org/wiki/[param], Wikipedia:English
+Thinktank:検索:NET,         .NET API Browser,       https://docs.microsoft.com/ja-jp/dotnet/api/?view=net-5.0&term=[param], Program:Microsoft:.NET :API
+Thinktank:検索:VBAOutlook,  VBAOutlook,             https://docs.microsoft.com/ja-jp/search/?search=[param]&category=outlook, Program:Microsoft:Outlook:VBA
+Thinktank:検索:VBAExcel,    VBAExcel,               https://docs.microsoft.com/ja-jp/search/?search=[param]&category=excel, Program:Microsoft:Excel:VBA
+Thinktank:検索:VBAWord,     VBAWord,                https://docs.microsoft.com/ja-jp/search/?search=[param]&category=word, Program:Microsoft:Word:VBA
+Thinktank:検索:VBAObject,   VBAObject,              https://docs.microsoft.com/ja-jp/search/?search=[param]&category=objects-visual-basic-for-applications, Program:Microsoft:Object:VBA
 
 ## 履歴
 Thinktank:設定:Application.Author,      制作者, Shinihciro Egashira

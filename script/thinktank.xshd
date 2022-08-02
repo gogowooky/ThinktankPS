@@ -42,7 +42,7 @@
 
         <!-- Tag -->
         <Span color="Tag" begin="\[():" end="\]" />
-        <Span color="SearchTag" begin="\[(CTG|KAKEN|GoogleJE|mail|GScholar|MHLWG|GoogleJC|GoogleE|Route|photo|Yahoo|Spotify|JST|Google|NET|Youtube|memo|GoogleEJ|PMC|Pubmed|Cortellis|Wikipedia|PMDA|ref|GoogleMap|NIPH|EMA|MHLW|WikipediaE):" end="\]" />
+        <Span color="SearchTag" begin="\[(CTG|KAKEN|VBAWord|GoogleJE|mail|GScholar|VBAExcel|MHLWG|GoogleJC|GoogleE|Route|photo|VBAObject|Spotify|JST|Google|NET|Yahoo|VBAOutlook|Youtube|memo|GoogleEJ|PMC|Pubmed|Cortellis|Wikipedia|PMDA|ref|GoogleMap|NIPH|EMA|MHLW|WikipediaE):" end="\]" />
 
         <!-- Date(tag) -->
         <Rule foreground="orange" underline="true" >

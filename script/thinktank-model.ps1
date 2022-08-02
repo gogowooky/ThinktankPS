@@ -485,11 +485,11 @@ class TTConfigs: TTCollection {
             $description, $value = $_.value -split ',' 
 
             $child = New-Object -TypeName $this.ChildType
-            $child.Name = $_.name
-            $child.Value = $value
-            $child.Description = $description
-            $child.UpdateDate = $file.LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
-            $child.MemoPos = "$($file.BaseName):$($_.linenumber)"
+            $child.Name =           $_.name
+            $child.Value =          $value
+            $child.Description =    $description
+            $child.UpdateDate =     $file.LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
+            $child.MemoPos =        "$($file.BaseName):$($_.linenumber)"
             $this.AddChild( $child )
         }.count
 
@@ -696,8 +696,8 @@ class TTCommands: TTCollection {
             Where-Object { $_ -like "ttcmd_*" }
         ).foreach{
             $child = [TTCommand]::New()
-            $child.Name = $_
-            $child.Description = ( Get-Help $_ | foreach-Object { $_.synopsis.split('|')[0] } )
+            $child.Name =           $_
+            $child.Description =    ( Get-Help $_ | foreach-Object { $_.synopsis.split('|')[0] } )
             $this.AddChild( $child ) 
         }.count
 
@@ -710,7 +710,7 @@ class TTCommands: TTCollection {
         }
 
         return $true
-        
+
     }
     [void] DeleteChild( $name ) {
         return
@@ -849,38 +849,32 @@ class TTSearchMethods: TTCollection {
         })
     }
     [bool] Update() {               # should be defined
-        $lines = @(
-            Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
-                Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
-                Select-String "^Thinktank:検索:" | `
-                Select-Object -Property Filename, LineNumber, Line
-        )
 
-        if ( 0 -Lt $lines.Count ) {
-            foreach ( $line in $lines ) {
-                $file = Get-Item -Path ([TTTool]::index_to_filepath( $line.Filename ))
-                $line.Line -match "Thinktank:検索:(?<title>[^,]+\s*)\[(?<tag>[^,]+)\]\s*,\s*(?<url>[^,]+)(,(?<catalog>.*))?"
-                $ma = $Matches
+        $count = $this.ConfigLines("検索").foreach{
+            $file = Get-Item -Path ([TTTool]::index_to_filepath($_.filename))
+            $tag = $_.name
+            $name, $url, $category = $_.value.split(',').Trim()
 
-                $child = [TTSearchMethod]::New()
-                $child.Tag = $ma.tag
-                $child.Name = $ma.title.Trim()
-                $child.Url = $ma.url.Trim()
-                $child.Category = $ma.catalog.Trim()
-                $child.UpdateDate = $file.LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
-                $child.MemoPos = "$($file.BaseName):$($line.LineNumber)"
-                $this.AddChild( $child )
-            }
+            $child = [TTSearchMethod]::New()
+            $child.Tag = $tag
+            $child.Name = $name
+            $child.Url = $url
+            $child.Category = $category
+            $child.UpdateDate = $file.LastWriteTime.ToString("yyyy-MM-dd-HHmmss")
+            $child.MemoPos = "$($file.BaseName):$($_.LineNumber)"
+            $this.AddChild( $child )
+        }.count
 
+        if( 0 -lt $count ){
             $this.UpdateDate = ( Get-Date -Format "yyyy-MM-dd-HHmmss")
+
             if( $this.OnUpdate ){ &$this.OnUpdate $this }
             if( $this.OnChange ){ &$this.OnChange $this }
-                return $true
+   
+        }
 
-        }
-        else {
-            return $false
-        }
+        return $true
+
     }
     [void] SaveCache() {
         # overwrite : thinktank.xshdも更新
@@ -1034,6 +1028,7 @@ class TTExternalLinks: TTCollection {
 
         $this.UpdateDate = $upd
 
+        
         $lines = @(
             Get-ChildItem -Path @( "$global:TTMemoDirPath\????-??-??-??????.txt", "$global:TTRootDirPath\thinktank.md" ) | `
                 Where-Object { $this.UpdateDate -Lt $_.LastWriteTime.ToString("yyyy-MM-dd-HHmmss") } | `
