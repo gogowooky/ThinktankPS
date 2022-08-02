@@ -30,7 +30,7 @@ class TTAppManager {
 
     TTAppManager(){
 
-        [xml]$xaml = Get-Content ( $global:TTScriptDirPath + "\thinktank.xaml" )
+        [xml]$xaml = (Get-Content ( $global:TTScriptDirPath + "\thinktank.xaml" ) ).replace( "C:\Users\shin\Documents\ThinktankPS2\script", $global:TTScriptDirPath )
         $this._window = [System.Windows.Markup.XamlReader]::Load( (New-Object XmlNodeReader $xaml) )
 
         $this._window.Add_Loaded( $global:TTWindowLoaded )
@@ -623,7 +623,7 @@ class TTCabinetManager : TTPanelManager {
             </Grid>
         </Border>
     </Window>
-"@
+"@.replace( "C:\Users\shin\Documents\ThinktankPS2\script", $global:TTScriptDirPath )
 
     TTCabinetManager( [TTAppManager]$app ) : base ( "Cabinet", $app, $null ){
 
@@ -1482,7 +1482,7 @@ class TTPopupMenuManager {
             </DockPanel>
         </Border>
     </Window>
-"@
+"@.replace( "C:\Users\shin\Documents\ThinktankPS2\script", $global:TTScriptDirPath )
 
     TTPopupMenuManager( [TTAppManager]$app ){
         # [xml]$xaml = Get-Content ( $global:TTScriptDirPath + "\thinktank-popupmenu.xaml" )
@@ -1493,11 +1493,11 @@ class TTPopupMenuManager {
         $this._list = $this._window.FindName("PopupMenuItems")
 
         $this._window.Add_Closing({ $args[1].Cancel = $True })
-        $this._window.Add_MouseLeftButtonDown({ $global:AppMan.PopupMenu._window.DragMove() })
-        $this._window.Add_MouseDoubleClick({ $global:AppMan.PopupMenu.Hide($true); $args[1].Handled=$True })
+        $this._window.Add_MouseLeftButtonDown( $global:TTPopup_MouseLeftButtonDown )
+        $this._window.Add_MouseDoubleClick( $global:TTPopup_MouseDoubleClick )
         $this._window.Add_PreviewKeyDown( $global:TTPopup_PreviewKeyDown )
         $this._window.Add_PreviewKeyUp( $global:TTPopup_PreviewKeyUp )
-        $this._window.Add_LostKeyboardFocus({ $global:AppMan.PopupMenu.Hide($false); $args[1].Handled=$True })
+        $this._window.Add_LostKeyboardFocus( $global:TTPopup_LostKeyboardFocus )
         
         $style = [Style]::new()
         $style.Setters.Add( [Setter]::new( [Controls.GridViewColumnHeader]::VisibilityProperty, [Visibility]::Collapsed ) )
@@ -1534,20 +1534,17 @@ class TTPopupMenuManager {
         $sortDescription = New-Object System.ComponentModel.SortDescription( "", 'Ascending' )
         $view.SortDescriptions.Add($sortDescription)
 
-
         return $this
     }
     [TTPopupMenuManager] Hide( [bool]$result ){
-        if( $result ){
-            $this._selected = $this._list.SelectedItem
-        }else{
-            $this._selected = $null
+        if( -not $result ){
+            $this._list.SelectedIndex = -1
         }
-        $this._window.Dispatcher.Invoke({ $global:AppMan.PopupMenu._window.Hide() })
+        $this._window.Hide()
+        # $this._window.Dispatcher.Invoke({ $global:AppMan.PopupMenu._window.Hide() })
         return $this
     }
     [psobject] Show(){
-
         $width = (
             $this._list.ItemsSource.foreach{
                 [System.Text.Encoding]::GetEncoding("shift_jis").GetByteCount( $_ )
@@ -1561,19 +1558,15 @@ class TTPopupMenuManager {
         
         $this._list.SelectedIndex = -1
 
-        $mod = ''
-        if ( [Keyboard]::IsKeyDown( [Key]::LeftCtrl ) -or [Keyboard]::IsKeyDown( [Key]::RightCtrl )){ 
-            $mod = 'Control' 
-        }elseif ( [Keyboard]::IsKeyDown( [Key]::LeftAlt) -or [Keyboard]::IsKeyDown( [Key]::RightAlt )){
-            $mod = 'Alt'
-        }
-        if( $mod -ne '' ){
-            [TTTentativeKeyBindingMode]::Start( 'PopupMenu', $mod, '' )
-            [TTTentativeKeyBindingMode]::Add_OnExit({ ttcmd_menu_ok 'PopupMenu' '' '' }.GetNewClosure())
+        if( $global:TTKeyEventMod -ne 'None' ){
+            [TTTentativeKeyBindingMode]::Start( 'PopupMenu', $global:TTKeyEventMod, '' )
+            # $this.Hide($true)
+            [TTTentativeKeyBindingMode]::Add_OnExit({ $global:AppMan.PopupMenu.Hide($true) })
         }
 
-        $this._window.ShowDialog()
-        return $this._selected
+        $ret = $this._window.ShowDialog()
+        
+        return $this._list.SelectedItem
     }
     [void] Top( [int] $num ){ $this._window.Top = $num }
     [int]  Top(){ return $this._window.Top }

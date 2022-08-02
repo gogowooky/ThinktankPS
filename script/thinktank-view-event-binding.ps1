@@ -12,7 +12,9 @@
     $key =      if( $mod -in @('Alt','Alt, Shift') ){ [string]($args[1].SystemKey) }else{ [string]($args[1].Key) }
     $tttv  =    [TTTentativeKeyBindingMode]::Name
     $panel =    $global:appcon._get('Focus.Application')
-
+    $global:TTKeyEventMod = $mod
+    $global:TTKeyEventKey = $key
+    
     if( $key.Contains('Alt') -or $key.Contains('Control') ){ return }
 
     if( $source -eq 'Application' ){        #### Application
@@ -52,10 +54,9 @@
         if( $global:TTKeyEventMessage ){
             Write-Host "PreviewKeyDown source:$source, tentative:$tttv, panel:$panel, mod:$mod, key:$key, command:$command"
         }
-        switch ( Invoke-Expression "$command '$panel' '$mod' '$key'" ){
-            'cancel' { $args[1].Handled = $false }
-            default { $args[1].Handled = $true }
-        }
+        Invoke-Expression "$command '$panel' '$mod' '$key'"
+        $args[1].Handled = $true 
+        
     }else{
         $args[1].Handled = $false
     }
@@ -66,7 +67,10 @@
         $args[1].Handled = $True
     }
 }
-$global:TTKeyEventMessage = $true
+$global:TTKeyEventMod = ''
+$global:TTKeyEventKey = ''
+
+$global:TTKeyEventMessage = $false
 $global:TTKeyEvents = @{}
 $global:TTEventKeys = @{}
 
@@ -101,6 +105,15 @@ function KeyBindingSetup(){
 [ScriptBlock] $global:TTPopup_PreviewKeyUp =    $global:TTPreviewKeyUp
 [ScriptBlock] $global:TTPanel_PreviewKeyUp =    {}
 [ScriptBlock] $global:TTTool_PreviewKeyUp =     {}
+
+#endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+#region PopupMenu Event
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+[ScriptBlock] $global:TTPopup_MouseLeftButtonDown = { $global:AppMan.PopupMenu._window.DragMove() }
+[ScriptBlock] $global:TTPopup_MouseDoubleClick =    { $global:AppMan.PopupMenu.Hide($true) }
+[ScriptBlock] $global:TTPopup_LostKeyboardFocus =   { $global:AppMan.PopupMenu.Hide($false) }
+# ; $args[1].Handled = $true
 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 

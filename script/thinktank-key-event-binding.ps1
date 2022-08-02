@@ -669,12 +669,6 @@ function ttcmd_editor_scroll_tonextline( $source, $mod, $key ){
 
     $global:appcon.tools.editor.move_to( 'nextline+' )
 }
-function ttcmd_editor_edit_insert_clipboard( $source, $mod, $key ){
-    #.SYNOPSIS
-    # クリップボードの内容を貼り付ける
-
-    $global:appcon.tools.editor.paste() 
-}
 function ttcmd_editor_move_toprevline( $source, $mod, $key ){
     #.SYNOPSIS
     # カーソルを前行へ移動する
@@ -729,6 +723,32 @@ function ttcmd_editor_move_tonextkeyword( $source, $mod, $key ){
 
     $global:appcon.tools.editor.move_to('nextkeyword')
 }
+function ttcmd_editor_edit_insert_clipboard( $source, $mod, $key ){
+    #.SYNOPSIS
+    # クリップボードの内容を貼り付ける
+
+    $global:appcon.tools.editor.paste() 
+}
+function ttcmd_editor_edit_insert_date( $source, $mod, $key ){
+    #.SYNOPSIS
+    # 日付タグを挿入する
+
+    # scan & select 
+    $editor = $global:AppMan.FindName( $source )
+    $global:datetag.scan($editor)
+    $selected = $global:AppMan.PopupMenu.Caption( '日付' ).Items( $global:datetag.tags() ).Show()
+
+    # # insert tag
+    if( 0 -eq $selected.length ){ return }
+    if( $global:datetag.length -eq 0 ){
+        $editor.Document.Insert( $editor.CaretOffset, $selected )
+    }else{
+        $editor.Document.Remove( $global:datetag.offset, $global:datetag.length )
+        $editor.Document.Insert( $global:datetag.offset, $selected )
+    }
+
+    $global:datetag.reset()
+}
 
 #endregion
 
@@ -767,27 +787,6 @@ function ttcmd_editor_history_next_tocurrenteditor( $source, $mod, $key ){
     # 先のファイルを開く
     
     $global:appcon.tools.editor.load('forward')
-}
-
-function ttcmd_editor_edit_insert_date( $source, $mod, $key ){
-    #.SYNOPSIS
-    # 日付タグを挿入する
-
-    # scan & select 
-    $editor = $global:AppMan.Document.Editor.Controls[$global:AppMan.Document.CurrentNumber-1]
-    $global:datetag.scan( $editor )
-    $selected = $global:AppMan.PopupMenu.Caption( '日付' ).Items( $global:datetag.tags() ).Show()
-
-    # # insert tag
-    if( 0 -eq $selected.length ){ return }
-    if( $global:datetag.length -eq 0 ){
-        $editor.Document.Insert( $editor.CaretOffset, $selected )    
-    }else{
-        $editor.Document.Remove( $global:datetag.offset, $global:datetag.length )
-        $editor.Document.Insert( $global:datetag.offset, $selected )
-    }
-
-    $global:datetag.reset()
 }
 
 #endregion

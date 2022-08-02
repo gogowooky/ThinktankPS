@@ -587,7 +587,7 @@ class TTTentativeKeyBindingMode{
         # KeyUpイベントで以下を用いてmodeから抜ける。
         # switch( "$([TTTentativeKeyBindingMode]::Mod)" ){
         switch( [TTTentativeKeyBindingMode]::Mod ){
-                'Alt' {
+            'Alt' {
                 if( $key -in @('RightAlt', 'LeftAlt') ){
                     &([TTTentativeKeyBindingMode]::OnExit)
                     [TTTentativeKeyBindingMode]::Initialize()

@@ -1434,8 +1434,8 @@ class TTMenuController {
     #region close/cursor
     [TTMenuController] close( [string]$name, [string]$action ){
         switch( $action ){
-            'cancel' { $global:AppMan.$name.Hide( $false ) }
-            'ok' { $global:AppMan.$name.Hide( $true ) }
+            'cancel' {  $global:AppMan.$name.Hide($false) }
+            default {   $global:AppMan.$name.Hide($true) }
         }
         return $this
     }
