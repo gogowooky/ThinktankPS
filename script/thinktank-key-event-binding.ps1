@@ -149,7 +149,7 @@ function ttcmd_panel_collapse_cabinet( $source, $mod, $key ){
     #.SYNOPSIS
     # Cabinetを非表示
 
-    $global:appcon.menu.close( $source, 'ok' )
+    $global:AppMan.$source.Hide( $true )
 }
 
 function ttcmd_panel_collapse_multi_panel( $source, $mod, $key ){
@@ -878,39 +878,37 @@ function ttcmd_menu_move_up( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルのカーソルを上に移動
 
-    $global:appcon.menu.cursor( $source, 'up' )
+    $global:AppMan.$source.Cursor( 'up' )
 }
 function ttcmd_menu_move_down( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルのカーソルを下に移動
 
-    $global:appcon.menu.cursor( $source, 'down' )
+    $global:AppMan.$source.Cursor( 'down' )
 }
 function ttcmd_menu_move_first( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルのカーソルを先頭に移動
 
-    $global:appcon.menu.cursor( $source, 'first' )
+    $global:AppMan.$source.Cursor( 'first' )
 }
 function ttcmd_menu_move_last( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルのカーソルを末尾に移動
 
-    $global:appcon.menu.cursor( $source, 'last' )
+    $global:AppMan.$source.Cursor( 'last' )
 }
 function ttcmd_menu_cancel( $source, $mod, $key ){
     #.SYNOPSIS
     # メニューの選択をキャンセル
 
-    $global:appcon.menu.close( $source, 'cancel' )
-    return $true
+    $global:AppMan.$source.Hide( $false )
 }
 function ttcmd_menu_ok( $source, $mod, $key ){
     #.SYNOPSIS
     # メニューの選択を確定
 
-    $global:appcon.menu.close( $source, 'ok' )
-    return $true
+    $global:AppMan.$source.Hide( $true )
 }
 
 

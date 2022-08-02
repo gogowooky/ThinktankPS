@@ -15,7 +15,6 @@ using namespace System.Windows.Documents
 
 class TTApplicationController {
     #region variants/ new/ default/ initialize_application
-    [TTMenuController] $menu
     [TTViewController] $view
     [TTGroupController] $group
     [TTToolsController] $tools
@@ -23,7 +22,6 @@ class TTApplicationController {
     [TTConfigs] $configs
 
     TTApplicationController(){
-        $this.menu = [TTMenuController]::New( $this )
         $this.view = [TTViewController]::New( $this )
         $this.group = [TTGroupController]::New( $this )
         $this.tools = [TTToolsController]::New( $this )
@@ -48,7 +46,6 @@ class TTApplicationController {
         $this._set( 'Config.KeyDownMessage',      'False' )
         $this._set( "Config.TaskResisterMessage", 'False' )
 
-        [void] $this.menu.default()
         [void] $this.view.default()
         [void] $this.group.default()
         [void] $this.tools.default()
@@ -62,7 +59,6 @@ class TTApplicationController {
         $this.configs.GetChildren().foreach{ if( $this._isnull( $_.Name ) ){ $this._set( $_.Name, $_.Value ) } }
         $this.status.GetChildren().foreach{ $this._set( $_.Name, $_.Value ) }
 
-        [void] $this.menu.initialize()
         [void] $this.view.initialize()
         [void] $this.group.initialize()
         [void] $this.tools.initialize()
@@ -1409,42 +1405,6 @@ class TTGridController {
         return $this
     }
     #endregion
-}
-class TTMenuController {
-    #region variants/ new/ default/ initialize
-    [TTApplicationController] $app
-
-    TTMenuController( [TTApplicationController] $_app ){
-        $this.app = $_app
-    }
-    [TTMenuController] default(){
-        $this.app._set( 'PopupMenu.Left',   '0' )
-        $this.app._set( 'PopupMenu.Top',    '0' )
-
-        return $this
-    }
-    [TTMenuController] initialize(){
-        $global:AppMan.PopupMenu.Left( $this.app._get('PopupMenu.Left') )
-        $global:AppMan.PopupMenu.Top( $this.app._get('PopupMenu.Top') )
-
-        return $this
-    }
-    #endregion
-
-    #region close/cursor
-    [TTMenuController] close( [string]$name, [string]$action ){
-        switch( $action ){
-            'cancel' {  $global:AppMan.$name.Hide($false) }
-            default {   $global:AppMan.$name.Hide($true) }
-        }
-        return $this
-    }
-    [TTMenuController] cursor( [string]$name, [string]$to ){
-        $global:AppMan.$name.Cursor( $to )
-        return $this
-    }
-    #endregion
-
 }
 
 <# region 旧　index, library, shelf, ListMenu 

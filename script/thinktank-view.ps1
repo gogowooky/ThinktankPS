@@ -1532,7 +1532,7 @@ class TTPopupMenuManager {
         return $this
     }
     [TTPopupMenuManager] Hide( [bool]$result ){
-        if( -not $result ){
+        if( $result -ne $true ){
             $this._list.SelectedIndex = -1
         }
         $this._window.Hide()
