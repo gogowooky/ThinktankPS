@@ -126,7 +126,6 @@ function KeyBindingSetup(){
 #region Focus Event
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 [ScriptBlock] $global:TTPanel_GotFocus =    { $args[1].Handled = $global:appcon.event_set_focus_panel( $args ) }
-[ScriptBlock] $global:TTTextBox_GotFocus =  { $args[1].Handled = $global:appcon.event_set_focus_application( $args ) }
 [ScriptBlock] $global:TTTool_GotFocus =     { $args[1].Handled = $global:appcon.event_set_focus_application( $args ) }
 [ScriptBlock] $global:TTDataGrid_GotFocus = { $args[1].Handled = $global:appcon.event_refocus( $args ) }
 
@@ -143,7 +142,9 @@ function KeyBindingSetup(){
 #region Mouse Click Events
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 [ScriptBlock] $global:TTDataGrid_PreviewMouseDown =     { $global:appcon.group.event_select_datagrid_item_by_mouse( $args ) }
-[ScriptBlock] $global:TextEditors_PreviewMouseDown =    { $global:appcon.tools.editor.event_invoke_actions( $args ) }
+[ScriptBlock] $global:TextEditors_PreviewMouseDown =    { $global:appcon.tools.editor.event_invoke_actions_by_mouse( $args ) }
+[ScriptBlock] $global:Browsers_PreviewMouseDown =       {}
+[ScriptBlock] $global:Grids_PreviewMouseDown =          {}
 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 

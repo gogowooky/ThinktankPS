@@ -33,10 +33,9 @@ class TTAppManager {
         [xml]$xaml = (Get-Content ( $global:TTScriptDirPath + "\thinktank.xaml" ) ).replace( "C:\Users\shin\Documents\ThinktankPS2\script", $global:TTScriptDirPath )
         $this._window = [System.Windows.Markup.XamlReader]::Load( (New-Object XmlNodeReader $xaml) )
 
-        $this._window.Add_Loaded( $global:TTWindowLoaded )
-
-        $this._window.Add_PreviewKeyDown( $global:TTAppMan_PreviewKeyDown )
-        $this._window.Add_PreviewKeyUp( $global:TTWindow_PreviewKeyUp )
+        $this._window.Add_Loaded(           $global:TTWindowLoaded )
+        $this._window.Add_PreviewKeyDown(   $global:TTAppMan_PreviewKeyDown )
+        $this._window.Add_PreviewKeyUp(     $global:TTWindow_PreviewKeyUp )
 
         $this._grid_window_lr = $this.FindName('GridWindowLR')
         $this._grid_lpanel_ul = $this.FindName('GridLPanelUL')
@@ -242,12 +241,11 @@ class TTPanelManager {
         $this._textbox =    $app.FindName("$($this._name)Keyword")
         $this._menu =       $app.FindName("$($this._name)Sorting")
 
-        $this._panel.Add_SizeChanged( $global:TTPanel_SizeChanged )
-        $this._panel.Add_GotFocus( $global:TTPanel_GotFocus )
-
-        $this._textbox.Add_GotFocus( $global:TTTextBox_GotFocus )
-        $this._textbox.Add_PreviewKeyDown( $global:TTPanel_PreviewKeyDown )
-        $this._textbox.Add_PreviewKeyUp( $global:TTPanel_PreviewKeyUp )
+        $this._panel.Add_SizeChanged(       $global:TTPanel_SizeChanged )
+        $this._panel.Add_GotFocus(          $global:TTPanel_GotFocus )
+        $this._textbox.Add_GotFocus(        $global:TTTool_GotFocus )
+        $this._textbox.Add_PreviewKeyDown(  $global:TTTool_PreviewKeyDown )
+        $this._textbox.Add_PreviewKeyUp(    $global:TTTool_PreviewKeyUp )
         
     }
 
@@ -528,41 +526,38 @@ class TTPanelManager {
 class TTLibraryManager : TTPanelManager {
 
     TTLibraryManager( [TTAppManager]$app ) : base( "Library", $app ){
-        $this._datagrid.Add_Sorting( $global:TTDataGrid_Sorting )
-        $this._datagrid.Add_SelectionChanged( $global:TTDataGrid_SelectionChanged )
-        $this._datagrid.Add_GotFocus( $global:TTDataGrid_GotFocus )
-        $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
-        $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToExtract )
+        $this._datagrid.Add_Sorting(            $global:TTDataGrid_Sorting )
+        $this._datagrid.Add_SelectionChanged(   $global:TTDataGrid_SelectionChanged )
+        $this._datagrid.Add_GotFocus(           $global:TTDataGrid_GotFocus )
+        $this._datagrid.Add_PreviewMouseDown(   $global:TTDataGrid_PreviewMouseDown )
+        $this._textbox.Add_TextChanged(         $global:TTPanel_TextChanged_ToExtract )
     }
 }
 class TTIndexManager : TTPanelManager {
     
     TTIndexManager( [TTAppManager]$app ) : base( "Index", $app ){
-        $this._datagrid.Add_Sorting( $global:TTDataGrid_Sorting )
-        $this._datagrid.Add_SelectionChanged( $global:TTDataGrid_SelectionChanged )
-        $this._datagrid.Add_GotFocus( $global:TTDataGrid_GotFocus )
-        $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
-        $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToExtract )
-        $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
+        $this._datagrid.Add_Sorting(            $global:TTDataGrid_Sorting )
+        $this._datagrid.Add_SelectionChanged(   $global:TTDataGrid_SelectionChanged )
+        $this._datagrid.Add_GotFocus(           $global:TTDataGrid_GotFocus )
+        $this._datagrid.Add_PreviewMouseDown(   $global:TTDataGrid_PreviewMouseDown )
+        $this._textbox.Add_TextChanged(         $global:TTPanel_TextChanged_ToExtract )
     }
 }
 class TTShelfManager : TTPanelManager {
 
     TTShelfManager( [TTAppManager]$app ) : base( "Shelf", $app ){
-        $this._datagrid.Add_Sorting( $global:TTDataGrid_Sorting )
-        $this._datagrid.Add_SelectionChanged( $global:TTDataGrid_SelectionChanged )
-        $this._datagrid.Add_GotFocus( $global:TTDataGrid_GotFocus )
-        $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
-        $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToExtract )
-        $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
-
+        $this._datagrid.Add_Sorting(            $global:TTDataGrid_Sorting )
+        $this._datagrid.Add_SelectionChanged(   $global:TTDataGrid_SelectionChanged )
+        $this._datagrid.Add_GotFocus(           $global:TTDataGrid_GotFocus )
+        $this._datagrid.Add_PreviewMouseDown(   $global:TTDataGrid_PreviewMouseDown )
+        $this._textbox.Add_TextChanged(         $global:TTPanel_TextChanged_ToExtract )
     }
 
 }
 class TTDeskManager : TTPanelManager {
 
     TTDeskManager( [TTAppManager]$app ) : base ( "Desk", $app ){
-        $this._textbox.Add_TextChanged( $global:TTDesk_TextChanged_ToHighlight )
+        $this._textbox.Add_TextChanged(         $global:TTDesk_TextChanged_ToHighlight )
 
 
         # $script:TextEditors_PreviewKeyDown
@@ -640,17 +635,17 @@ class TTCabinetManager : TTPanelManager {
         $this._menu =       $this._window.FindName("$($this._name)Sorting")
 
         # $this._window.Add_Loaded({ $global:AppMan.Cabinet.Focus() })
-        $this._window.Add_Closing({ $args[1].Cancel = $True })
-        $this._window.Add_MouseLeftButtonDown({ $global:AppMan.Cabinet._window.DragMove() })
-        $this._window.Add_MouseDoubleClick({ $global:AppMan.Cabinet.Hide($true); $args[1].Handled=$True })
-        $this._window.Add_PreviewKeyDown( $global:TTCabin_PreviewKeyDown )
-        $this._window.Add_PreviewKeyUp( $global:TTCabin_PreviewKeyUp )
+        $this._window.Add_Closing(              { $args[1].Cancel = $True })
+        $this._window.Add_MouseLeftButtonDown(  { $global:AppMan.Cabinet._window.DragMove() })
+        $this._window.Add_MouseDoubleClick(     { $global:AppMan.Cabinet.Hide($true); $args[1].Handled=$True })
+        $this._window.Add_PreviewKeyDown(       $global:TTCabin_PreviewKeyDown )
+        $this._window.Add_PreviewKeyUp(         $global:TTCabin_PreviewKeyUp )
 
-        $this._datagrid.Add_Sorting( $global:TTDataGrid_Sorting )
-        $this._datagrid.Add_SelectionChanged( $global:TTDataGrid_SelectionChanged )
-        $this._datagrid.Add_GotFocus( $global:TTDataGrid_GotFocus )
-        $this._datagrid.Add_PreviewMouseDown( $global:TTDataGrid_PreviewMouseDown )
-        $this._textbox.Add_TextChanged( $global:TTPanel_TextChanged_ToExtract )
+        $this._datagrid.Add_Sorting(            $global:TTDataGrid_Sorting )
+        $this._datagrid.Add_SelectionChanged(   $global:TTDataGrid_SelectionChanged )
+        $this._datagrid.Add_GotFocus(           $global:TTDataGrid_GotFocus )
+        $this._datagrid.Add_PreviewMouseDown(   $global:TTDataGrid_PreviewMouseDown )
+        $this._textbox.Add_TextChanged(         $global:TTPanel_TextChanged_ToExtract )
 
     }
 
@@ -753,9 +748,9 @@ class TTToolsManager { # abstract
     [TTToolsManager] Initialize(){              # if needed
         $this.Controls = @( $this.IDs.foreach{ $this.app.FindName($_) } )
         $this.Controls.foreach{ 
-            $_.Add_GotFocus( $global:TTTool_GotFocus )
-            $_.Add_PreviewKeyDown( $global:TTTool_PreviewKeyDown )
-            $_.Add_PreviewKeyUp( $global:TTTool_PreviewKeyUp )
+            $_.Add_GotFocus(        $global:TTTool_GotFocus )
+            $_.Add_PreviewKeyDown(  $global:TTTool_PreviewKeyDown )
+            $_.Add_PreviewKeyUp(    $global:TTTool_PreviewKeyUp )
         }
         return $this
     }
@@ -832,10 +827,10 @@ class TTEditorsManager : TTToolsManager{
         )
         $editor.AllowDrop = $true
 
-        $editor.Add_TextChanged( $global:TextEditors_TextChanged )
-        $editor.Add_GotFocus( $global:TextEditors_GotFocus )
-        $editor.Add_PreviewMouseDown( $global:TextEditors_PreviewMouseDown )
-        $editor.Add_Drop( $global:TextEditors_PreviewDrop )
+        $editor.Add_TextChanged(        $global:TextEditors_TextChanged )
+        $editor.Add_GotFocus(           $global:TextEditors_GotFocus )
+        $editor.Add_PreviewMouseDown(   $global:TextEditors_PreviewMouseDown )
+        $editor.Add_Drop(               $global:TextEditors_PreviewDrop )
         
         return $this
     }
@@ -1492,12 +1487,12 @@ class TTPopupMenuManager {
         $this._name = $this._window.Name
         $this._list = $this._window.FindName("PopupMenuItems")
 
-        $this._window.Add_Closing({ $args[1].Cancel = $True })
-        $this._window.Add_MouseLeftButtonDown( $global:TTPopup_MouseLeftButtonDown )
-        $this._window.Add_MouseDoubleClick( $global:TTPopup_MouseDoubleClick )
-        $this._window.Add_PreviewKeyDown( $global:TTPopup_PreviewKeyDown )
-        $this._window.Add_PreviewKeyUp( $global:TTPopup_PreviewKeyUp )
-        $this._window.Add_LostKeyboardFocus( $global:TTPopup_LostKeyboardFocus )
+        $this._window.Add_Closing(              { $args[1].Cancel = $True })
+        $this._window.Add_MouseLeftButtonDown(  $global:TTPopup_MouseLeftButtonDown )
+        $this._window.Add_MouseDoubleClick(     $global:TTPopup_MouseDoubleClick )
+        $this._window.Add_PreviewKeyDown(       $global:TTPopup_PreviewKeyDown )
+        $this._window.Add_PreviewKeyUp(         $global:TTPopup_PreviewKeyUp )
+        $this._window.Add_LostKeyboardFocus(    $global:TTPopup_LostKeyboardFocus )
         
         $style = [Style]::new()
         $style.Setters.Add( [Setter]::new( [Controls.GridViewColumnHeader]::VisibilityProperty, [Visibility]::Collapsed ) )

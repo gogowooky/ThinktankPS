@@ -414,7 +414,7 @@ function ttcmd_panel_action_select( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの選択アイテムを選択・実行する
 
-    $global:appcon.group.select_actions_then_invoke( $source )
+    $global:appcon.group.select_and_invoke_actions( $source )
 
 }
 function ttcmd_panel_reload( $source, $mod, $key ){

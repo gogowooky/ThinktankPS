@@ -568,13 +568,13 @@ class TTGroupController {
     }
     #endregion
 
-    #region invoke_action/ select_actions_then_invoke
+    #region invoke_action/ select_and_invoke_actions
     [bool] invoke_action( [string]$panel ){
         $items = $global:AppMan.$panel.SelectedItems()
         return $items[0].InvokeAction( 'Action', $items )
     }
 
-    [bool] select_actions_then_invoke( [string]$panel ){
+    [bool] select_and_invoke_actions( [string]$panel ){
         $items = $global:AppMan.$panel.SelectedItems()
 
         $title = "{0}:{1}:アクション選択" -f $global:AppMan.$panel.Caption(), $panel
@@ -756,7 +756,7 @@ class TTGroupController {
             }
             ([Input.MouseButton]::Right) {
                 if( $mouse.ClickCount -eq 1 ){
-                    $this.select_actions_then_invoke( $panel )
+                    $this.select_and_invoke_actions( $panel )
                     $mouse.Handled = $true
                 }
             }
@@ -1298,7 +1298,7 @@ class TTEditorController {
         return $true
 
     }
-    [bool] event_invoke_actions( $params ){
+    [bool] event_invoke_actions_by_mouse( $params ){
         $editor =   $params[0]
         $mouse =    $params[1]
     
@@ -1680,8 +1680,8 @@ class TTDesk{
         $this._caption  = $script:AppMan.FindName("$($this._name)Caption")
         $this._sorting  = $script:AppMan.FindName("$($this._name)Sorting")
 
-        $this._keyword.Add_PreviewKeyDown( $script:DeskKeyword_PreviewKeyDown )
-        $this._keyword.Add_TextChanged( $script:DeskKeyword_TextChanged )  
+        $this._keyword.Add_PreviewKeyDown(  $script:DeskKeyword_PreviewKeyDown )
+        $this._keyword.Add_TextChanged(     $script:DeskKeyword_TextChanged )  
 
         [xml]$xshd = Get-Content "$global:TTScriptDirPath\thinktank.xshd"
         $script:Editors.foreach{
@@ -1696,11 +1696,11 @@ class TTDesk{
                 [ICSharpCode.AvalonEdit.Highlighting.HighlightingManager].Instance
             )
             $_.AllowDrop = $true
-            $_.Add_Drop( $script:TextEditors_PreviewDrop )
-            $_.Add_TextChanged( $script:TextEditors_TextChanged )
-            $_.Add_PreviewKeyDown( $script:TextEditors_PreviewKeyDown )
-            $_.Add_PreviewMouseDown( $script:TextEditors_PreviewMouseDown )
-            $_.Add_GotFocus( $script:TextEditors_GotFocus )
+            $_.Add_Drop(                $script:TextEditors_PreviewDrop )
+            $_.Add_TextChanged(         $script:TextEditors_TextChanged )
+            $_.Add_PreviewKeyDown(      $script:TextEditors_PreviewKeyDown )
+            $_.Add_PreviewMouseDown(    $script:TextEditors_PreviewMouseDown )
+            $_.Add_GotFocus(            $script:TextEditors_GotFocus )
 
         }
 
