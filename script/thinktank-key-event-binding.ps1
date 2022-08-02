@@ -862,6 +862,7 @@ PopupMenu   None            Up          ttcmd_menu_move_up
 PopupMenu   None            Down        ttcmd_menu_move_down
 PopupMenu   Shift           Up          ttcmd_menu_move_first
 PopupMenu   Shift           Down        ttcmd_menu_move_last
+popupMenu   None            Q           ttcmd_menu_cancel
 PopupMenu   None            Escape      ttcmd_menu_cancel
 PopupMenu   None            Space       ttcmd_menu_ok
 PopupMenu   None            Return      ttcmd_menu_ok
