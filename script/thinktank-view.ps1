@@ -851,7 +851,7 @@ class TTEditorsManager : TTToolsManager{
         if( $filepath -eq $editor.Document.FileName ){
             [TTTool]::debug_message( $this, "caution >> read already: $filepath" )
             return $this
-        } 
+        }
 
         #### load
         $index = $this.History( $num, $index )

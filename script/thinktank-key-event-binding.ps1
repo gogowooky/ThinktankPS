@@ -20,6 +20,9 @@ Application     Alt             C           ttcmd_panel_focus_cabinet
 Application     Alt             D           ttcmd_panel_focus_deskwork
 Application     Alt             W           ttcmd_panel_focus_work_toggle
 Application     Alt             Z           ttcmd_panel_collapse_multi_work
+Application     Alt             D1          ttcmd_panel_focus_workn
+Application     Alt             D2          ttcmd_panel_focus_workn
+Application     Alt             D3          ttcmd_panel_focus_workn
 Application     Alt, Shift      S           ttcmd_panel_collapse_shelf
 Application     Alt, Shift      L           ttcmd_panel_collapse_library
 Application     Alt, Shift      I           ttcmd_panel_collapse_index
@@ -180,6 +183,17 @@ function ttcmd_panel_collapse_multi_work( $source, $mod, $key ){
 
     }
 }
+function ttcmd_panel_focus_workn( $source, $mod, $key ){
+    #.SYNOPSIS
+    # Worknへフォーカス
+
+    $work = $key.replace( 'D', 'Work' )
+    if( -not $global:appcon.view.focusable( $work )  ){
+        $global:appcon.view.style( 'Work', $work )
+    }
+    $global:appcon.group.focus( $work, '', '' )
+
+}
 #endregion
 
 #region _help_
@@ -243,7 +257,6 @@ Library+    Alt, Shift  Space       ttcmd_panel_action_select
 Library+    Alt         Space       ttcmd_panel_action_invoke
 Library+    Alt         D0          ttcmd_panel_reload
 Library+    Alt         K           ttcmd_panel_filter_clear
-Library+    Alt         D           ttcmd_panel_discard_selected
 
 Library     None        Up          ttcmd_panel_move_up
 Library     None        Down        ttcmd_panel_move_down
@@ -278,7 +291,6 @@ Index+      Alt, Shift  Space       ttcmd_panel_action_select
 Index+      Alt         Space       ttcmd_panel_action_invoke
 Index+      Alt         D0          ttcmd_panel_reload
 Index+      Alt         K           ttcmd_panel_filter_clear
-Index+      Alt         D           ttcmd_panel_discard_selected
 
 Index       None        Up          ttcmd_panel_move_up
 Index       None        Down        ttcmd_panel_move_down
@@ -313,7 +325,6 @@ Shelf+      Alt, Shift  Space       ttcmd_panel_action_select
 Shelf+      Alt         Space       ttcmd_panel_action_invoke
 Shelf+      Alt         D0          ttcmd_panel_reload
 Shelf+      Alt         K           ttcmd_panel_filter_clear
-Shelf+      Alt         D           ttcmd_panel_discard_selected
 
 Shelf       None        Up          ttcmd_panel_move_up
 Shelf       None        Down        ttcmd_panel_move_down
