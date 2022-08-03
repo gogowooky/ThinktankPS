@@ -111,8 +111,8 @@ function KeyBindingSetup(){
 #region PopupMenu Event
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 [ScriptBlock] $global:TTPopup_MouseLeftButtonDown = { $global:AppMan.PopupMenu._window.DragMove() }
-[ScriptBlock] $global:TTPopup_MouseDoubleClick =    { $global:AppMan.PopupMenu.Hide($true) }
-[ScriptBlock] $global:TTPopup_LostKeyboardFocus =   { $global:AppMan.PopupMenu.Hide($false) }
+[ScriptBlock] $global:TTPopup_MouseDoubleClick =    { $global:AppMan.PopupMenu.Hide( $true ) }
+[ScriptBlock] $global:TTPopup_LostKeyboardFocus =   { $global:AppMan.PopupMenu.Hide( $false ) }
 # ; $args[1].Handled = $true
 
 #endregion:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

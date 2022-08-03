@@ -865,6 +865,15 @@ class TTEditorsManager : TTToolsManager{
             $editor.Document = $refdoc
             $editor.Document.FileName = $filepath
             $editor.Load( $filepath )
+
+        }
+
+        $this.documents.where{
+            $doc = $_
+            0 -eq $this.Controls.where{ $_.Document -eq $doc }.count
+        }.foreach{
+            $_.Text = ''
+            $_.FileName = ''
         }
 
         #### setup folding object
@@ -1447,7 +1456,7 @@ class TTPopupMenuManager {
     [TTAppManager] $_app
     [System.Windows.Window] $_window
     [ListView] $_list
-    [psobject] $_selected
+    [string] $_selected
     $xml = @"
     <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -1488,10 +1497,10 @@ class TTPopupMenuManager {
         $this._list = $this._window.FindName("PopupMenuItems")
 
         $this._window.Add_Closing(              { $args[1].Cancel = $True })
-        $this._window.Add_MouseLeftButtonDown(  $global:TTPopup_MouseLeftButtonDown )
-        $this._window.Add_MouseDoubleClick(     $global:TTPopup_MouseDoubleClick )
         $this._window.Add_PreviewKeyDown(       $global:TTPopup_PreviewKeyDown )
         $this._window.Add_PreviewKeyUp(         $global:TTPopup_PreviewKeyUp )
+        $this._window.Add_MouseLeftButtonDown(  $global:TTPopup_MouseLeftButtonDown )
+        $this._window.Add_MouseDoubleClick(     $global:TTPopup_MouseDoubleClick )
         $this._window.Add_LostKeyboardFocus(    $global:TTPopup_LostKeyboardFocus )
         
         $style = [Style]::new()
@@ -1532,8 +1541,8 @@ class TTPopupMenuManager {
         return $this
     }
     [TTPopupMenuManager] Hide( [bool]$result ){
-        if( $result -ne $true ){
-            $this._list.SelectedIndex = -1
+        if( $result ){ 
+            $this._selected = $this._list.SelectedItem 
         }
         $this._window.Hide()
         # $this._window.Dispatcher.Invoke({ $global:AppMan.PopupMenu._window.Hide() })
@@ -1551,17 +1560,19 @@ class TTPopupMenuManager {
         $this._window.Width = $width * 10 + 15
         $this._window.Height = ($this._list.Items.Count + 1) * 22.5 + 15  
         
-        $this._list.SelectedIndex = -1
+        # $this._list.SelectedIndex = -1
 
-        if( $global:TTKeyEventMod -ne 'None' ){
-            [TTTentativeKeyBindingMode]::Start( 'PopupMenu', $global:TTKeyEventMod, '' )
-            # $this.Hide($true)
-            [TTTentativeKeyBindingMode]::Add_OnExit({ $global:AppMan.PopupMenu.Hide($true) })
-        }
+        # if( $global:TTKeyEventMod -ne 'None' ){
+        #     [TTTentativeKeyBindingMode]::Start( 'PopupMenu', $global:TTKeyEventMod, '' )
+        #     $this.Hide($true)
+        #     # [TTTentativeKeyBindingMode]::Add_OnExit({ $global:AppMan.PopupMenu.Hide($true) })
+        # }
 
-        $ret = $this._window.ShowDialog()
+        $this._selected = ""                
+
+        $this._window.ShowDialog()
         
-        return $this._list.SelectedItem
+        return $this._selected
     }
     [void] Top( [int] $num ){ $this._window.Top = $num }
     [int]  Top(){ return $this._window.Top }
