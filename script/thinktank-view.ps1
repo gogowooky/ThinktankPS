@@ -59,7 +59,7 @@ class TTAppManager {
     [object] FindName( [string]$name ){
         return $this._window.FindName( $name )
     }
-    [void] Show(){
+    [void] ShowApplication(){
         $this._window.ShowDialog()
     }
 
