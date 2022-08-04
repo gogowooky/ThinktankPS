@@ -133,6 +133,6 @@ $global:datetag =       [TTTagFormat]::new()
 $global:appcon =        [TTApplicationController]::new()
 
 
-$global:AppMan.Show()
+$global:AppMan.ShowApplication()
 
 

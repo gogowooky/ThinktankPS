@@ -15,6 +15,16 @@
 
 - Configs表示の更新（Panel.Focusが表示されない）
 
+<<<<<<< HEAD
+## 不具合
+- PopMenuで異常終了する
+- PopupMenu, Cabinetで、Alt-ESCで終了するよう設定すること
+- マウスでMemo選択loadするとEditor2/3が一緒になってしまう。
+- メモ中にThinktank:URI: があるとデータ回収できず落ちる
+- Panel非表示時にtentative表示すると、脱mode後に再非表示されない
+- StatusでCurrent.Workspace/Toolが正しく表示されない　→設定ミス or 表示エラー
+=======
+>>>>>>> 1c97be74c2928664aa7c977865083cca0d0b9692
 
 ## 謎
 - Alt+DでDeskからWorkplaceにFocusするときに、Editorが2度 focusされる謎 [220712]
