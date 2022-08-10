@@ -197,11 +197,11 @@ class TTCollection : TTObject {
             $this_name = $this.Name 
             if( $this.GetType().Name -eq 'TTResources' ){
                 TTTimerResistEvent "TTResources:AddChild" 2 0 {
-                    $global:TTResources.SaveCache()
+                    $global:ResMan.SaveCache()
                 }
             }else{
                 TTTimerResistEvent "$($this.GetType().Name):AddChild" 2 0 {
-                    $global:TTResources.GetChild( $script:this_name ).SaveCache()
+                    $global:ResMan.GetChild( $script:this_name ).SaveCache()
                 }.GetNewClosure()
             }
 
@@ -381,6 +381,7 @@ class TTResources : TTCollection {
     static [string] $ActionDataLocaiton = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
+    
 }
 
 #endregion###############################################################################################################
@@ -602,7 +603,7 @@ class TTStatus : TTCollection {
             $this.UpdateDate = ( Get-Date -Format "yyyy-MM-dd-HHmmss")
             $this.count = $this.children.count
             TTTimerResistEvent "TTStatus:Set" 2 0 {
-                    $global:TTResources.GetChild( "Status" ).SaveCache()
+                    $global:ResMan.GetChild( "Status" ).SaveCache()
                 }
         }
     }
