@@ -123,10 +123,10 @@ function TTTimerResistEvent( [string]$name, [long]$countdown, [long]$rewind, [Sc
 KeyBindingSetup
 
 # View
-$global:AppMan =        [TTAppManager]::new()
+$global:AppMan =   [TTAppManager]::new()
 
 # Model
-$global:TTResources =   [TTResources]::new().Initialize()
+$global:ResMan =   [TTResources]::new().Initialize()
 
 # Control
 $global:datetag =       [TTTagFormat]::new()

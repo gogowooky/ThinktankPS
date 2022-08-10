@@ -1277,7 +1277,8 @@ class TTEditorsManager : TTToolsManager{
 
     #endregion
 
-    #region Text
+    #region Text/ Edit
+    [string] Text( [string]$attr ){ return $this.Text( $this.docman.CurrentNumber, $attr ) }
     [string] Text( [int]$num, [string]$attr ){
         $editor = $this.Controls[$num-1]
 
@@ -1291,7 +1292,18 @@ class TTEditorsManager : TTToolsManager{
             'RootSection' {}
             'ParentSection' {}
         }
-        return ''
+        return ""
+    }
+    [void] Edit( [string]$action ){ $this.Edit( $this.docman.CurrentNumber, $action ) }
+    [void] Edit( [int]$num, [string]$action ){
+        $editor = $this.Controls[$num-1]
+
+        switch( $action ) {
+            'delete'    { [EditingCommands]::Delete.Execute( $null, $editor.TextArea ) }
+            'backspace' { [EditingCommands]::Backspace.Execute( $null, $editor.TextArea ) }
+            'section+' { return }
+            'section-' { return }
+        }
     }
     #endregion
 

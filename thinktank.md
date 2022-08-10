@@ -1,7 +1,6 @@
 ﻿Thinktank
 
 
-
 # 仕様書
 ## 名称
 Thinktank。　考え（Think）を蓄えるもの（tank）。

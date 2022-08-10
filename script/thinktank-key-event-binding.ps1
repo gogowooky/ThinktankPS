@@ -618,14 +618,14 @@ Editor      Shift           Return          ttcmd_editor_scroll_tonewline
 Editor      Control         H               ttcmd_editor_edit_backspace
 Editor      Control         G               ttcmd_editor_new_tocurrenteditor
 Editor      Control         D               ttcmd_editor_edit_delete
+Editor      Control         I               ttcmd_editor_outline_insert_section
 
 
+xEditor      Control         OemPlus         ttcmd_editor_edit_turn_bullet_norm
 xEditor      Alt             C               ttcmd_editor_copy_tag_atcursor
 
 xEditor      Alt             M               ttcmd_desk_focus_menu
 xEditor      Alt             OemBackslash    ttcmd_application_config_editor_wordwrap_toggle
-xEditor      Control         OemPlus         ttcmd_editor_edit_turn_bullet_norm
-xEditor      Control         I               ttcmd_editor_outline_insert_section
 xEditor      Control         OemBackslash    ttcmd_application_config_editor_wordwrap_toggle
 xEditor      Control         Oem3            ttcmd_application_config_editor_staycursor_toggle
 xEditor      Control, Shift  OemPlus         ttcmd_editor_edit_turn_bullet_rev
@@ -648,13 +648,13 @@ function ttcmd_editor_edit_delete( $source, $mod, $key ){
     #.SYNOPSIS
     # カーソルの右を削除する
 
-    $global:appcon.tools.editor.edit( 'delete' )
+    $global:AppMan.Document.Editor.Edit('delete')
 }
 function ttcmd_editor_edit_backspace( $source, $mod, $key ){
     #.SYNOPSIS
     # カーソルの左を削除する
 
-    $global:appcon.tools.editor.edit( 'backspace' )
+    $global:AppMan.Document.Editor.Edit('backspace' )
 }
 function ttcmd_editor_scroll_tonewline( $source, $mod, $key ){
     #.SYNOPSIS
@@ -760,6 +760,13 @@ function ttcmd_editor_edit_insert_date( $source, $mod, $key ){
 
     $global:datetag.reset()
 }
+function ttcmd_editor_outline_insert_section( $source, $mod, $key ){
+    #.SYNOPSIS
+    # カーソル位置にセクションを挿入する
+
+    $global:AppMan.Document.Editor.Edit('section')
+}
+
 
 #endregion
 
@@ -1174,12 +1181,6 @@ function ttcmd_editor_edit_turn_bullet_rev( $source, $mod, $key ){
     # カーソル位置にアイテムヘッダーを挿入する
 
     $script:desk.tool( 'Editor' ).edit('bullet_rev')
-}
-function ttcmd_editor_outline_insert_section( $source, $mod, $key ){
-    #.SYNOPSIS
-    # カーソル位置にセクションを挿入する
-
-    $script:desk.tool( 'Editor' ).edit( 'section' )
 }
 
 

@@ -156,7 +156,7 @@ class TTTagAction{
     [object] $_editor
     [int] $_offset
 
-    $regex_tags = $global:TTResources.Getchild('Searchs').GetActionTagsRegex()
+    $regex_tags = $global:ResMan.Getchild('Searchs').GetActionTagsRegex()
     [psobject[]] $_tags = @(
         @{  tag     = 'date'
             regex   = "(\[[0-9]{4}\-[0-9]{2}\-[0-9]{2}\])" },
@@ -253,7 +253,7 @@ class TTTagAction{
         $tag   = $this._ma.groups['tag'].Value
         $param = $this._ma.groups['param'].Value
 
-        $search = $global:TTResources.GetChild('Searchs').children[$tag]
+        $search = $global:ResMan.GetChild('Searchs').children[$tag]
 
         switch ($search.Url){
             "thinktank_tag" {
@@ -301,7 +301,7 @@ class TTTagAction{
         $outlook = New-Object -ComObject Outlook.Application
         try {
             $backupFolder = $null
-            $backupFolderName = $global:TTResources.GetChild('Configs').GetChild("OutlookBackupFolder").Value
+            $backupFolderName = $global:ResMan.GetChild('Configs').GetChild("OutlookBackupFolder").Value
     
             $folders = $outlook.GetNamespace('MAPI').Folders
             for( $i = 1; $i -le $folders.count; $i++ ){ 
