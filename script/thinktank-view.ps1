@@ -22,26 +22,30 @@ class TTAppManager {
     [TTDeskManager] $Desk
     [TTDocumentManager] $Document
 
-    [Grid] $_grid_window_lr
-    [Grid] $_grid_lpanel_ul
-    [Grid] $_grid_rpanel_ul
-    [Grid] $_grid_desk_lr
-    [Grid] $_grid_desk_ul
+    [Grid] $GridWindowLR
+    [Grid] $GridLPanelUL
+    [Grid] $GridRPanelUL
+    [Grid] $GridDeskLR
+    [Grid] $GridDeskUL
 
     TTAppManager(){
 
         [xml]$xaml = (Get-Content ( $global:TTScriptDirPath + "\thinktank.xaml" ) ).replace( "C:\Users\shin\Documents\ThinktankPS2\script", $global:TTScriptDirPath )
         $this._window = [System.Windows.Markup.XamlReader]::Load( (New-Object XmlNodeReader $xaml) )
 
-        $this._window.Add_Loaded(           $global:TTWindowLoaded )
-        $this._window.Add_PreviewKeyDown(   $global:TTAppMan_PreviewKeyDown )
-        $this._window.Add_PreviewKeyUp(     $global:TTWindow_PreviewKeyUp )
+        $this._window.Add_Loaded(           { $global:State.event_after_window_loaded( $args ) })
+        # $this._window.Add_PreviewKeyDown(   $global:Action_event_to_trigger_key_bound_command )
+        # $this._window.Add_PreviewKeyUp(     $global:Action_event_to_terminate_key_event )
+        $this._window.Add_PreviewKeyDown(   { $global:Action.event_to_trigger_key_bound_command( $args ) })
+        $this._window.Add_PreviewKeyUp(     { $global:Action.event_to_terminate_key_event( $args ) })
+        $this._window.Add_StateChanged(     { $global:State.event_after_windowstate_changed( $args ) })
+        $this._window.Add_SizeChanged(      { $global:State.event_after_windowsize_changed( $args ) })
 
-        $this._grid_window_lr = $this.FindName('GridWindowLR')
-        $this._grid_lpanel_ul = $this.FindName('GridLPanelUL')
-        $this._grid_rpanel_ul = $this.FindName('GridRPanelUL')
-        $this._grid_desk_lr =   $this.FindName('GridDeskLR')
-        $this._grid_desk_ul =   $this.FindName('GridDeskUL')
+        $this.GridWindowLR = $this.GetWPFObject('GridWindowLR')
+        $this.GridLPanelUL = $this.GetWPFObject('GridLPanelUL')
+        $this.GridRPanelUL = $this.GetWPFObject('GridRPanelUL')
+        $this.GridDeskLR =   $this.GetWPFObject('GridDeskLR')
+        $this.GridDeskUL =   $this.GetWPFObject('GridDeskUL')
     
         $this.PopupMenu =   [TTPopupMenuManager]::new( $this )
         $this.Library =     [TTLibraryManager]::new( $this )
@@ -52,37 +56,322 @@ class TTAppManager {
         $this.Document =    [TTDocumentManager]::new( $this )
 
     }
-
     #endregion
 
-    #region FindName/ Show
-    [object] FindName( [string]$name ){
+    #region GetWPFObject/ Show/ SetDefaultState
+    [object] GetWPFObject( [string]$name ){
         return $this._window.FindName( $name )
     }
     [void] ShowApplication(){
+        $global:State.event_before_window_loaded( $null )
         $this._window.ShowDialog()
     }
+    [void] SetDefaultState(){
+        $this.Window( 'State', 'Max' )
+        $this.Window( 'Top', '0' )
+        $this.Window( 'Left', '0' )
+        $this.Border( 'Layout.Library.Width',   '15' )
+        $this.Border( 'Layout.Library.Height',  '25' )
+        $this.Border( 'Layout.Shelf.Height',    '25' )
+        $this.Border( 'Layout.Work1.Width',     '70' )
+        $this.Border( 'Layout.Work1.Height',    '70' )
+        $this.Border( 'Layout.Library.ExWidth', '50' )
+        $this.Border( 'Layout.Shelf.ExHeight',  '75' )
+        $this.Border( 'Layout.Work1.ExHeight',  '80' )
+        $this.Border( 'Layout.Work1.ExWidth',   '20' )
+
+
+        # $this._set( 'Config.MessageOnCacheSaved',   'False' ) # Modelでsetして、eventで設定すべし
+        # $this._set( 'Config.MessageOnMemoSaved',    'True' )  # Viewでsetして、eventで設定すべし
+        # $this._set( 'Config.MessageOnTaskExpired',  'False' ) # Viewでsetして、eventで設定すべし
+        # $this._set( 'Config.MessageOnKeyDown',      'False' ) # Viewでsetして、eventで設定すべし
+        # $this._set( "Config.MessageOnTaskRegistered", 'False' ) # Viewでsetして、eventで設定すべし
+
+        # $this._set( 'Focus.Application',  'Library' )
+
+        $this.PopupMenu.SetDefaultState()
+        $this.Library.SetDefaultState()
+        $this.Index.SetDefaultState()
+        $this.Shelf.SetDefaultState()
+        $this.Desk.SetDefaultState()
+        $this.Cabinet.SetDefaultState()
+        $this.Document.SetDefaultState()
+
+
+    }
+    #endregion
+
+    #region Window(io)/ Border(io)/ Title(io)
+    [void] Window( [string]$name, [string]$value ){ 
+        switch( $name ){
+            'State' {
+                switch( $value ){
+                    'Max'    { $this._window.WindowState = [System.Windows.WindowState]::Maximized }
+                    'Min'    { $this._window.WindowState = [System.Windows.WindowState]::Minimized }
+                    'Normal' { $this._window.WindowState = [System.Windows.WindowState]::Normal }
+                    'Close'  { $this._window.Close() }
+                }
+            }
+            'Top' { $this._window.Top = [int]$value }
+            'Left' { $this._window.Left = [int]$value }
+        }
+    }
+    [string] Window( $name ){
+        switch( $name ){
+            'State' {
+                switch( $this._window.WindowState ){
+                    [System.Windows.WindowState]::Maximized { return 'Max' }
+                    [System.Windows.WindowState]::Minimized { return 'Min' }
+                    [System.Windows.WindowState]::Normal { return 'Normal' }
+                }        
+            }
+            'Top' { return [string]$this._window.Top }
+            'Left' { return [string]$this._window.Left }
+        }
+        return ""
+    }
+    [void] Border( [string]$name, [string]$value ){ # percent 
+        $percent = [int]$value
+        if( $value -match "^[+-]\d+$" ){ $percent += [int]$this._get( $name ) }
+        if( $percent -lt 0 ){ $percent = 0 }
+        if( 100 -lt $percent ){ $percent = 100 }
+
+        switch( $name ){
+            'Layout.Library.Width' {
+                $this.GridWindowLR.ColumnDefinitions[0].Width = "$percent*"
+                $this.GridWindowLR.ColumnDefinitions[1].Width = "$(100-$percent)*"
+            }
+            'Layout.Library.Height' {
+                $this.GridLPanelUL.RowDefinitions[0].Height = "$percent*"
+                $this.GridLPanelUL.RowDefinitions[1].Height = "$(100-$percent)*"
+            }
+            'Layout.Shelf.Height' {
+                $this.GridRPanelUL.RowDefinitions[0].Height = "$percent*"
+                $this.GridRPanelUL.RowDefinitions[1].Height = "$(100-$percent)*"
+            }
+            'Layout.Work1.Width' {
+                $this.GridDeskLR.ColumnDefinitions[0].Width = "$percent*"
+                $this.GridDeskLR.ColumnDefinitions[1].Width = "$(100-$percent)*"
+            }
+            'Layout.Work1.Height' {
+                $this.GridDeskUL.RowDefinitions[0].Height = "$percent*"
+                $this.GridDeskUL.RowDefinitions[1].Height = "$(100-$percent)*"
+            }
+        }
+
+    }
+    [string] Border( [string]$name ){ # 220812 eventで更新するなら必要ないか？
+        $a = -1
+        $b = 100
+
+        switch( $name ){
+            'Layout.Library.Width' {
+                $a = $this.GridWindowLR.ColumnDefinitions[0].ActualWidth
+                $b = $this.GridWindowLR.ColumnDefinitions[1].ActualWidth
+            }
+            'Layout.Library.Height' {
+                $a = $this.GridLPanelUL.RowDefinitions[0].ActualHeight
+                $b = $this.GridLPanelUL.RowDefinitions[1].ActualHeight
+            }
+            'Layout.Shelf.Height' {
+                $a = $this.GridRPanelUL.RowDefinitions[0].ActualHeight
+                $b = $this.GridRPanelUL.RowDefinitions[1].ActualHeight
+            }
+            'Layout.Work1.Width' {
+                $a = $this.GridDeskLR.ColumnDefinitions[0].ActualWidth
+                $b = $this.GridDeskLR.ColumnDefinitions[1].ActualWidth
+            }
+            'Layout.Work1.Height' {
+                $a = $this.GridDeskUL.RowDefinitions[0].ActualHeight
+                $b = $this.GridDeskUL.RowDefinitions[1].ActualHeight
+            }
+        }
+        return [string][int]( $a / ( $a + $b ) * 100 )
+    }
+    [void] Title( $text ){ $this._window.Title = $text }
+    [string] Title(){ return $this._window.Title }
+    [void] Style( [string]$name, [string]$value ){
+        switch( $name ){
+            'Group' { # Standard, Zen, next+/prev+
+                $order = @( 'Standard', 'Zen' )
+                switch( $value ){
+                    'Standard' {
+                        $global:View.Border( 'Layout.Library.Width',    $this._get('Stored.Layout.Library.Width') )
+                        $global:View.Border( 'Layout.Library.Height',   $this._get('Stored.Layout.Library.Height') )
+                        $global:View.Border( 'Layout.Shelf.Height',     $this._get('Stored.Layout.Shelf.Height') )
+                    }
+                    'Zen' {
+                        $this._set( 'Stored.Layout.Library.Width',  $global:View.Border('Layout.Library.Width') )
+                        $this._set( 'Stored.Layout.Library.Height', $global:View.Border('Layout.Library.Height') )
+                        $this._set( 'Stored.Layout.Shelf.Height',   $global:View.Border('Layout.Shelf.Height') )
+                        $global:View.Border( 'Layout.Library.Width', 0 )
+                        $global:View.Border( 'Layout.Shelf.Height', 0 )
+                    }
+                    default {
+                        $style= [TTTool]::siblig( $_, $this._get('Layout.Style.Group'), $order )
+                        if( $style -ne '' ){ $this.Style( $name, $style ) }
+                        return
+                    }
+                    # $this._set( 'Layout.Style.Group', $value )
+                    # $this.app.group.focus( $this.app._get('Current.Workplace'), '', '' )
+                }
+            }
+            'Work' { # Work1, Work2, Work3, next+/prev+
+                $order = @( 'Work1', 'Work2', 'Work3' )
+                $layout = @{}
+                switch( $value ){
+                    'Work1' { $layout = @{ width = 100;  height = 100 } }
+                    'Work2' { $layout = @{ width = 0;    height = 100 } }
+                    'Work3' { $layout = @{ width = 0;    height = 0 } }
+                    default{
+                        $style= [TTTool]::siblig( $_, $this._get('Layout.Style.Work'), $order )
+                        if( $style -ne '' ){ $this.Style( $name, $style ) }
+                        return
+                    }
+                }
+                $global:View.Border( 'Layout.Work1.Width', $layout.width )
+                $global:View.Border( 'Layout.Work1.Height', $layout.height )
+                $this._set( 'Layout.Style.Work', $value )
+                # $this.group.focus( $value, '', '' )
+
+            }
+            'Focus+Work' { # Workplace≧2 → focusWork, Workplace=1 → Work+Focus
+                $focusable_tools = @( 'Work1', 'Work2', 'Work3' ).where{ $global:View.Focusable($_) }
+                if( 1 -lt $focusable_tools.count ){
+                    $work = $this.app._get('Current.Workplace')
+                    switch( $value ){
+                        'toggle' { $work = [TTTool]::toggle( $work, $focusable_tools ) }
+                        'revtgl' { $work = [TTTool]::revtgl( $work, $focusable_tools ) }
+                    }
+                    $this.app.group.focus( $work, '', '' )
+
+                }else{
+                    $this.style( 'Work', $value )
+
+                }
+
+            }
+            'Desk' { # Work12, Work123, Work13, toggle/revtgl
+                $order = @( 'Work12', 'Work123', 'Work13' )
+                switch( $value ){
+                    'Alone' {
+                        $this.app._set( 'Layout.Work1.Width', $global:View.Border('Layout.Work1.Width') )
+                        $this.app._set( 'Layout.Work1.Height', $global:View.Border('Layout.Work1.Height') )
+                        $global:View.Border( 'Layout.Work1.Width', 100 )
+                        $global:View.Border( 'Layout.Work1.Height', 100 )
+                        $work = $this.app._get('Current.Workplace')
+                        $this.style( 'Work', $work )
+                        $this.app.group.focus( $work, '', '' )
+                    }
+                    'Work12' {
+                        $this.app._set( 'Layout.Work1.Height', $global:View.Border('Layout.Work1.Height') )
+                        $global:View.Border( 'Layout.Work1.Width', $this.app._get('Layout.Work1.Width') )
+                        $global:View.Border( 'Layout.Work1.Height', 100 )
+                        $this.app._set( 'Layout.Style.Desk', $value )                
+                    }
+                    'Work123' {
+                        $global:View.Border( 'Layout.Work1.Width', $this.app._get('Layout.Work1.Width') )
+                        $global:View.Border( 'Layout.Work1.Height', $this.app._get('Layout.Work1.Height') )
+                        $this.app._set( 'Layout.Style.Desk', $value )                
+                    }
+                    'Work13' {
+                        $this.app._set( 'Layout.Work1.Width', $global:View.Border('Layout.Work1.Width') )
+                        $global:View.Border( 'Layout.Work1.Width', 100 )
+                        $global:View.Border( 'Layout.Work1.Height', $this.app._get('Layout.Work1.Height') )
+                        $this.app._set( 'Layout.Style.Desk', $value )                
+                    }
+                    'toggle' {
+                        $this.style( $name, [TTTool]::toggle( $this.app._get('Layout.Style.Desk'), $order ) )
+                    }
+                    'revtgl' {
+                        $this.style( $name, [TTTool]::revtgl( $this.app._get('Layout.Style.Desk'), $order ) )
+                    }
+                }
+
+            }
+            'Library' { # None, Default, Extent , toggle/revtgl
+                $order = @( 'None', 'Default', 'Extent' )
+                switch( $value ){
+                    'None' {
+                        $global:View.Border( 'Layout.Library.Width', 0 )
+                        $this.app._set( 'Layout.Style.Library', $value )
+                    }
+                    'Default' {
+                        $global:View.Border( 'Layout.Library.Width', $this.app._get('Layout.Library.Width') )
+                        $this.app._set( 'Layout.Style.Library', $value )
+                    }
+                    'Extent' {
+                        $width = $this.app._get('Layout.Library.Width') + 10
+                        $this.border( 'Layout.Library.Width', $width )
+                        $this.app._set( 'Layout.Style.Library', $value )
+                    }
+                    'toggle' {
+                        $this.style( $name, [TTTool]::toggle( $this.app._get('Layout.Style.Library'), $order ) )
+                    }
+                    'revtgl' {
+                        $this.style( $name, [TTTool]::revtgl( $this.app._get('Layout.Style.Library'), $order ) )
+                    }
+                }
+            }
+            'Index' { # None, Default, Extent , toggle/revtgl
+                $order = @( 'None', 'Default', 'Extent' )
+                switch( $value ){
+                    'None' {
+                        $global:View.Border( 'Layout.Library.Height', 100 )
+                        $this.app._set( 'Layout.Style.Index', $value )
+                    }
+                    'Default' {
+                        $global:View.Border( 'Layout.Library.Height', $this.app._get('Layout.Library.Height') )
+                        $this.app._set( 'Layout.Style.Index', $value )
+                    }
+                    'Extent' {
+                        $global:View.Border( 'Layout.Library.Height', 0 )
+                        $this.app._set( 'Layout.Style.Index', $value )
+                    }
+                    'toggle' {
+                        $this.style( $name, [TTTool]::toggle( $this.app._get('Layout.Style.Index'), $order ) )
+                    }
+                    'revtgl' {
+                        $this.style( $name, [TTTool]::revtgl( $this.app._get('Layout.Style.Index'), $order ) )
+                    }
+                }
+            }
+            'Shelf' { # None, Default, Extent, Full, toggle/revtrgl
+                $order = @( 'None', 'Default', 'Extent', 'Full' )
+                switch( $value ){
+                    'None' {
+                        $global:View.Border( 'Layout.Shelf.Height', 0 )
+                        $this.app._set( 'Layout.Style.Shelf', $value )
+                    }
+                    'Default' {
+                        $global:View.Border( 'Layout.Shelf.Height', $this.app._get('Layout.Shelf.Height') )
+                        $this.app._set( 'Layout.Style.Shelf', $value )
+                    }
+                    'Extent' {
+                        $width = $this.app._get('Layout.Shelf.Height') + 20
+                        $global:View.Border( 'Layout.Shelf.Height', $width )
+                        $this.app._set( 'Layout.Style.Shelf', $value )
+                    }
+                    'Full' {
+                        $global:View.Border( 'Layout.Shelf.Height', 100 )
+                        $this.app._set( 'Layout.Style.Shelf', $value )
+                    }
+                    'toggle' {
+                        $this.style( $name, [TTTool]::toggle( $this.app._get('Layout.Style.Shelf'), $order ) )
+                    }
+                    'revtgl' {
+                        $this.style( $name, [TTTool]::revtgl( $this.app._get('Layout.Style.Shelf'), $order ) )
+                    }
+                }
+            }
+        }
+
+    }
+
 
     #endregion
 
-    #region Window(io)/ Focus/ Focasable/ Dialog  
-    [void] Window( [string]$state ){ 
-        switch( $state ){
-            'Max'    { $this._window.WindowState = [System.Windows.WindowState]::Maximized }
-            'Min'    { $this._window.WindowState = [System.Windows.WindowState]::Minimized }
-            'Normal' { $this._window.WindowState = [System.Windows.WindowState]::Normal }
-            'Close'  { $this._window.Close() }
-        }
-    }
-    [string] Window(){
-        $ret = ""
-        switch( $this._window.WindowState ){
-            [System.Windows.WindowState]::Maximized { $ret = 'Max' }
-            [System.Windows.WindowState]::Minimized { $ret = 'Min' }
-            [System.Windows.WindowState]::Normal { $ret = 'Normal' }
-        }
-        return $ret
-    }
+    #region Focus/ Focasable/ Dialog  
     [string] Focus( [string] $target ){
 
         switch -regex ( $target ){      
@@ -139,68 +428,6 @@ class TTAppManager {
         return $false
     }
     #endregion
-
-    #region Border(io)/ Top(io)/ Left(io)/ Title(io)
-    [void] Border( [string]$name, [int]$percent ){ 
-        switch( $name ){
-            'Layout.Library.Width' {
-                $this._grid_window_lr.ColumnDefinitions[0].Width = "$percent*"
-                $this._grid_window_lr.ColumnDefinitions[1].Width = "$(100-$percent)*"
-            }
-            'Layout.Library.Height' {
-                $this._grid_lpanel_ul.RowDefinitions[0].Height = "$percent*"
-                $this._grid_lpanel_ul.RowDefinitions[1].Height = "$(100-$percent)*"
-            }
-            'Layout.Shelf.Height' {
-                $this._grid_rpanel_ul.RowDefinitions[0].Height = "$percent*"
-                $this._grid_rpanel_ul.RowDefinitions[1].Height = "$(100-$percent)*"
-            }
-            'Layout.Work1.Width' {
-                $this._grid_desk_lr.ColumnDefinitions[0].Width = "$percent*"
-                $this._grid_desk_lr.ColumnDefinitions[1].Width = "$(100-$percent)*"
-            }
-            'Layout.Work1.Height' {
-                $this._grid_desk_ul.RowDefinitions[0].Height = "$percent*"
-                $this._grid_desk_ul.RowDefinitions[1].Height = "$(100-$percent)*"
-            }
-        }
-    }
-    [int] Border( [string]$name ){ 
-        $a = -1
-        $b = 100
-        switch( $name ){
-            'Layout.Library.Width' {
-                $a = $this._grid_window_lr.ColumnDefinitions[0].ActualWidth
-                $b = $this._grid_window_lr.ColumnDefinitions[1].ActualWidth
-            }
-            'Layout.Library.Height' {
-                $a = $this._grid_lpanel_ul.RowDefinitions[0].ActualHeight
-                $b = $this._grid_lpanel_ul.RowDefinitions[1].ActualHeight
-            }
-            'Layout.Shelf.Height' {
-                $a = $this._grid_rpanel_ul.RowDefinitions[0].ActualHeight
-                $b = $this._grid_rpanel_ul.RowDefinitions[1].ActualHeight
-            }
-            'Layout.Work1.Width' {
-                $a = $this._grid_desk_lr.ColumnDefinitions[0].ActualWidth
-                $b = $this._grid_desk_lr.ColumnDefinitions[1].ActualWidth
-            }
-            'Layout.Work1.Height' {
-                $a = $this._grid_desk_ul.RowDefinitions[0].ActualHeight
-                $b = $this._grid_desk_ul.RowDefinitions[1].ActualHeight
-            }
-        }
-        return [int]( $a / ( $a + $b ) * 100 )
-    }
-    [void] Top( [int] $num ){ $this._window.Top = $num }
-    [int]  Top(){ return $this._window.Top }
-    [void] Left( [int] $num ){ $this._window.Left = $num }
-    [int]  Left(){ return $this._window.Left }
-    [void]   Title( $text ){ $this._window.Title = $text }
-    [string] Title(){ return $this._window.Title }
-
-
-    #endregion
 }
 
 #region TTPanelManager (TTLibraryManager, TTIndexManager, TTShellManager, TTDeskManager, TTCabinaetManager )
@@ -230,25 +457,44 @@ class TTPanelManager {
     TTPanelManager( $name, [TTAppManager]$app, $ex ){ # Cabinet用
         $this._name =       $name
         $this._app =        $app
-
     }
     TTPanelManager( $name, [TTAppManager]$app ){
-        $this._name =       $name
-        $this._app =        $app
-        $this._panel =      $app.FindName("$($this._name)Panel")
-        $this._label =      $app.FindName("$($this._name)Caption")
-        $this._datagrid =   $app.FindName("$($this._name)Items")
-        $this._textbox =    $app.FindName("$($this._name)Keyword")
-        $this._menu =       $app.FindName("$($this._name)Sorting")
+        $this._name =   $name
+        $this._app =    $app
+        $this._panel =  $app.GetWPFObject("$($this._name)Panel")
+        $this._label =  $app.GetWPFObject("$($this._name)Caption")
 
-        $this._panel.Add_SizeChanged(       $global:TTPanel_SizeChanged )
-        $this._panel.Add_GotFocus(          $global:TTPanel_GotFocus )
-        $this._textbox.Add_GotFocus(        $global:TTTool_GotFocus )
-        $this._textbox.Add_PreviewKeyDown(  $global:TTTool_PreviewKeyDown )
-        $this._textbox.Add_PreviewKeyUp(    $global:TTTool_PreviewKeyUp )
-        
+        $this._panel.Add_SizeChanged(       { $global:State.event_after_bordersize_changed( $args ) })
+
+        ## 220811 Statusを変更するeventを設定すること！！
+
+        if( $name -in @( 'Library','Index', 'Shelf' )){
+            $this._datagrid =   $app.GetWPFObject("$($this._name)Items")
+            $this._datagrid.Add_Sorting(            { $global:Action.event_to_sort_datagrid_after_onsort( $args ) })
+            $this._datagrid.Add_GotFocus(           { $global:Action.event_to_move_focus_to_main( $args ) })
+            $this._datagrid.Add_PreviewMouseDown(   { $global:Action.event_to_invoke_action_after_click_on_datagrid( $args ) })
+            $this._datagrid.Add_SelectionChanged(   { $global:State.event_after_selecteditem_changed( $args ) })
+            $this._datagrid.Add_SourceUpdated({})       # 'Library.Resource'
+            $this._datagrid.Add_Sorting({})             # 'Library.Sort.Dir', 'Library.Sort.Column'
+            $this._datagrid.Add_TargetUpdated({})       # 'Library.Resource' ?
+            $this._datagrid.Add_SelectionChanged({})    # 'Library.Selected'
+        }
+        if( $name -in @( 'Shelf' )){
+            $this._textbox =    $app.GetWPFObject("$($this._name)Keyword")
+            $this._textbox.Add_TextChanged(         { $global:State.event_after_textbox_changed_for_datagrid( $args ) })
+            $this._textbox.Add_GotFocus(        { $global:State.event_after_focus_changed( $args ) })
+            $this._textbox.Add_TextChanged({})          # 'Library.Keyword'
+            }
+        if( $name -in @( 'Desk' )){
+            $this._textbox =    $app.GetWPFObject("$($this._name)Keyword")
+            $this._textbox.Add_TextChanged(     { $global:State.event_after_textbox_changed_for_workplace( $args ) })
+            $this._textbox.Add_GotFocus(        { $global:State.event_after_focus_changed( $args ) })
+            $this._textbox.Add_TextChanged({})          # 'Library.Keyword'
+        }
+        if( $name -in @( 'Shelf', 'Desk' )){
+            $this._menu =       $app.GetWPFObject("$($this._name)Sorting")
+        }
     }
-
     #endregion
 
     #region Items/ SelecteItems/ SelectedItem/ GetItems/ SelectedIndex/ Refresh
@@ -453,6 +699,7 @@ class TTPanelManager {
         }
         $view.SortDescriptions.Clear()
         $sortDescription = New-Object System.ComponentModel.SortDescription( $this._colname, $direction )
+        $this.Alert( "'$sortc'を$($sortd)でソート", 2 )
         $view.SortDescriptions.Add( $sortDescription )
 
         $this._sortdir = $direction
@@ -510,8 +757,8 @@ class TTPanelManager {
             $tmp = $this._label.Content
             $name = $this._name
             TTTimerResistEvent "$name::Message" $sec 0 {
-                if( $global:AppMan.($script:name)._label.Content -eq $script:text ){
-                    $global:AppMan.($script:name)._label.Content = $script:tmp
+                if( $global:View.($script:name)._label.Content -eq $script:text ){
+                    $global:View.($script:name)._label.Content = $script:tmp
                 }
             }.GetNewClosure()
             $this._label.Content = $text
@@ -524,47 +771,48 @@ class TTPanelManager {
 }
 
 class TTLibraryManager : TTPanelManager {
+    TTCabinetManager( [TTAppManager]$app ) : base ( "Library", $app, $null ){
+    }
+    [void] SetDefaultState(){
+        $this.Items( 'Thinktank' )
 
-    TTLibraryManager( [TTAppManager]$app ) : base( "Library", $app ){
-        $this._datagrid.Add_Sorting(            $global:TTDataGrid_Sorting )
-        $this._datagrid.Add_SelectionChanged(   $global:TTDataGrid_SelectionChanged )
-        $this._datagrid.Add_GotFocus(           $global:TTDataGrid_GotFocus )
-        $this._datagrid.Add_PreviewMouseDown(   $global:TTDataGrid_PreviewMouseDown )
-        $this._textbox.Add_TextChanged(         $global:TTPanel_TextChanged_ToExtract )
+        # $this._set( 'Library.Resource',     'Thinktank' )
+        # $this._set( 'Library.Keyword',      '' )
+        # $this._set( 'Library.Sort.Dir',     'Descending' )
+        # $this._set( 'Library.Sort.Column',  'UpdateDate' )
+        # $this._set( 'Library.Selected',     'Memos' )
     }
 }
 class TTIndexManager : TTPanelManager {
-    
-    TTIndexManager( [TTAppManager]$app ) : base( "Index", $app ){
-        $this._datagrid.Add_Sorting(            $global:TTDataGrid_Sorting )
-        $this._datagrid.Add_SelectionChanged(   $global:TTDataGrid_SelectionChanged )
-        $this._datagrid.Add_GotFocus(           $global:TTDataGrid_GotFocus )
-        $this._datagrid.Add_PreviewMouseDown(   $global:TTDataGrid_PreviewMouseDown )
-        $this._textbox.Add_TextChanged(         $global:TTPanel_TextChanged_ToExtract )
+    TTIndexManager( [TTAppManager]$app ) : base ( "Index", $app, $null ){
+    }
+    [void] SetDefaultState(){
+        # $this._set( 'Index.Resource',       'Status' )
+        # $this._set( 'Index.Keyword',        '' )
+        # $this._set( 'Index.Sort.Dir',       'Descending' )
+        # $this._set( 'Index.Sort.Column',    'Name' )
+        # $this._set( 'Index.Selected',       'Application.Author.Name' )
     }
 }
 class TTShelfManager : TTPanelManager {
+    TTShelfManager( [TTAppManager]$app ) : base ( "Shelf", $app, $null ){
 
-    TTShelfManager( [TTAppManager]$app ) : base( "Shelf", $app ){
-        $this._datagrid.Add_Sorting(            $global:TTDataGrid_Sorting )
-        $this._datagrid.Add_SelectionChanged(   $global:TTDataGrid_SelectionChanged )
-        $this._datagrid.Add_GotFocus(           $global:TTDataGrid_GotFocus )
-        $this._datagrid.Add_PreviewMouseDown(   $global:TTDataGrid_PreviewMouseDown )
-        $this._textbox.Add_TextChanged(         $global:TTPanel_TextChanged_ToExtract )
+    }
+    [void] SetDefaultState(){
+        # $this._set( 'Shelf.Resource',       'Memos' )
+        # $this._set( 'Shelf.Keyword',        '' )
+        # $this._set( 'Shelf.Sort.Dir',       'Descending' )
+        # $this._set( 'Shelf.Sort.Column',    'UpdateDate' )
+        # $this._set( 'Shelf.Selected',       'thinktank' )
     }
 
 }
 class TTDeskManager : TTPanelManager {
+    TTDeskManager( [TTAppManager]$app ) : base ( "Desk", $app, $null ){
 
-    TTDeskManager( [TTAppManager]$app ) : base ( "Desk", $app ){
-        $this._textbox.Add_TextChanged(         $global:TTDesk_TextChanged_ToHighlight )
-
-
-        # $script:TextEditors_PreviewKeyDown
-        # $script:TextEditors_TextChanged
-        # $script:TextEditors_GotFocus
-        # $script:TextEditors_PreviewMouseDown
-        # $script:TextEditors_PreviewDrop
+    }
+    [void] SetDefaultState(){
+        # $this._set( 'Desk.Keyword', '' )
     }
 
 }
@@ -634,19 +882,37 @@ class TTCabinetManager : TTPanelManager {
         $this._textbox =    $this._window.FindName("$($this._name)Keyword")
         $this._menu =       $this._window.FindName("$($this._name)Sorting")
 
-        # $this._window.Add_Loaded({ $global:AppMan.Cabinet.Focus() })
+        # $this._window.Add_Loaded({ $global:View.Cabinet.Focus() })
         $this._window.Add_Closing(              { $args[1].Cancel = $True })
-        $this._window.Add_MouseLeftButtonDown(  { $global:AppMan.Cabinet._window.DragMove() })
-        $this._window.Add_MouseDoubleClick(     { $global:AppMan.Cabinet.Hide($true); $args[1].Handled=$True })
-        $this._window.Add_PreviewKeyDown(       $global:TTCabin_PreviewKeyDown )
-        $this._window.Add_PreviewKeyUp(         $global:TTCabin_PreviewKeyUp )
+        $this._window.Add_MouseLeftButtonDown(  { $global:View.Cabinet._window.DragMove() })
+        $this._window.Add_MouseDoubleClick(     { $global:View.Cabinet.Hide($true); $args[1].Handled=$True })
+        # $this._window.Add_PreviewKeyDown(       $global:Action_event_to_trigger_key_bound_command )
+        # $this._window.Add_PreviewKeyUp(         $global:Action_event_to_terminate_key_event )
+        $this._window.Add_PreviewKeyDown(   { $global:Action.event_to_trigger_key_bound_command( $args ) })
+        $this._window.Add_PreviewKeyUp(     { $global:Action.event_to_terminate_key_event( $args ) })
 
-        $this._datagrid.Add_Sorting(            $global:TTDataGrid_Sorting )
-        $this._datagrid.Add_SelectionChanged(   $global:TTDataGrid_SelectionChanged )
-        $this._datagrid.Add_GotFocus(           $global:TTDataGrid_GotFocus )
-        $this._datagrid.Add_PreviewMouseDown(   $global:TTDataGrid_PreviewMouseDown )
-        $this._textbox.Add_TextChanged(         $global:TTPanel_TextChanged_ToExtract )
+        $this._datagrid.Add_Sorting(            { $global:Action.event_to_sort_datagrid_after_onsort( $args ) })
+        $this._datagrid.Add_GotFocus(           { $global:Action.event_to_move_focus_to_main( $args ) })
+        $this._datagrid.Add_PreviewMouseDown(   { $global:Action.event_to_invoke_action_after_click_on_datagrid( $args ) })
+        $this._datagrid.Add_SelectionChanged(   { $global:State.event_after_selecteditem_changed( $args ) })
+        $this._datagrid.Add_SourceUpdated({})       # 'Library.Resource'
+        $this._datagrid.Add_Sorting({})             # 'Library.Sort.Dir', 'Library.Sort.Column'
+        $this._datagrid.Add_TargetUpdated({})       # 'Library.Resource' ?
+        $this._datagrid.Add_SelectionChanged({})    # 'Library.Selected'
 
+        $this._textbox.Add_TextChanged(         { $global:State.event_after_textbox_changed_for_datagrid( $args ) })
+        $this._textbox.Add_GotFocus(        { $global:State.event_after_focus_changed( $args ) })
+        $this._textbox.Add_TextChanged({})          # 'Library.Keyword'
+
+    }
+    [void] SetDefaultState(){
+        # $this._set( 'Cabinet.Resource',       'Commands' )
+        # $this._set( 'Cabinet.Keyword',        '' )
+        # $this._set( 'Cabinet.Sort.Dir',       'Descending' )
+        # $this._set( 'Cabinet.Sort.Column',    'UpdateDate' )
+        # $this._set( 'Cabinet.Selected',       'ttcmd_application_window_quit' )
+        # $this._set( 'Cabinet.Left',   '0' ) # Viewでsetして、eventで設定すべし
+        # $this._set( 'Cabinet.Top',    '0' ) # Viewでsetして、eventで設定すべし
     }
 
     #endregion
@@ -667,7 +933,7 @@ class TTCabinetManager : TTPanelManager {
         }else{
             $this._selected = $null
         }
-        $this._window.Dispatcher.Invoke({$global:AppMan.Cabinet._window.Hide() })
+        $this._window.Dispatcher.Invoke({$global:View.Cabinet._window.Hide() })
         return $this
     }
     [string] Focus(){
@@ -676,6 +942,7 @@ class TTCabinetManager : TTPanelManager {
 
     #endregion
 }
+
 #endregion
 
 
@@ -699,8 +966,29 @@ class TTDocumentManager{
         $this.Grid = [TTGridsManager]::New( $this ).Initialize()
 
         $this.IDs =         @( 'Work1', 'Work2', 'Work3' )
-        $this.Controls =    @( $this.IDs.foreach{ $this.app.FindName($_) } )
+        $this.Controls =    @( $this.IDs.foreach{ $this.app.GetWPFObject($_) } )
         (1..3).foreach{ $this.SelectTool( $_, 'Editor' ) }
+
+    }
+    [void] SetDefaultState(){
+        # $this._set( 'Work1.Tool', 'Editor' )
+        # $this._set( 'Work2.Tool', 'Editor' )
+        # $this._set( 'Work3.Tool', 'Editor' )
+        # $this._set( 'Current.Workspace', 'Work1' )
+        # $this._set( 'Current.Tool', 'Editor1' )
+
+        # $this._set( 'Editor1.Index', 'thinktank' )
+        # $this._set( 'Editor2.Index', 'thinktank' )
+        # $this._set( 'Editor3.Index', 'thinktank' )
+
+        # $this.tools.app._set( 'Browser1.Url', 'http://google.com' )
+        # $this.tools.app._set( 'Browser2.Url', 'http://google.com' )
+        # $this.tools.app._set( 'Browser3.Url', 'http://google.com' )
+
+        # $this.tools.app._set( 'Grid1.Index',  'thinktank' )
+        # $this.tools.app._set( 'Grid2.Index',  'thinktank' )
+        # $this.tools.app._set( 'Grid3.Index',  'thinktank' )
+
 
     }
 
@@ -729,6 +1017,7 @@ class TTDocumentManager{
 
     #endregion
 }
+
 #endregion
 
 
@@ -746,11 +1035,11 @@ class TTToolsManager { # abstract
         $this.app = $docman.app
     }
     [TTToolsManager] Initialize(){              # if needed
-        $this.Controls = @( $this.IDs.foreach{ $this.app.FindName($_) } )
+        $this.Controls = @( $this.IDs.foreach{ $this.app.GetWPFObject($_) } )
         $this.Controls.foreach{ 
-            $_.Add_GotFocus(        $global:TTTool_GotFocus )
-            $_.Add_PreviewKeyDown(  $global:TTTool_PreviewKeyDown )
-            $_.Add_PreviewKeyUp(    $global:TTTool_PreviewKeyUp )
+            $_.Add_GotFocus({ $global:State.event_after_focus_changed( $args ) })
+            $_.Add_PreviewKeyDown({})
+            $_.Add_PreviewKeyUp({})
         }
         return $this
     }
@@ -788,6 +1077,11 @@ class TTEditorsManager : TTToolsManager{
         $this.xshd = Get-Content "$global:TTScriptDirPath\thinktank.xshd"
     }
     [TTEditorsManager] Initialize(){               # if needed
+
+        [TTEditorsManager]::OnSave = { $global:State.event_after_editor_saved( $args ) }
+        [TTEditorsManager]::OnLoad = { $global:State.event_after_editor_loaded( $args ) }
+
+
         ([TTToolsManager]$this).Initialize()
         $this.documents = @((1..3).foreach{ [ICSharpCode.AvalonEdit.Document.TextDocument]::new() })
         $this.documents.foreach{ $_.FileName = "" }
@@ -827,10 +1121,10 @@ class TTEditorsManager : TTToolsManager{
         )
         $editor.AllowDrop = $true
 
-        $editor.Add_TextChanged(        $global:TextEditors_TextChanged )
-        $editor.Add_GotFocus(           $global:TextEditors_GotFocus )
-        $editor.Add_PreviewMouseDown(   $global:TextEditors_PreviewMouseDown )
-        $editor.Add_Drop(               $global:TextEditors_PreviewDrop )
+        $editor.Add_TextChanged(        { $global:Action.event_to_save_after_text_change_on_editor( $args ) })
+        $editor.Add_PreviewMouseDown(   { $global:Action.event_to_invoke_action_after_click_on_editor( $args ) })
+        $editor.Add_Drop(               { $global:Action.event_to_open_file_after_file_dropped( $args ) })
+        $editor.Add_GotFocus(           { $global:State.event_after_editor_focused( $args ) })
         
         return $this
     }
@@ -838,9 +1132,14 @@ class TTEditorsManager : TTToolsManager{
     #endregion
 
     #region Load/ Save/ History
+    [TTEditorsManager] Load( [string]$index ){
+        return $this.Load( $this.docman.CurrentNumbe, $index )
+    }
     [TTEditorsManager] Load( [int]$num, [string]$index ){
+        if( $num -eq -1 ){ $num = $global:View.Document.CurrentNumber }
 
         $editor =   $this.Controls[$num-1]
+        $index = $this.GetHistory( $index )
         $filepath = [TTTool]::index_to_filepath( $index )
 
         #### noneed to load
@@ -854,7 +1153,7 @@ class TTEditorsManager : TTToolsManager{
         }
 
         #### load
-        $index = $this.History( $num, $index )
+        $this.Initialize( $num )
 
         $refdoc = $this.documents.where{ $_.FileName -eq $filepath }[0]
         if( $null -ne $refdoc ){    #::: share file loaded on other editor
@@ -884,10 +1183,18 @@ class TTEditorsManager : TTToolsManager{
 
         #### invoke OnLoad event
         &([TTEditorsManager]::OnLoad) $this $num $index
-    
+        #    $this.SetHistory( $num, $index ) # →eventで処理する
+        #    @('Index','Shelf','Cabinet').foreach{ $this.tools.app.group.refresh($_) }
+
+
         return $this
     }
+    [TTEditorsManager] Save(){
+        return $this.Save( $this.docman.CurrentNumbe )
+    }
     [TTEditorsManager] Save( [int]$num ){
+        if( $num -eq -1 ){ $num = $global:View.Document.CurrentNumber }
+
         $editor = $this.Controls[$num-1]
         $filepath = $editor.Document.FileName
 
@@ -902,7 +1209,11 @@ class TTEditorsManager : TTToolsManager{
 
         return $this
     }
-    [string] History( [int]$num, [string]$action ){
+    [string] GetHistory( [string]$action ){
+        return $this.GetHistory( $this.docman.CurrentNumber, $action )
+    }
+    [string] GetHistory( [int]$num, [string]$action ){
+        if( $num -eq -1 ){ $num = $global:View.Document.CurrentNumber }
 
         $curpos = $this.HistoryPositions[$num-1]
         $curidx = $this.Histories[$num-1][$curpos]
@@ -922,24 +1233,57 @@ class TTEditorsManager : TTToolsManager{
                 return $this.Histories[$num-1][$curpos]
 
             }
-            default {
-                if( $curidx -eq $action ){ return $action }
-                if( $curpos -eq 100 ){ return $action }
-                $curpos += 1
-                $this.HistoryPositions[$num-1] = $curpos
-                if( $this.Histories[$num-1][$curpos] -ne $action ){
-                    $this.Histories[$num-1][$curpos] = $action
-                    @(($curpos+1)..99).foreach{ $this.Histories[$num-1][$_] = '' }
-                }        
-            }
         }
 
         return $action
     }
+    [void] SetHistory( [string]$index ){
+        $this.SetHistory( $this.docman.CurrentNumber, $index )
+    }
+    [void] SetHistory( [int]$num, [string]$index ){
+        if( $num -eq -1 ){ $num = $global:View.Document.CurrentNumber }
+
+        $curpos = $this.HistoryPositions[$num-1]
+        $curidx = $this.Histories[$num-1][$curpos]
+
+        if( $curidx -eq $index ){ return $index }
+        if( $curpos -eq 100 ){ return $index }
+        $curpos += 1
+        $this.HistoryPositions[$num-1] = $curpos
+        if( $this.Histories[$num-1][$curpos] -ne $index ){
+            $this.Histories[$num-1][$curpos] = $index
+            @(($curpos+1)..99).foreach{ $this.Histories[$num-1][$_] = '' }
+        }        
+    }
+    [string] Create(){
+        #### invoke OnCreate event
+        $index = $global:Model.GetChild('Memos').CreateChild()
+
+        &([TTEditorsManager]::OnCreate) $this $index
+        # @('Index','Shelf','Cabinet').where{ 
+        #     $this.tools.app._get("$_.Resource") -eq 'Memos'
+        # }.foreach{
+        #     $this.tools.app.group.reload($_)
+        # } 
+
+        return $index
+    }
+    [string] Create( [int]$num ){
+        if( $num -eq -1 ){ $num = $this.docman.CurrentNumber }
+        $index = $this.Create()
+
+        return $this.load( $index ) 
+    }
+
     #endregion
 
     #region MoveTo/ NodeTo/ SelectTo
+    [bool] MoveTo( [string]$to ){
+        return $this.MoveTo( $this.docman.CurrentNumber, $to )
+    }
     [bool] MoveTo( [int]$num, [string]$to ){
+        if( $num -eq -1 ){ $num = $global:View.Document.CurrentNumber }
+
         $editor = $this.Controls[$num-1]
         $curpos = $editor.CaretOffset
         $curlin = $editor.document.GetLineByOffset( $curpos )
@@ -1078,7 +1422,7 @@ class TTEditorsManager : TTToolsManager{
                 }
             }
             'prevkeywordnode' {
-                $text = $global:AppMan.Desk._textbox.Text.Trim().Split(",")[0]  # テキストボックスの最初の , までをキーワード認識
+                $text = $global:View.Desk._textbox.Text.Trim().Split(",")[0]  # テキストボックスの最初の , までをキーワード認識
                 $text = $text -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'  # 正規表現記号をエスケープ 
                 $text = $text -replace "[ 　\t]+", " "                          # 空白文字を半角に統一
 
@@ -1098,7 +1442,7 @@ class TTEditorsManager : TTToolsManager{
                 return $false
             }
             'nextkeywordnode' {
-                $text = $global:AppMan.Desk._textbox.Text.Trim().Split(",")[0]         # テキストボックスの最初の , までをキーワード認識
+                $text = $global:View.Desk._textbox.Text.Trim().Split(",")[0]         # テキストボックスの最初の , までをキーワード認識
                 $text = $text -replace "[\.\^\$\|\\\[\]\(\)\{\}\+\*\?]", '\$0'  # 正規表現記号をエスケープ 
                 $text = $text -replace "[ 　\t]+", " "                          # 空白文字を半角に統一
 
@@ -1137,7 +1481,12 @@ class TTEditorsManager : TTToolsManager{
         return $true
 
     }
+    [bool] NodeTo( [string]$state ){
+        return $this.NodeTo( $this.docman.CurrentNumber, $to, $following_action )
+    }
     [bool] NodeTo( [int]$num, [string]$state ){
+        if( $num -eq -1 ){ $num = $global:View.Document.CurrentNumber }
+
         $editor =   $this.Controls[$num-1]
         $curpos =   $editor.CaretOffset
         $curlin =   $editor.document.GetLineByOffset( $curpos )
@@ -1216,7 +1565,12 @@ class TTEditorsManager : TTToolsManager{
 
         return $true
     }
+    [bool] SelectTo( [string]$to, [string]$following_action ){
+        return $this.SelectTo( $this.docman.CurrentNumber, $to, $following_action )
+    }
     [bool] SelectTo( [int]$num, [string]$to, [string]$following_action ){
+        if( $num -eq -1 ){ $num = $global:View.Document.CurrentNumber }
+
         $editor = $this.Controls[$num-1]
         $curpos  = $editor.CaretOffset
 
@@ -1278,7 +1632,9 @@ class TTEditorsManager : TTToolsManager{
     #endregion
 
     #region Text/ Edit
-    [string] Text( [string]$attr ){ return $this.Text( $this.docman.CurrentNumber, $attr ) }
+    [string] Text( [string]$attr ){
+        return $this.Text( $this.docman.CurrentNumber, $attr )
+    }
     [string] Text( [int]$num, [string]$attr ){
         $editor = $this.Controls[$num-1]
 
@@ -1294,19 +1650,250 @@ class TTEditorsManager : TTToolsManager{
         }
         return ""
     }
-    [void] Edit( [string]$action ){ $this.Edit( $this.docman.CurrentNumber, $action ) }
+    [void] Edit( [string]$action ){
+        $this.Edit( $this.docman.CurrentNumber, $action )
+    }
     [void] Edit( [int]$num, [string]$action ){
         $editor = $this.Controls[$num-1]
+        $doc = $editor.Document
+        $cur = $editor.CaretOffset
 
         switch( $action ) {
             'delete'    { [EditingCommands]::Delete.Execute( $null, $editor.TextArea ) }
             'backspace' { [EditingCommands]::Backspace.Execute( $null, $editor.TextArea ) }
-            'section+' { return }
-            'section-' { return }
+            'section+'  { return }
+            'section-'  { return }
+            'clipboard' { return $this.paste( $no ) }
+            'newline'   { $doc.Insert( $cur, "`r`n" ) }
+            'newline+'  { $editor.LineDown(); $doc.Insert( $cur, "`r`n" ) }
+            'touch'     { $editor.IsModified = $true }
         }
     }
     #endregion
 
+    #region Paste
+    [void] Paste(){
+        $this.Paste( $this.docman.CurrentNumber )
+    }
+    [bool] Paste( [int]$no ){
+        $editor = $this.Controls[$num-1]
+        $text = [TTClipboard]::GetText()
+
+        switch( [TTClipboard]::DataType() ){
+            "Text,"                     { $this._paste_url_text( $_, $editor, $text ) }
+            "FileDropList,Text,CSV,"    { $this._paste_outlookmails( $_, $editor, $text ) }
+            "Text,CSV,"                 { $this._paste_outlookmails( $_, $editor, $text ) } 
+            "TTObject,"                 { $this._paste_ttobject( $_, $editor, $text ) } 
+            "Text,TTObject,"            { $this._paste_ttobject_text( $_, $editor, $text ) } 
+            "TTObjects,"                { $this._paste_ttobjects( $_, $editor, $text ) } 
+            "FileDropList,Text,"        { $this._paste_outlookschedule( $_, $editor, $text ) }
+            "Image,"                    { $this._paste_image( $_, $editor, $text ) } 
+            "Image,Html,"               { $this._paste_image( $_, $editor, $text ) } 
+            "Text,Rtf,Html,"            { $this._paste_url_text( $_, $editor, $text ) } # word
+            "FileDropList,"             { $this._paste_files_folders( $_, $editor, $text ) }
+            "Text,Html,"                { $this._paste_url_text( $_, $editor, $text ) } # favorite
+            "Text,Image,CSV,Rtf,Html,DataInterchangeFormat," 
+                                        { $this._paste_excelrange( $_, $editor, $text ) } 
+            default                     { 
+                Write-Host "non supported data"
+                return $false
+            }
+        }
+        return $true
+
+    }
+    [void] _paste_url_text( $type, $editor, $text ){
+        $doc = $editor.Document
+        $cur = $editor.CaretOffset
+
+        if( $text -match "^https?://[^　 \[\],;`&lt;&gt;&quot;&apos;]+"){   #### url
+            $items = @{
+                "@そのまま" =           'raw'
+                "URLデコード" =         'decode'
+                "# ⇒ [タイトル](URL)" = 'title'
+            }
+            $selected = $global:View.PopupMenu.Caption( 'URLをペースト' ).Items( $items.Keys ).Show()
+            switch( $items[$selected] ){
+                'decode' { 
+                    $text = [System.Web.HttpUtility]::UrlDecode($text)
+                }
+                'title'  {
+                    if( ( Invoke-WebRequest $text ).Content -match "\<title\>(?<title>.+)\<\/title\>" ){
+                        $text = "[$($Matches.title)]($text)"
+                    }
+                    $text = [System.Web.HttpUtility]::UrlDecode( $text )
+                }
+            }
+            $doc.Insert( $cur, $text )
+
+        }else{                                                              #### text
+            $items = @{
+                "@そのまま"     = 'raw'
+                "コメント化"    = 'commentize'
+                "URLデコード"   = 'decode'
+                "URLエンコード%"   = 'decode'
+            }
+            $selected = $global:View.PopupMenu.Caption( 'テキストをペースト' ).Items( $items.Keys ).Show()
+            switch( $items[$selected] ){
+                'decode' {
+                    $text = [System.Web.HttpUtility]::UrlDecode($text)
+                }
+                'commentize' {
+                    $text =  @(
+                        $text.split("`r`n").where{$_ -ne ""}.foreach{ "; $_" }
+                    ) -join "`r`n"
+                }
+            }
+            $doc.Insert( $cur, $text )
+
+        }
+        
+    }
+    [void] _paste_outlookmails( $type, $editor, $text ){
+        $doc = $editor.Document
+        $cur = $editor.CaretOffset
+        $titles = (ConvertFrom-Csv ([Clipboard]::GetText() -replace "`t", ",")).件名
+        $outlook = New-Object -ComObject Outlook.Application
+    
+        try {
+            $fmt = ""
+            $mails = $outlook.ActiveExplorer().Selection
+    
+            for( $i = 1; $i -le $mails.count; $i++ ){
+                $mail = $mails.Item($i)
+                if( $mail.Subject -notin $titles ){ continue }
+    
+                $id =           (Get-Date $mail.ReceivedTime).tostring("yyyy-MM-dd-HHmmss")
+                $title =        $mail.Subject
+                $sendername =   $mail.Sender.Name
+                $body = @(($mail.body.split("From")[0]).split("`r`n").where{ $_ -ne "" }.foreach{ "; "+$_ }) -join "`r`n"
+    
+                if( $fmt -eq "" ){
+                    $items = @{
+                        "[mail:$($id)]" =                   '"[mail:$($id)]`r`n"'
+                        "$($sendername):[mail:$($id)]" =    '"`r`n$($sendername):[mail:$($id)]"'
+                        "⇒ $title`\[mail:$($id)]" =          '"⇒ $title`r`n[mail:$($id)]"'
+                        "⇒ $title`\[mail:$($id)]`\本体" =     '"⇒ $title`r`n[mail:$($id)]`r`n$body"'
+                    }
+                    $selected = $global:View.PopupMenu.Caption( 'Outlookメールをペースト' ).Items( $items.Keys ).Show()
+                    $fmt = $items[$selected]
+                    if( 0 -eq $fmt.length ){ return }
+                }
+                $doc.Insert( $cur, (Invoke-Expression $fmt) )
+                $backupFolderName = $global:Model.GetChild('Configs').GetChild("OutlookBackupFolder").Value
+                $mailFolderName = $mail.parent.FolderPath.substring(2)
+                foreach( $folder in $outlook.GetNamespace("MAPI").Folders ){
+                    if( ($folder.Name -eq $backupFolderName) -and
+                        ($folder.Name -ne $mailFolderName) ){ $mail.Move( $folder ) } 
+                }
+            }
+        
+        } finally {
+            [void][System.Runtime.Interopservices.Marshal]::ReleaseComObject($outlook)
+        }
+
+    }
+    [void] _paste_ttobjects( $type, $editor, $text ){
+        $doc =  $editor.Document
+        $cur =  $editor.CaretOffset
+        $objs = [TTClipboard]::_ttobjs
+
+        switch( $objs[0].GetType().Name ){
+            'TTMemo' { 
+                $items = @{
+                    "@[memo:$($objs[0].MemoID)]" =                   'memoid'
+                    "[memo:$($objs[0].MemoID)] $($objs[0].Title)"=    'title'
+                }
+                $selected = $global:View.PopupMenu.Caption( 'TTMemoをペースト' ).Items( $items.Keys ).Show()
+                switch( $items[$selected] ){
+                    'memoid' { 
+                        $objs.foreach{ $doc.Insert( $cur, "[memo:$($_.MemoID)]`r`n" ) }
+                    } 
+                    'title' {
+                        $objs.foreach{ $doc.Insert( $cur, "[memo:$($_.MemoID)] $($_.Title)`r`n" ) }
+                    }
+                }    
+            }
+        }
+    }
+    [void] _paste_ttobject( $type, $editor, $text ){
+        # $doc    = [TTClipboard]::_target.Document
+        # $offset = [TTClipboard]::_target.CaretOffset
+        # $target = [TTClipboard]::_target 
+        # $copied = [TTClipboard]::_copied
+
+        # switch( $copied.GetType().Name ){
+        #     'TTMemo' { 
+        #         $items = @{
+        #             "@[memo:$($copied.MemoID)]"     = 'memoid'
+        #             "[memo:$($copied.MemoID)] $($copied.Title)"  = 'title'
+        #         }
+        #         switch( $items[ [string](ShowPopupMenu $items.keys "" "" "Memo" $target) ] ){
+        #             'memoid' { $doc.Insert( $offset, "[memo:$($copied.MemoID)]" ) }
+        #             'title'  { $doc.Insert( $offset, "[memo:$($copied.MemoID)] $($copied.Title)" ) }
+        #         }    
+        #     }
+        # }
+    
+    }
+    [void] _paste_ttobject_text( $type, $editor, $text ){ # メモと引用テキスト
+        # $text   = [Clipboard]::GetText()
+        # $doc    = [TTClipboard]::_target.Document
+        # $offset = [TTClipboard]::_target.CaretOffset
+        # $target = [TTClipboard]::_target 
+        # $copied = [TTClipboard]::_copied
+
+        # switch( $copied.GetType().Name ){
+        #     'TTMemo' { 
+        #         $items = @{
+        #             "@[memo:$($copied.MemoID):$text]"     = 'memoid'
+        #             "[memo:$($copied.MemoID):$text] $($copied.Title)"  = 'title'
+        #         }
+        #         switch( $items[ [string](ShowPopupMenu $items.keys "" "" "Memo" $target) ] ){
+        #             'memoid' { $doc.Insert( $offset, "[memo:$($copied.MemoID):$text]" ) }
+        #             'title'  { $doc.Insert( $offset, "[memo:$($copied.MemoID):$text] $($copied.Title)" ) }
+        #         }    
+        #     }
+        # }
+
+    }
+    [void] _paste_outlookschedule( $type, $editor, $text ){ # 未実装
+        $text = [Clipboard]::GetText()                   # 件名（場所）
+        $filedroplist = [Clipboard]::GetFileDropList()   # error
+    }
+    [void] _paste_image( $type, $editor, $text ){ # photoタグとの運用を考える
+    
+        # $image = [Clipboard]::GetImage()  # image:System.Windows.Interop.InteropBitmap
+    
+        $folder = $global:Model.GetChild('Configs').GetChild("CaptureFolder").value
+        if( (Test-Path $folder) -eq $false ){ $folder = [Environment]::GetFolderPath('MyPictures') }
+        $folder = $folder + "\thinktank\" + (Get-Date).ToString("yyyy-MM-dd")
+        if( (Test-Path $folder) -eq $false ){ New-Item $folder -ItemType Directory }
+        $filename = $folder + "\" + (Get-Date).ToString("yyyy-MM-dd-HHmmss") + ".png"
+    
+        (Get-Clipboard -Format Image).Save( $filename )
+    
+        $editor.Document.Insert( $editor.CaretOffset, "$filename`r`n" )
+    }
+    [void] _paste_files_folders( $type, $editor, $text ){ # 未実装
+        
+        $filedroplist = [Clipboard]::GetFileDropList()
+        $filedroplist.foreach{
+            $editor.Document.Insert( $editor.CaretOffset, "$_`r`n" )
+        }
+        # Write-Host "filedroplist:$filedroplist" # [stringcollection]fullpath
+    }
+    [void] _paste_excelrange( $type, $editor, $text ){ # 未実装
+        # $text = [Clipboard]::GetText()
+        # $image = [Clipboard]::GetImage()            # string
+        # $csv = [Clipboard]::GetDataObject("CSV")    # image:System.Windows.Interop.InteropBitmap
+        # $rtf = [Clipboard]::GetDataObject("Rich Text Format")      # no datd
+        # $html = [Clipboard]::GetDataObject("Html")                 # no datd
+        # $dif = [Clipboard]::GetDataObject("DataInterchangeFormat") # no datd
+    }
+
+    #endregion
+    
     #region UpdateFolding
     [bool] UpdateFolding( [int]$num ){
         if( ($null -ne $this.FoldStrategies[$num-1]) -and ($null -ne $this.FoldManagers[$num-1]) ){
@@ -1509,18 +2096,25 @@ class TTPopupMenuManager {
         $this._list = $this._window.FindName("PopupMenuItems")
 
         $this._window.Add_Closing(              { $args[1].Cancel = $True })
-        $this._window.Add_PreviewKeyDown(       $global:TTPopup_PreviewKeyDown )
-        $this._window.Add_PreviewKeyUp(         $global:TTPopup_PreviewKeyUp )
-        $this._window.Add_MouseLeftButtonDown(  $global:TTPopup_MouseLeftButtonDown )
-        $this._window.Add_MouseDoubleClick(     $global:TTPopup_MouseDoubleClick )
-        $this._window.Add_LostKeyboardFocus(    $global:TTPopup_LostKeyboardFocus )
+        $this._window.Add_PreviewKeyDown(   { $global:Action.event_to_trigger_key_bound_command( $args ) })
+        $this._window.Add_PreviewKeyUp(     { $global:Action.event_to_terminate_key_event( $args ) })
+        # $this._window.Add_PreviewKeyDown(       $global:Action_event_to_trigger_key_bound_command )
+        # $this._window.Add_PreviewKeyUp(         $global:Action_event_to_terminate_key_event )
+        $this._window.Add_MouseLeftButtonDown(  { $global:View.PopupMenu._window.DragMove() })
+        $this._window.Add_MouseDoubleClick(     { $global:View.PopupMenu.Hide( $true ) })
+        $this._window.Add_LostKeyboardFocus(    { $global:View.PopupMenu.Hide( $false ) })
         
         $style = [Style]::new()
         $style.Setters.Add( [Setter]::new( [Controls.GridViewColumnHeader]::VisibilityProperty, [Visibility]::Collapsed ) )
         $this._list.view.ColumnHeaderContainerStyle = $style
 
+        # $this._set( 'PopupMenu.Left',   '0' ) # Viewでsetして、eventで設定すべし
+        # $this._set( 'PopupMenu.Top',    '0' ) # Viewでsetして、eventで設定すべし
+
+
     }
 
+    
     #endregion
     
     #region  Caption/ Cursor/ Items/ Hide/ Show/ Tio(io)/ Left(io)
@@ -1557,7 +2151,7 @@ class TTPopupMenuManager {
             $this._selected = $this._list.SelectedItem 
         }
         $this._window.Hide()
-        # $this._window.Dispatcher.Invoke({ $global:AppMan.PopupMenu._window.Hide() })
+        # $this._window.Dispatcher.Invoke({ $global:View.PopupMenu._window.Hide() })
         return $this
     }
     [psobject] Show(){
@@ -1577,7 +2171,7 @@ class TTPopupMenuManager {
         # if( $global:TTKeyEventMod -ne 'None' ){
         #     [TTTentativeKeyBindingMode]::Start( 'PopupMenu', $global:TTKeyEventMod, '' )
         #     $this.Hide($true)
-        #     # [TTTentativeKeyBindingMode]::Add_OnExit({ $global:AppMan.PopupMenu.Hide($true) })
+        #     # [TTTentativeKeyBindingMode]::Add_OnExit({ $global:View.PopupMenu.Hide($true) })
         # }
 
         $this._selected = ""                

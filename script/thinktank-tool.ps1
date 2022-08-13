@@ -19,6 +19,22 @@ using namespace System.Text.RegularExpressions
 #region　static TTTool
 #########################################################################################################################
 class TTTool{
+    static [string] sibling( [string]$name, [string]$item, [string[]]$items ){
+        $pos = $items.IndexOf( $item )
+        $len = $items.length
+        if( ($pos -eq -1) -or ($len -eq 0) ){ return '' }
+
+        switch( $name ){
+            'next+' { return $items[ ( $len + $pos + 1 ) % $len ] }
+            'prev+' { return $items[ ( $len + $pos - 1 ) % $len ] }
+            'next'  { return $items[ ( @($pos+1,$len-1)  | Measure-Object -Minimum).Minimum ] }
+            'prev'  { return $items[ ( @($pos-1,0)       | Measure-Object -Maximum).Maximum ] }
+            'first' { return $items[0] }
+            'last'  { return $items[$len-1] }
+        }
+        return ''
+
+    }
 
     static [string] toggle( [string]$item, [string[]]$items ){
         $n = $items.IndexOf( $item )
@@ -33,7 +49,7 @@ class TTTool{
         $url = $url.replace('"','')
     
         if( $url -like "*[param]*" ){
-            $url = $url.replace( "[param]", [System.Web.HttpUtility]::UrlEncode( $global:AppMan.Desk.Keyword() ) )
+            $url = $url.replace( "[param]", [System.Web.HttpUtility]::UrlEncode( $global:View.Desk.Keyword() ) )
         }
         # Start-Process $url
         Start-Process "microsoft-edge:$url"
@@ -156,7 +172,7 @@ class TTTagAction{
     [object] $_editor
     [int] $_offset
 
-    $regex_tags = $global:ResMan.Getchild('Searchs').GetActionTagsRegex()
+    $regex_tags = $global:Model.Getchild('Searchs').GetActionTagsRegex()
     [psobject[]] $_tags = @(
         @{  tag     = 'date'
             regex   = "(\[[0-9]{4}\-[0-9]{2}\-[0-9]{2}\])" },
@@ -231,7 +247,7 @@ class TTTagAction{
             "@URLを開く" =          'open url'
             "一つ上のURLを開く" =   'open parent url'
         }
-        $selected = $global:AppMan.PopupMenu.Caption( 'URLを開く' ).Items( $actions.Keys ).Show()
+        $selected = $global:View.PopupMenu.Caption( 'URLを開く' ).Items( $actions.Keys ).Show()
         switch( $actions[$selected] ){
             'open url'        { [TTTool]::open_url( $this._ma.Value ) }
             'open parent url' { [TTTool]::open_url( (Split-Path $this._ma.Value -Parent) ) }
@@ -242,7 +258,7 @@ class TTTagAction{
             "@ファイルを開く" =     'open file'
             "ディレクトリを開く" =  'open directory'
         }
-        $selected = $global:AppMan.PopupMenu.Caption( 'Pathを開く' ).Items( $actions.Keys ).Show()
+        $selected = $global:View.PopupMenu.Caption( 'Pathを開く' ).Items( $actions.Keys ).Show()
         switch( $actions[$selected] ){
             'open file'      { Start-Process $this._ma.Value }
             'open directory' { Start-Process (Split-Path ($this._ma.Value.replace('"','')) -Parent) }
@@ -253,7 +269,7 @@ class TTTagAction{
         $tag   = $this._ma.groups['tag'].Value
         $param = $this._ma.groups['param'].Value
 
-        $search = $global:ResMan.GetChild('Searchs').children[$tag]
+        $search = $global:Model.GetChild('Searchs').children[$tag]
 
         switch ($search.Url){
             "thinktank_tag" {
@@ -301,7 +317,7 @@ class TTTagAction{
         $outlook = New-Object -ComObject Outlook.Application
         try {
             $backupFolder = $null
-            $backupFolderName = $global:ResMan.GetChild('Configs').GetChild("OutlookBackupFolder").Value
+            $backupFolderName = $global:Model.GetChild('Configs').GetChild("OutlookBackupFolder").Value
     
             $folders = $outlook.GetNamespace('MAPI').Folders
             for( $i = 1; $i -le $folders.count; $i++ ){ 
@@ -607,6 +623,10 @@ class TTTentativeKeyBindingMode{
     static [bool] IsNotActive(){
         return ( [TTTentativeKeyBindingMode]::Name -eq '' )
     }
+    static [bool] IsActive(){
+        return ( [TTTentativeKeyBindingMode]::Name -ne '' )
+    }
+
 }
 
 #endregion###############################################################################################################

@@ -3,11 +3,13 @@
 
 
 
+
+
 #region　TTObject / TTCollection / TTResources
 #########################################################################################################################
 class TTObject {
 
-    #region Object itself (Dictionary)
+    #region variants/ new/ GetDictionary/ GetFilename
 
     hidden [string] $flag
     [string] $Name
@@ -29,7 +31,7 @@ class TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Display
+    #region GetDisplay
     [hashtable] GetDisplay() {      # should be override 
         return @{
             Shelf = "flag,Name"
@@ -39,7 +41,7 @@ class TTObject {
     }
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ InvokeAction/ GetActions
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
 
@@ -78,7 +80,7 @@ class TTObject {
 
 class TTCollection : TTObject {
 
-    #region Object itself
+    #region variants/ new/ GetDictionary/ GetFilename/ Initilaize 
     hidden [ScriptBlock] $OnLoad = $null
     hidden [ScriptBlock] $OnSave = $null
     hidden [ScriptBlock] $OnAddChild = $null
@@ -86,7 +88,7 @@ class TTCollection : TTObject {
     hidden [ScriptBlock] $OnUpdate = $null
     hidden [ScriptBlock] $OnChange = $null
 
-    static [string] $MessageOnSaving = 'False'
+    static [string] $MessageOnCacheSaved = 'False'
 
     [string]$Description
     [string]$UpdateDate
@@ -129,6 +131,10 @@ class TTCollection : TTObject {
         $this.LoadCache()
         $this.Update()
     }
+
+    #endregion ----------------------------------------------------------------------------------------------------------
+
+    #region LoadCache/ Update/ ConfigLines/ AddChild/ SaveCache
     [void] LoadCache() {
         # ファイルを読み込む (空行＊, Format-List形式(自己プロパティ), 空行＋, CSV(子プロパティ))
 
@@ -197,11 +203,11 @@ class TTCollection : TTObject {
             $this_name = $this.Name 
             if( $this.GetType().Name -eq 'TTResources' ){
                 TTTimerResistEvent "TTResources:AddChild" 2 0 {
-                    $global:ResMan.SaveCache()
+                    $global:Model.SaveCache()
                 }
             }else{
                 TTTimerResistEvent "$($this.GetType().Name):AddChild" 2 0 {
-                    $global:ResMan.GetChild( $script:this_name ).SaveCache()
+                    $global:Model.GetChild( $script:this_name ).SaveCache()
                 }.GetNewClosure()
             }
 
@@ -212,7 +218,7 @@ class TTCollection : TTObject {
     }
     [void] SaveCache() {
         # 現データをファイルに保存する (空行, Format-List形式(自己プロパティ), 空行, CSV(子プロパティ))
-        if( [TTCollection]::MessageOnSaving -eq 'True' ){       
+        if( [TTCollection]::MessageOnCacheSaved -eq 'True' ){       
             [TTTool]::debug_message( $this, "saved >> $($this.GetFilename())" )
         }
         $this | Format-List | Out-File $this.GetFilename()
@@ -221,6 +227,10 @@ class TTCollection : TTObject {
         if( $this.OnSave ){ &$this.OnSave $this }
 
     }
+
+    #endregion ----------------------------------------------------------------------------------------------------------
+
+    #region GetChildren/ GetChild/ DiscardResources/ DeleteChild/ Child
     [array] GetChildren() {
         return @($this.children.values)
     }
@@ -280,8 +290,7 @@ class TTCollection : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-
-    #region Object Display
+    #region variants/ GetDisplay
     hidden $menus = @(
         @{  Titles =    "_B)はじめに"
             Script =     {ttcmd_application_help_breifing} },
@@ -306,8 +315,7 @@ class TTCollection : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionToShelf = ''
@@ -322,8 +330,7 @@ class TTCollection : TTObject {
 
 class TTResources : TTCollection {
 
-    #region Object itself
-
+    #region variantes/ new/ GetFilename/ Initialize
     hidden [string] $ChildType = "TTCollection"
 
     TTResources() {
@@ -333,6 +340,8 @@ class TTResources : TTCollection {
         $this.children =        @{}
         $this.count =          0
         $this.loading =         $false
+
+        $this.Initialize()
     }
     [string] GetFilename() { 
         return "$global:TTCacheDirPath\thinktank.cache"
@@ -353,6 +362,10 @@ class TTResources : TTCollection {
         return $this
         
     }
+
+    #endregion ----------------------------------------------------------------------------------------------------------
+
+    #region LoadCache/ GGetChildren/ InitializeChildren
     [void] LoadCache() {
         $this.count = $this.children.count
         return
@@ -372,13 +385,14 @@ class TTResources : TTCollection {
     }
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionToShelf = ''
     static [string] $ActionToIndex = ''
     static [string] $ActionToCabinet = ''
     static [string] $ActionDataLocaiton = ''
+
     #endregion ----------------------------------------------------------------------------------------------------------
 
     
@@ -390,8 +404,7 @@ class TTResources : TTCollection {
 #########################################################################################################################
 class TTConfig : TTObject {
 
-    #region Object itself (Dictionary)
-
+    #region variants/ GetDictionary/ GetFilename
     [string]$Description
     [string]$Value
     [string]$MemoPos
@@ -415,7 +428,7 @@ class TTConfig : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Display
+    #region GetDisplay
     [hashtable] GetDisplay() {      # should be override 
         return @{
             Shelf = "Name,Description,Value,PCName,MemoPos,UpdateDate"
@@ -425,7 +438,7 @@ class TTConfig : TTObject {
     }
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionDataLocaiton = ''
@@ -435,7 +448,7 @@ class TTConfig : TTObject {
 
 class TTConfigs: TTCollection {
 
-    #region Object itself
+    #region variants/ new/ Initialize/ Update
 
     hidden [string] $ChildType = "TTConfig"
 
@@ -506,7 +519,7 @@ class TTConfigs: TTCollection {
     }
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionToShelf = ''
@@ -523,7 +536,7 @@ class TTConfigs: TTCollection {
 #########################################################################################################################
 class TTState : TTObject {
 
-    #region Object itself (Dictionary)
+    #region variants/ new/ GetDictionary
     [string]$Value
 
     TTState(){                      # should be override
@@ -541,7 +554,7 @@ class TTState : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Display
+    #region GetDisplay
     [hashtable] GetDisplay() {      # should be override 
         return @{
             Shelf = "Name,Value"
@@ -552,7 +565,7 @@ class TTState : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionFilter = ''
@@ -562,7 +575,7 @@ class TTState : TTObject {
 
 class TTStatus : TTCollection {
 
-    #region Object itself
+    #region variants/ new/ Initialize/ Get/ Set
 
     hidden [string] $ChildType = "TTState"
 
@@ -603,14 +616,14 @@ class TTStatus : TTCollection {
             $this.UpdateDate = ( Get-Date -Format "yyyy-MM-dd-HHmmss")
             $this.count = $this.children.count
             TTTimerResistEvent "TTStatus:Set" 2 0 {
-                    $global:ResMan.GetChild( "Status" ).SaveCache()
+                    $global:Model.GetChild( "Status" ).SaveCache()
                 }
         }
     }
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionToShelf = ''
@@ -627,7 +640,7 @@ class TTStatus : TTCollection {
 #########################################################################################################################
 class TTCommand : TTObject {
 
-    #region Object itself (Dictionary)
+    #region variants/ new/ GetDictionary
     [string]$Description
 
     TTCommand(){
@@ -643,8 +656,7 @@ class TTCommand : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-
-    #region Object Display
+    #region GetDisplay
     [hashtable] GetDisplay() {      # should be override 
         return @{
             Shelf = "Name,Description"
@@ -654,19 +666,18 @@ class TTCommand : TTObject {
     }
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionInvokeCommand = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionFilter = ''
     #endregion ----------------------------------------------------------------------------------------------------------
 
-
 }
 
 class TTCommands: TTCollection {
 
-    #region Object itself
+    #region variants/ new/ Initialize/ Update/ DeleteChild
 
     hidden [string] $ChildType = "TTCommand"
 
@@ -719,7 +730,7 @@ class TTCommands: TTCollection {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionToShelf = ''
@@ -736,7 +747,7 @@ class TTCommands: TTCollection {
 #########################################################################################################################
 class TTSearchMethod : TTObject {
 
-    #region Object itself (Dictionary)
+    #region variants/ new/ GetDictionary/ GetFilename
 
     [string]$Category       # Google:Japan
     [string]$UpdateDate     # 
@@ -768,8 +779,7 @@ class TTSearchMethod : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-
-    #region Object Display
+    #region Object GetDisplay
     [hashtable] GetDisplay() {      # should be override 
         return @{
             Shelf = "Name,Tag,Category,MemoPos,UpdateDate,Url"
@@ -780,8 +790,7 @@ class TTSearchMethod : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
     
-
-    #region Object Action
+    #region variants/ (GetAction)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionDataLocation = ''
@@ -795,7 +804,7 @@ class TTSearchMethod : TTObject {
 
 class TTSearchMethods: TTCollection {
 
-    #region Object itself
+    #region variants/ new/ Initialize/ Update/ SaveCache/ DeleteChild/ GetActionTagsRegex
 
     hidden [string] $ChildType = "TTSearchMethod"
 
@@ -918,7 +927,7 @@ class TTSearchMethods: TTCollection {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionToShelf = ''
@@ -935,8 +944,7 @@ class TTSearchMethods: TTCollection {
 #########################################################################################################################
 class TTExternalLink : TTObject {
 
-    #region Object itself (Dictionary)
-
+    #region variants/ new/ GetDictionary/ GetFilename
     [string]$Category
     [string]$UpdateDate
     [string]$MemoPos
@@ -966,7 +974,7 @@ class TTExternalLink : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Display
+    #region GetDisplay
     [hashtable] GetDisplay() {      # should be override 
         return @{
             Shelf = "Name,Category,MemoPos,UpdateDate,Uri"
@@ -977,7 +985,7 @@ class TTExternalLink : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
     
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionDataLocation = ''
@@ -990,7 +998,7 @@ class TTExternalLink : TTObject {
 
 class TTExternalLinks: TTCollection {
 
-    #region Object itself
+    #region variants/ new/ Initialize/ Update/ DeleteChild/ AddChildFromBrowser
 
     hidden [string] $ChildType = "TTExternalLink"
     
@@ -1090,7 +1098,7 @@ class TTExternalLinks: TTCollection {
     }
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionToShelf = ''
@@ -1107,7 +1115,7 @@ class TTExternalLinks: TTCollection {
 #########################################################################################################################
 class TTMemo : TTObject {
 
-    #region Object itself (Dictionary)
+    #region variants/ new/ GetDictionary/ GetFilename
 
     [string]$MemoID
     [string]$UpdateDate
@@ -1135,7 +1143,7 @@ class TTMemo : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Display
+    #region GetDisplay
     [hashtable] GetDisplay() {      # should be override 
         return @{
             Shelf = "flag,UpdateDate,MemoID,Title"
@@ -1146,7 +1154,7 @@ class TTMemo : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionOpen = ''
@@ -1158,7 +1166,7 @@ class TTMemo : TTObject {
 
 class TTMemos: TTCollection {
 
-    #region Object itself
+    #region variants/ new/ Initialize/ Update/ CreateChild
 
     hidden [string] $ChildType = "TTMemo"
 
@@ -1237,7 +1245,7 @@ class TTMemos: TTCollection {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionToShelf = ''
@@ -1255,7 +1263,7 @@ class TTMemos: TTCollection {
 #########################################################################################################################
 class TTEditing : TTObject {
 
-    #region Object itself (Dictionary)
+    #region variants/ new/ GetDictionary/ GetFilename
 
     [string]$MemoID     # xxxx-xx-xx-xxxxxx or thinktank
     [string]$UpdateDate
@@ -1286,7 +1294,7 @@ class TTEditing : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Display
+    #region GetDisplay
     [hashtable] GetDisplay() {      # should be override 
         return @{
             Shelf = "MemoID,UpdateDate,Offset,Foldings,WordWrap"
@@ -1297,7 +1305,7 @@ class TTEditing : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionOpen = ''
@@ -1308,7 +1316,7 @@ class TTEditing : TTObject {
 
 class TTEditings: TTCollection {
 
-    #region Object itself
+    #region variants/ new/ Initialize/ AddChild
     hidden [string] $ChildType = "TTEditing"
     TTEditings() {                  # should be override
         $this.Name          = "Editings"
@@ -1337,7 +1345,7 @@ class TTEditings: TTCollection {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
-    #region Object Action
+    #region variants/ (GetActions)
     static [string] $Action = ''
     static [string] $ActionDiscardResources = ''
     static [string] $ActionToShelf = ''

@@ -8,7 +8,6 @@
 
 
 
-
 #region Application
 #########################################################################################################################
 $global:KeyBind_Application = @'
@@ -40,34 +39,35 @@ function ttcmd_application_window_quit( $source, $mod, $key ){
     switch( [MessageBox]::Show( "終了しますか", "Quit",'YesNo','Question') ){
         'No' { return }
     }
-    $global:appcon.view.window( 'State', 'Close' )
+    $global:View.Window( 'State', 'Close' )
 }
 function ttcmd_application_window_full( $source, $mod, $key ){
     #.SYNOPSIS
     # アプリケーションを最大化する
     
-    $global:appcon.view.window( 'State', 'Max' )
+    $global:View.Window( 'State', 'Max' )
 }
 function ttcmd_application_window_icon( $source, $mod, $key ){
     #.SYNOPSIS
     # アプリケーションを最小化する
 
-    $global:appcon.view.window( 'State', 'Min' )
+    $global:View.Eindow( 'State', 'Min' )
 }
 function ttcmd_application_window_free( $source, $mod, $key ){
     #.SYNOPSIS
     # アプリケーションを通常化する
 
-    $global:appcon.view.window( 'State', 'Normal' )
+    $global:View.Window( 'State', 'Normal' )
 }
 function ttcmd_application_window_turn( $source, $mod, $key ){
     #.SYNOPSIS
     # アプリケーション表示を変更する
 
-    $global:appcon.view.window( 'State', 'toggle' )
+    $global:View.Window( 'State', 'toggle' )
 }
 
 #endregion
+
 #region _panel_focus/collapse_
 function ttcmd_panel_focus_shelf( $source, $mod, $key ){
     #.SYNOPSIS
@@ -152,7 +152,7 @@ function ttcmd_panel_collapse_cabinet( $source, $mod, $key ){
     #.SYNOPSIS
     # Cabinetを非表示
 
-    $global:AppMan.$source.Hide( $true )
+    $global:View.$source.Hide( $true )
 }
 
 function ttcmd_panel_collapse_multi_panel( $source, $mod, $key ){
@@ -418,14 +418,14 @@ function ttcmd_panel_action_invoke( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの選択アイテムを実行する
 
-    $global:appcon.group.invoke_action( $source )
+    $global:Action.invoke( $source )
 
 }
 function ttcmd_panel_action_select( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルの選択アイテムを選択・実行する
 
-    $global:appcon.group.select_and_invoke_actions( $source )
+    $global:Action.select_and_invoke( $source )
 
 }
 function ttcmd_panel_reload( $source, $mod, $key ){
@@ -444,7 +444,7 @@ function ttcmd_panel_discard_selected( $source, $mod, $key ){
     #.SYNOPSIS
     # 選択アイテムの関連リソースを削除する
 
-    $global:appcon.group.invoke_action( $source, 'SelectedItems', 'DiscardResources' )
+    $global:Action.invoke( $source, 'SelectedItems', 'DiscardResources' )
 }
 
 #endregion
@@ -648,13 +648,13 @@ function ttcmd_editor_edit_delete( $source, $mod, $key ){
     #.SYNOPSIS
     # カーソルの右を削除する
 
-    $global:AppMan.Document.Editor.Edit('delete')
+    $global:View.Document.Editor.Edit('delete')
 }
 function ttcmd_editor_edit_backspace( $source, $mod, $key ){
     #.SYNOPSIS
     # カーソルの左を削除する
 
-    $global:AppMan.Document.Editor.Edit('backspace' )
+    $global:View.Document.Editor.Edit('backspace' )
 }
 function ttcmd_editor_scroll_tonewline( $source, $mod, $key ){
     #.SYNOPSIS
@@ -745,9 +745,9 @@ function ttcmd_editor_edit_insert_date( $source, $mod, $key ){
     # 日付タグを挿入する
 
     # scan & select 
-    $editor = $global:AppMan.FindName( $source )
+    $editor = $global:View.GetWPFObject( $source )
     $global:datetag.scan($editor)
-    $selected = $global:AppMan.PopupMenu.Caption( '日付' ).Items( $global:datetag.tags() ).Show()
+    $selected = $global:View.PopupMenu.Caption( '日付' ).Items( $global:datetag.tags() ).Show()
 
     # # insert tag
     if( 0 -eq $selected.length ){ return }
@@ -764,7 +764,7 @@ function ttcmd_editor_outline_insert_section( $source, $mod, $key ){
     #.SYNOPSIS
     # カーソル位置にセクションを挿入する
 
-    $global:AppMan.Document.Editor.Edit('section')
+    $global:View.Document.Editor.Edit('section')
 }
 
 
@@ -787,7 +787,7 @@ function ttcmd_editor_tag_invoke( $source, $mod, $key ){
         
 
     }else{
-        $current_editor = $global:AppMan.Document.Editor.Controls[$global:AppMan.Document.CurrentNumber-1]
+        $current_editor = $global:View.Document.Editor.Controls[$global:View.Document.CurrentNumber-1]
         [TTTagAction]::New( $current_editor ).invoke()
         
     }
@@ -900,37 +900,37 @@ function ttcmd_menu_move_up( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルのカーソルを上に移動
 
-    $global:AppMan.$source.Cursor( 'up' )
+    $global:View.$source.Cursor( 'up' )
 }
 function ttcmd_menu_move_down( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルのカーソルを下に移動
 
-    $global:AppMan.$source.Cursor( 'down' )
+    $global:View.$source.Cursor( 'down' )
 }
 function ttcmd_menu_move_first( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルのカーソルを先頭に移動
 
-    $global:AppMan.$source.Cursor( 'first' )
+    $global:View.$source.Cursor( 'first' )
 }
 function ttcmd_menu_move_last( $source, $mod, $key ){
     #.SYNOPSIS
     # パネルのカーソルを末尾に移動
 
-    $global:AppMan.$source.Cursor( 'last' )
+    $global:View.$source.Cursor( 'last' )
 }
 function ttcmd_menu_cancel( $source, $mod, $key ){
     #.SYNOPSIS
     # メニューの選択をキャンセル
 
-    $global:AppMan.$source.Hide( $false )
+    $global:View.$source.Hide( $false )
 }
 function ttcmd_menu_ok( $source, $mod, $key ){
     #.SYNOPSIS
     # メニューの選択を確定
 
-    $global:AppMan.$source.Hide( $true )
+    $global:View.$source.Hide( $true )
 }
 
 
@@ -1072,25 +1072,25 @@ function ttcmd_application_config_app_keydown_message_on( $source, $mod, $key ){
     #.SYNOPSIS
     # アプリのキーダウンメッセージをON
 
-    $script:app._set( "Config.KeyDownMessage", "True" )
+    $script:app._set( "Config.MessageOnKeyDown", "True" )
 }
 function ttcmd_application_config_app_keydown_message_off( $source, $mod, $key ){
     #.SYNOPSIS
     # アプリのキーダウンメッセージをOFF
 
-    $script:app._set( "Config.KeyDownMessage", "False" )
+    $script:app._set( "Config.MessageOnKeyDown", "False" )
 }
 function ttcmd_application_config_app_taskexpired_message_on( $source, $mod, $key ){
     #.SYNOPSIS
     # アプリのタスク終了メッセージをON
 
-    $script:app._set( "Config.TaskExpiredMessage", "True" )
+    $script:app._set( "Config.MessageOnTaskExpired", "True" )
 }
 function ttcmd_application_config_app_taskexpired_message_off( $source, $mod, $key ){
     #.SYNOPSIS
     # アプリのタスク終了メッセージをOFF
 
-    $script:app._set( "Config.TaskExpiredMessage", "False" )
+    $script:app._set( "Config.MessageOnTaskExpired", "False" )
 }
 function ttcmd_application_config_app_memosaved_message_on( $source, $mod, $key ){
     #.SYNOPSIS

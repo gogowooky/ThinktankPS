@@ -1,7 +1,6 @@
 ﻿#region Event Binding
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-[ScriptBlock] $global:TTStatus_OnSave = {  $global:appcon.event_save_status( $args ) } 
 
 #region　Model Action-Command Binding
 [TTMemo]::Action =                  'ttact_open_memo'

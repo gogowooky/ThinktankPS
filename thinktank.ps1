@@ -29,13 +29,16 @@ Add-Type -AssemblyName PresentationFramework, System.Windows.Forms, System.Drawi
 #　external script
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 . .\script\thinktank-tool.ps1           #  支援
-. .\script\thinktank-view.ps1           #  .NET Framework（UI出力）
-. .\script\thinktank-model.ps1          #　データ管理クラス
-. .\script\thinktank-control.ps1        #　データ-UI連携
 
-. .\script\thinktank-key-event-binding.ps1       #　.NET Framwork eventとcontrol, Key Eventとcommandをbinding
-. .\script\thinktank-view-event-binding.ps1     #  event-event, event-function ルーティング
-. .\script\thinktank-model-event-binding.ps1     #  event-event, event-function ルーティング
+. .\script\thinktank-model.ps1          #　データ管理クラス
+. .\script\thinktank-view.ps1           #  イベント用のscriptblockが参照できる必要あり
+. .\script\thinktank-state.ps1  #　データ管理クラス
+. .\script\thinktank-action.ps1 #　データ-UI連携
+
+. .\script\thinktank-action-key.ps1         #　.NET Framwork eventとcontrol, Key Eventとcommandをbinding
+. .\script\thinktank-model-notification.ps1     #  event-event, event-function ルーティング
+
+
 
 #endregion###############################################################################################################
 
@@ -119,20 +122,16 @@ function TTTimerResistEvent( [string]$name, [long]$countdown, [long]$rewind, [Sc
 }
 #endregion###############################################################################################################
 
-# セットアップ
-KeyBindingSetup
+#region 起動
+#'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-# View
-$global:AppMan =   [TTAppManager]::new()
+$global:View =      [TTAppManager]::new()
+$global:Model =     [TTResources]::new()
+$global:Action =    [TTActionController]::new()
+$global:State =     [TTStateController]::new()
 
-# Model
-$global:ResMan =   [TTResources]::new().Initialize()
+$global:View.ShowApplication()
 
-# Control
-$global:datetag =       [TTTagFormat]::new()
-$global:appcon =        [TTApplicationController]::new()
-
-
-$global:AppMan.ShowApplication()
+#endregion###############################################################################################################
 
 
