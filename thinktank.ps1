@@ -125,12 +125,22 @@ function TTTimerResistEvent( [string]$name, [long]$countdown, [long]$rewind, [Sc
 #region 起動
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-$global:View =      [TTAppManager]::new()
-$global:Model =     [TTResources]::new()
-$global:Action =    [TTActionController]::new()
-$global:State =     [TTStateController]::new()
+$global:View =      [TTAppManager]::New()
+$global:Model =     [TTResources]::New()
+$global:Action =    [TTActionController]::New()
+$global:State =     [TTStateController]::New()
+
+# default設定
+
+$global:Action.BindEvents(  $global:View )
+$global:Action.BindEvents(  $global:Model )
+$global:State.BindEvents(   $global:View )
+$global:State.BindEvents(   $global:Model )
 
 $global:View.ShowApplication()
+
+# WIndw.Loaded eventで Status/Configs値の設定
+
 
 #endregion###############################################################################################################
 

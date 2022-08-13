@@ -113,13 +113,13 @@ class TTActionController {
     [TTTagFormat] $datetag
 
     TTActionController(){
-
         $this.datetag = [TTTagFormat]::new()
 
         $keybinds = ( @(  
             $global:KeyBind_Application,    $global:KeyBind_Cabinet,    $global:KeyBind_Library, 
             $global:KeyBind_Index,          $global:KeyBind_Shelf,      $global:KeyBind_Misc, 
-            $global:KeyBind_Desk,           $global:KeyBind_Editor,     $global:KeyBind_PopupMenu  ) -join "`n" )
+            $global:KeyBind_Desk,           $global:KeyBind_Editor,     $global:KeyBind_PopupMenu  ) -join "`n" 
+        )
     
         $keybinds.split("`n").foreach{
             $kb_fmt = "(?<mode>[^ ]+)\s{2,}(?<mod>[^ ]+( [^ ]+)?)\s{2,}(?<key>[^ ]+)\s{2,}(?<command>[^\s]+)\s*"
@@ -131,11 +131,77 @@ class TTActionController {
                 $global:TTEventKeys[$Matches.command] += @( @{ Mode = $Matches.mode; Key = "[$($Matches.mod)]$($Matches.key)" } )
             }
         }
-    
     }
-    [TTActionController] initialize(){
-        return $this
+
+    [void] BindEvents( [TTAppManager]$view ){
+
+        @( $view, $view.Cabinet, $view.PopupMenu ).foreach{
+            $_._window.Add_PreviewKeyDown(      { $this.event_to_trigger_key_bound_command( $args ) })
+            $_._window.Add_PreviewKeyUp(        { $this.event_to_terminate_key_event( $args ) })
+        }
+        @( $view.Library, $view.Index, $view.Shelf, $view.Cabinet ).foreach{
+            $_._datagrid.Add_GotFocus(          { $this.event_to_move_focus_to_main( $args ) })
+            $_._datagrid.Add_Sorting(           { $this.event_to_sort_datagrid_after_onsort( $args ) })
+            $_._datagrid.Add_PreviewMouseDown(  { $this.event_to_invoke_action_after_click_on_datagrid( $args ) })
+            $_._datagrid.Add_SourceUpdated(     {})    # 'Library.Resource'
+            $_._datagrid.Add_Sorting(           {})    # 'Library.Sort.Dir', 'Library.Sort.Column'
+            $_._datagrid.Add_TargetUpdated(     {})    # 'Library.Resource' ?
+            $_._datagrid.Add_SelectionChanged(  {})    # 'Library.Selected'
+            $this._textbox.Add_TextChanged(     {})    # 'Library.Keyword'
+        }
+        @( $view.Desk ).foreach{
+            $this._textbox.Add_TextChanged(     {})    # 'Library.Keyword'
+        }
+        @( $view.Cabinet ).foreach{
+            # $this._window.Add_Loaded({ $global:View.Cabinet.Focus() })
+            $this._window.Add_Closing(              { $args[1].Cancel = $True })
+            $this._window.Add_MouseLeftButtonDown(  { $_._window.DragMove() })
+            $this._window.Add_MouseDoubleClick(     { $_.Hide($true); $args[1].Handled=$True })
+
+            $this._datagrid.Add_SourceUpdated(      {}) # 'Library.Resource'
+            $this._datagrid.Add_Sorting(            {}) # 'Library.Sort.Dir', 'Library.Sort.Column'
+            $this._datagrid.Add_TargetUpdated(      {}) # 'Library.Resource' ?
+            $this._datagrid.Add_SelectionChanged(   {}) # 'Library.Selected'
+
+            $this._textbox.Add_TextChanged( {})     # 'Library.Keyword'
+        }
+        @( $view.PopupMenu ).foreach{
+            $this._window.Add_Closing(              { $args[1].Cancel = $True })
+            $this._window.Add_MouseLeftButtonDown(  { $_._window.DragMove() })
+            $this._window.Add_MouseDoubleClick(     { $_.Hide( $true ) })
+            $this._window.Add_LostKeyboardFocus(    { $_.Hide( $false ) })
+        }
+        @( $view.Document.Editor ).foreach{
+            $_.OnSave = { $global:State.event_after_editor_saved( $args ) }
+            $_.OnLoad = { $global:State.event_after_editor_loaded( $args ) }
+            $_.Controls.foreach{
+                $_.Add_GotFocus(            { $global:State.event_after_focus_changed( $args ) })
+                $_.Add_TextChanged(         { $this.event_to_save_after_text_change_on_editor( $args ) })
+                $_.Add_PreviewMouseDown(    { $this.event_to_invoke_action_after_click_on_editor( $args ) })
+                $_.Add_PreviewDrop(         { $this.event_to_open_file_after_file_dropped( $args ) })
+                $_.Add_PreviewKeyDown(  {})
+                $_.Add_PreviewKeyUp(    {})
+            }
+        }
+        @( $view.Document.Browser ).foreach{
+            $this.Controls.foreach{ 
+                $_.Add_GotFocus({ $global:State.event_after_focus_changed( $args ) })
+                $_.Add_PreviewKeyDown({})
+                $_.Add_PreviewKeyUp({})
+            }
+        }
+        @( $view.Document.Grid ).foreach{
+            $this.Controls.foreach{ 
+                $_.Add_GotFocus({ $global:State.event_after_focus_changed( $args ) })
+                $_.Add_PreviewKeyDown({})
+                $_.Add_PreviewKeyUp({})
+            }
+        }
     }
+
+    [void] BindEvents( [TTResources]$model ){
+    }
+
     #endregion
 
     #region invoke/ select_and_invoke
@@ -158,89 +224,48 @@ class TTActionController {
     }
 
     #endregion
+
+    #region focus
+    [void] focus( $panel, $mod, $key ){
+
+        if( $panel -notmatch "(?<panel>Library|Index|Shelf)\+" ){       #### go normal focus
+                $global:View.Focus( $panel )
+                return
+        }
+
+        $tentative_panel = $Matches.panel
+
+        if( $this._eq( 'Focus.Application', $tentative_panel ) ){       #### no need to focus
+            return
+        }
+
+        if( [TTTentativeKeyBindingMode]::Name -eq $tentative_panel ){   #### move to normal focus
+            [TTTentativeKeyBindingMode]::Initialize()
+            $global:View.Focus( $tentative_panel )
+            return
+        }
+        
+        if( [TTTentativeKeyBindingMode]::Name -ne '' ){                 #### cancel tentative mode
+            [TTTentativeKeyBindingMode]::Initialize()
+            return
+
+        }else{                                                          #### go tentative mode
+            $notvisible = ( $global:View.Focusable( $tentative_panel ) -eq $false )
+            if( $notvisible ){ $global:View.Style( $tentative_panel, 'Default' ) }
+    
+            # tentative mode, Library | Index | Shelf
+            [TTTentativeKeyBindingMode]::Start( $tentative_panel, $mod, $key )
+            [TTTentativeKeyBindingMode]::Add_OnExit({
+                if( $script:notvisible ){ $global:View.Style( $script:tentative_panel, 'None' ) }
+            }.GetNewClosure() )
+        }
+
+    }
+
+    #endregion ----------------------------------------------------------------------------------------------------------
     
     #region event
-    [bool] event_to_move_focus_to_main( $params ){ # Library/Index/Shelf/Desk/Cabinet
-        if( $params[0].Name -match "(?<panel>Library|Index|Shelf|Cabinet).*" ){
-            $panel = $Matches.panel
-            $global:View.$panel.focus( $Matches.panel, '', '' ) # tentative処理を誰がするか
-        }
-        return $false
-    }
-    [bool] event_to_invoke_action_after_click_on_datagrid( $params ){ # Datagrid
-        $panel =    ($params[0].Name -replace "(Library|Index|Shelf).*",'$1')
-        $mouse =    $params[1]
-        switch( $mouse.ChangedButton ){
-            ([Input.MouseButton]::Left) {
-                if( $mouse.ClickCount -eq 2 ){
-                    $this.invoke( $panel )
-                    $mouse.Handled = $true
-                }
-            }
-            ([Input.MouseButton]::Right) {
-                if( $mouse.ClickCount -eq 1 ){
-                    $this.select_and_invoke( $panel )
-                    $mouse.Handled = $true
-                }
-            }
-        }
-        return $false
-    }
-    [bool] event_to_save_after_text_change_on_editor( $params ){ # Editor
-        $editor = $params[0]
-        $num = [int][string]($editor.Name[-1])
-
-        if( $global:View.Document.Editor.UpdateFolding($num) ){ 
-            TTTimerResistEvent "event_to_save_after_text_change_on_editor(Editor$num)" 10 0 { 
-                $global:View.Document.Editor.Save($num)
-            }.GetNewClosure()
-        }
-
-        return $false
-    }
-    [bool] event_to_invoke_action_after_click_on_editor( $params ){ # Editor
-        $editor =   $params[0]
-        $mouse =    $params[1]
-    
-        switch( $mouse.ChangedButton ){
-            ([Input.MouseButton]::Left) {
-                if( $mouse.ClickCount -eq 2 ){
-                    $pos = $editor.GetPositionFromPoint( $mouse.GetPosition($editor) )
-                    [TTTagAction]::New( $editor ).invoke( $pos.Line, $pos.Column )
-                    $mouse.Handled = $true
-                }
-            }
-        }
-
-        return $false
-    }
-    [bool] event_to_open_file_after_file_dropped( $params ){ # 未実装
-
-        return $false
-
-        $editor = $params[0]
-        $drag = $params[1]
-        Write-Host $drag   
-        # 要修正
-    
-    }
-    [bool] event_to_sort_datagrid_after_onsort( $params ){ # Library/Index/Shelf/Cabinet
-        $panel = ( $params[0].Name -replace "(Library|Index|Shelf|Cabinet).*", '$1' )
-        $e = $params[1]
-        $e.Handled = $false
-        $colname = $e.Column.Header
-        $global:View.$panel.sort( $panel, $colname, 'toggle' )
-
-        return $false
-    }
-
-    [bool] event_to_terminate_tentative_mode( $params ){ # Bind to AppMan, PopupMenu, Cabinet
-        if( [TTTentativeKeyBindingMode]::Check( $params[1].Key ) ){
-            return $False
-        }
-        return $False
-    }
-    [bool] event_to_trigger_key_bound_command( $params ){ # Bind to AppMan, PopupMenu, Cabinet
+    [bool] event_to_trigger_key_bound_command( $params ){   # View/PopupMenu/Cabinet
 
         $source =   [string]($args[0].Name) # ⇒ Application, Cabinet, PopupMenu
         $mod =      [string]($args[1].KeyboardDevice.Modifiers)
@@ -250,7 +275,7 @@ class TTActionController {
         $global:TTKeyEventMod = $mod
         $global:TTKeyEventKey = $key
         
-        if( $key.Contains('Alt') -or $key.Contains('Control') ){ return }
+        if( $key.Contains('Alt') -or $key.Contains('Control') ){ return $false }
     
         $command = 
             if( $source -eq 'Application' ){        #### Application
@@ -262,7 +287,7 @@ class TTActionController {
                 }else{                              #### non tentative
                     $cmd = try{ $global:TTKeyEvents['Application'][$mod][$key] }catch{ $null }
         
-                    if( 0 -ne $command.length ){    #### Application
+                    if( 0 -ne $cmd.length ){    #### Application
                         $panel = $source
         
                     }else{
@@ -299,46 +324,87 @@ class TTActionController {
         }
         
     }
+    [bool] event_to_terminate_tentative_mode( $params ){    # View/PopupMenu/Cabinet
+        if( [TTTentativeKeyBindingMode]::Check( $params[1].Key ) ){
+            return $False
+        }
+        return $False
+    }
+    [bool] event_to_move_focus_to_main( $params ){          # Library/Index/Shelf/Cabinet
+        if( $params[0].Name -match "(?<panel>Library|Index|Shelf|Cabinet).*" ){
+            $panel = $Matches.panel
+            $global:View.$panel.focus( $Matches.panel, '', '' ) # tentative処理を誰がするか
+        }
+        return $false
+    }
+    [bool] event_to_sort_datagrid_after_onsort( $params ){  # Library/Index/Shelf/Cabinet
+        $panel = ( $params[0].Name -replace "(Library|Index|Shelf|Cabinet).*", '$1' )
+        $e = $params[1]
+        $e.Handled = $false
+        $colname = $e.Column.Header
+        $global:View.$panel.sort( $panel, $colname, 'toggle' )
+
+        return $false
+    }
+    [bool] event_to_invoke_action_after_click_on_datagrid( $params ){ # Library/Index/Shelf/Cabinet
+        $panel =    ($params[0].Name -replace "(Library|Index|Shelf).*",'$1')
+        $mouse =    $params[1]
+        switch( $mouse.ChangedButton ){
+            ([Input.MouseButton]::Left) {
+                if( $mouse.ClickCount -eq 2 ){
+                    $this.invoke( $panel )
+                    $mouse.Handled = $true
+                }
+            }
+            ([Input.MouseButton]::Right) {
+                if( $mouse.ClickCount -eq 1 ){
+                    $this.select_and_invoke( $panel )
+                    $mouse.Handled = $true
+                }
+            }
+        }
+        return $false
+    }
+    [bool] event_to_save_after_text_change_on_editor( $params ){    # Editor
+        $editor = $params[0]
+        $num = [int][string]($editor.Name[-1])
+
+        if( $global:View.Document.Editor.UpdateFolding($num) ){ 
+            TTTimerResistEvent "event_to_save_after_text_change_on_editor(Editor$num)" 10 0 { 
+                $global:View.Document.Editor.Save($num)
+            }.GetNewClosure()
+        }
+
+        return $false
+    }
+    [bool] event_to_invoke_action_after_click_on_editor( $params ){ # Editor
+        $editor =   $params[0]
+        $mouse =    $params[1]
     
-    #endregion ----------------------------------------------------------------------------------------------------------
-
-    #region focus
-    [void] focus( $panel, $mod, $key ){
-
-        if( $panel -notmatch "(?<panel>Library|Index|Shelf)\+" ){       #### go normal focus
-                $global:View.Focus( $panel )
-                return
+        switch( $mouse.ChangedButton ){
+            ([Input.MouseButton]::Left) {
+                if( $mouse.ClickCount -eq 2 ){
+                    $pos = $editor.GetPositionFromPoint( $mouse.GetPosition($editor) )
+                    [TTTagAction]::New( $editor ).invoke( $pos.Line, $pos.Column )
+                    $mouse.Handled = $true
+                }
+            }
         }
 
-        $tentative_panel = $Matches.panel
+        return $false
+    }
+    [bool] event_to_open_file_after_file_dropped( $params ){        # 未実装
 
-        if( $this._eq( 'Focus.Application', $tentative_panel ) ){       #### no need to focus
-            return
-        }
+        return $false
 
-        if( [TTTentativeKeyBindingMode]::Name -eq $tentative_panel ){   #### move to normal focus
-            [TTTentativeKeyBindingMode]::Initialize()
-            $global:View.Focus( $tentative_panel )
-            return
-        }
-        
-        if( [TTTentativeKeyBindingMode]::Name -ne '' ){                 #### cancel tentative mode
-            [TTTentativeKeyBindingMode]::Initialize()
-            return
-
-        }else{                                                          #### go tentative mode
-            $notvisible = ( $global:View.Focusable( $tentative_panel ) -eq $false )
-            if( $notvisible ){ $global.View.Style( $tentative_panel, 'Default' ) }
+        $editor = $params[0]
+        $drag = $params[1]
+        Write-Host $drag   
+        # 要修正
     
-            # tentative mode, Library | Index | Shelf
-            [TTTentativeKeyBindingMode]::Start( $tentative_panel, $mod, $key )
-            [TTTentativeKeyBindingMode]::Add_OnExit({
-                if( $script:notvisible ){ $global:View.Style( $script:tentative_panel, 'None' ) }
-            }.GetNewClosure() )
-        }
-
     }
 
+    
     #endregion ----------------------------------------------------------------------------------------------------------
 }
 
@@ -346,6 +412,7 @@ class TTActionController {
 
 
 
+<#
 class TTGroupController {
     #region variants/ new/ initialize
     [TTApplicationController] $app
@@ -450,3 +517,4 @@ class TTGroupController {
 }
 
 
+#>
