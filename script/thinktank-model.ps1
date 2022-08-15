@@ -9,6 +9,11 @@
 #########################################################################################################################
 class TTObject {
 
+
+
+
+
+    
     #region variants/ new/ GetDictionary/ GetFilename
 
     hidden [string] $flag
