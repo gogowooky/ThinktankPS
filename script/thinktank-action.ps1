@@ -109,7 +109,7 @@ function KeyBindingSetup(){
 
 
 class TTActionController {
-    #region variants/ new/ initialize
+    #region variants/ new/ BindEvents(view, model)
     [TTTagFormat] $datetag
 
     TTActionController(){
@@ -132,73 +132,70 @@ class TTActionController {
             }
         }
     }
-
     [void] BindEvents( [TTAppManager]$view ){
 
         @( $view, $view.Cabinet, $view.PopupMenu ).foreach{
             $_._window.Add_PreviewKeyDown(      { $this.event_to_trigger_key_bound_command( $args ) })
             $_._window.Add_PreviewKeyUp(        { $this.event_to_terminate_key_event( $args ) })
         }
-        @( $view.Library, $view.Index, $view.Shelf, $view.Cabinet ).foreach{
+        @( $view.Library, $view.Index, $view.Shelf ).foreach{
             $_._datagrid.Add_GotFocus(          { $this.event_to_move_focus_to_main( $args ) })
             $_._datagrid.Add_Sorting(           { $this.event_to_sort_datagrid_after_onsort( $args ) })
             $_._datagrid.Add_PreviewMouseDown(  { $this.event_to_invoke_action_after_click_on_datagrid( $args ) })
             $_._datagrid.Add_SourceUpdated(     {})    # 'Library.Resource'
-            $_._datagrid.Add_Sorting(           {})    # 'Library.Sort.Dir', 'Library.Sort.Column'
             $_._datagrid.Add_TargetUpdated(     {})    # 'Library.Resource' ?
             $_._datagrid.Add_SelectionChanged(  {})    # 'Library.Selected'
-            $this._textbox.Add_TextChanged(     {})    # 'Library.Keyword'
+            $_._textbox.Add_TextChanged(        {})    # 'Library.Keyword'
         }
         @( $view.Desk ).foreach{
-            $this._textbox.Add_TextChanged(     {})    # 'Library.Keyword'
+            $_._textbox.Add_TextChanged(        {})    # 'Library.Keyword'
         }
         @( $view.Cabinet ).foreach{
             # $this._window.Add_Loaded({ $global:View.Cabinet.Focus() })
-            $this._window.Add_Closing(              { $args[1].Cancel = $True })
-            $this._window.Add_MouseLeftButtonDown(  { $_._window.DragMove() })
-            $this._window.Add_MouseDoubleClick(     { $_.Hide($true); $args[1].Handled=$True })
-
-            $this._datagrid.Add_SourceUpdated(      {}) # 'Library.Resource'
-            $this._datagrid.Add_Sorting(            {}) # 'Library.Sort.Dir', 'Library.Sort.Column'
-            $this._datagrid.Add_TargetUpdated(      {}) # 'Library.Resource' ?
-            $this._datagrid.Add_SelectionChanged(   {}) # 'Library.Selected'
-
-            $this._textbox.Add_TextChanged( {})     # 'Library.Keyword'
+            $_._window.Add_Closing(             { $args[1].Cancel = $True })
+            $_._window.Add_MouseLeftButtonDown( { $_._window.DragMove() })
+            $_._window.Add_MouseDoubleClick(    { $_.Hide($true); $args[1].Handled=$True })
+            $_._datagrid.Add_GotFocus(          { $this.event_to_move_focus_to_main( $args ) })
+            $_._datagrid.Add_Sorting(           {}) # 'Library.Sort.Dir', 'Library.Sort.Column'
+            $_._datagrid.Add_PreviewMouseDown(  { $this.event_to_invoke_action_after_click_on_datagrid( $args ) })
+            $_._datagrid.Add_SourceUpdated(     {}) # 'Library.Resource'
+            $_._datagrid.Add_TargetUpdated(     {}) # 'Library.Resource' ?
+            $_._datagrid.Add_SelectionChanged(  {}) # 'Library.Selected'
+            $_._textbox.Add_TextChanged(        {})     # 'Library.Keyword'
         }
         @( $view.PopupMenu ).foreach{
-            $this._window.Add_Closing(              { $args[1].Cancel = $True })
-            $this._window.Add_MouseLeftButtonDown(  { $_._window.DragMove() })
-            $this._window.Add_MouseDoubleClick(     { $_.Hide( $true ) })
-            $this._window.Add_LostKeyboardFocus(    { $_.Hide( $false ) })
+            $_._window.Add_Closing(             { $args[1].Cancel = $True })
+            $_._window.Add_MouseLeftButtonDown( { $_._window.DragMove() })
+            $_._window.Add_MouseDoubleClick(    { $_.Hide( $true ) })
+            $_._window.Add_LostKeyboardFocus(   { $_.Hide( $false ) })
         }
         @( $view.Document.Editor ).foreach{
-            $_.OnSave = { $global:State.event_after_editor_saved( $args ) }
-            $_.OnLoad = { $global:State.event_after_editor_loaded( $args ) }
+            $_.OnSave =                 { $global:State.event_after_editor_saved( $args ) }
+            $_.OnLoad =                 { $global:State.event_after_editor_loaded( $args ) }
             $_.Controls.foreach{
-                $_.Add_GotFocus(            { $global:State.event_after_focus_changed( $args ) })
-                $_.Add_TextChanged(         { $this.event_to_save_after_text_change_on_editor( $args ) })
-                $_.Add_PreviewMouseDown(    { $this.event_to_invoke_action_after_click_on_editor( $args ) })
-                $_.Add_PreviewDrop(         { $this.event_to_open_file_after_file_dropped( $args ) })
+                $_.Add_GotFocus(        { $global:State.event_after_focus_changed( $args ) })
+                $_.Add_TextChanged(     { $this.event_to_save_after_text_change_on_editor( $args ) })
+                $_.Add_PreviewMouseDown({ $this.event_to_invoke_action_after_click_on_editor( $args ) })
+                $_.Add_PreviewDrop(     { $this.event_to_open_file_after_file_dropped( $args ) })
                 $_.Add_PreviewKeyDown(  {})
                 $_.Add_PreviewKeyUp(    {})
             }
         }
         @( $view.Document.Browser ).foreach{
             $this.Controls.foreach{ 
-                $_.Add_GotFocus({ $global:State.event_after_focus_changed( $args ) })
-                $_.Add_PreviewKeyDown({})
-                $_.Add_PreviewKeyUp({})
+                $_.Add_GotFocus(        { $global:State.event_after_focus_changed( $args ) })
+                $_.Add_PreviewKeyDown(  {})
+                $_.Add_PreviewKeyUp(    {})
             }
         }
         @( $view.Document.Grid ).foreach{
             $this.Controls.foreach{ 
-                $_.Add_GotFocus({ $global:State.event_after_focus_changed( $args ) })
-                $_.Add_PreviewKeyDown({})
-                $_.Add_PreviewKeyUp({})
+                $_.Add_GotFocus(        { $global:State.event_after_focus_changed( $args ) })
+                $_.Add_PreviewKeyDown(  {})
+                $_.Add_PreviewKeyUp(    {})
             }
         }
     }
-
     [void] BindEvents( [TTResources]$model ){
     }
 
@@ -404,6 +401,7 @@ class TTActionController {
     
     }
 
+    [bool] event_to_sort_datagrid_after_onsort( $params ){}
     
     #endregion ----------------------------------------------------------------------------------------------------------
 }

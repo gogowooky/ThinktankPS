@@ -32,11 +32,11 @@ Add-Type -AssemblyName PresentationFramework, System.Windows.Forms, System.Drawi
 
 . .\script\thinktank-model.ps1          #　データ管理クラス
 . .\script\thinktank-view.ps1           #  イベント用のscriptblockが参照できる必要あり
-. .\script\thinktank-state.ps1  #　データ管理クラス
-. .\script\thinktank-action.ps1 #　データ-UI連携
+. .\script\thinktank-state.ps1          #　データ管理クラス
+. .\script\thinktank-action.ps1         #　データ-UI連携
 
-. .\script\thinktank-action-key.ps1         #　.NET Framwork eventとcontrol, Key Eventとcommandをbinding
-. .\script\thinktank-model-notification.ps1     #  event-event, event-function ルーティング
+. .\script\thinktank-key-action.ps1     #　.NET Framwork eventとcontrol, Key Eventとcommandをbinding
+. .\script\thinktank-model-action.ps1   #  event-event, event-function ルーティング
 
 
 
@@ -130,18 +130,21 @@ $global:Model =     [TTResources]::New()
 $global:Action =    [TTActionController]::New()
 $global:State =     [TTStateController]::New()
 
-# default設定
-
 $global:Action.BindEvents(  $global:View )
 $global:Action.BindEvents(  $global:Model )
 $global:State.BindEvents(   $global:View )
 $global:State.BindEvents(   $global:Model )
 
+$global:View.SetDefaultStates()
+
+# $global:Model.LoadCache()
+
 $global:View.ShowApplication()
+
+# default設定
 
 # WIndw.Loaded eventで Status/Configs値の設定
 
 
 #endregion###############################################################################################################
-
 

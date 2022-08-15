@@ -9,7 +9,6 @@
 
 
 #region Application
-#########################################################################################################################
 $global:KeyBind_Application = @'
 Application     None            Escape      ttcmd_application_window_quit
 Application     Alt             S           ttcmd_panel_focus_shelf

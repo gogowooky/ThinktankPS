@@ -53,28 +53,7 @@ class TTAppManager {
     }
     #endregion
 
-    #region ShowApplication/ BindEvents/ SetDefaultState
-    [void] ShowApplication(){
-
-
-        # set default
-        $this.SetDefaultStates()
-        $this.Library.SetDefaultStates()
-        $this.Index.SetDefaultStates()
-        $this.Shelf.SetDefaultStates()
-        $this.Desk.SetDefaultStates()
-        $this.Cabinet.SetDefaultStates()
-        $this.Document.SetDefaultStates()
-        $this.PopupMenu.SetDefaultStates()
-
-        # 220813: ここまでNo Errorでくるが要見直し。　
-        # View/Modelは自分のことだけ考えて、ActionやStateがEvent Bindの面倒を見るのが良いのではないか
-
-        # reset stored config
-
-
-        $this._window.ShowDialog()
-    }
+    #region SetDefaultState/ ShowApplication
     [void] SetDefaultStates(){
         $this.Window( 'State', 'Max' )
         $this.Window( 'Top', '0' )
@@ -98,6 +77,35 @@ class TTAppManager {
 
         # $this._set( 'Focus.Application',  'Library' )
 
+        $this.Library.SetDefaultStates()
+        $this.Index.SetDefaultStates()
+        $this.Shelf.SetDefaultStates()
+        $this.Desk.SetDefaultStates()
+        $this.Cabinet.SetDefaultStates()
+        $this.Document.SetDefaultStates()
+        $this.PopupMenu.SetDefaultStates()
+    
+    }
+    [void] ShowApplication(){
+
+
+        # set default
+        $this.SetDefaultStates()
+        $this.Library.SetDefaultStates()
+        $this.Index.SetDefaultStates()
+        $this.Shelf.SetDefaultStates()
+        $this.Desk.SetDefaultStates()
+        $this.Cabinet.SetDefaultStates()
+        $this.Document.SetDefaultStates()
+        $this.PopupMenu.SetDefaultStates()
+
+        # 220813: ここまでNo Errorでくるが要見直し。　
+        # View/Modelは自分のことだけ考えて、ActionやStateがEvent Bindの面倒を見るのが良いのではないか
+
+        # reset stored config
+
+
+        $this._window.ShowDialog()
     }
     #endregion
 
@@ -430,8 +438,8 @@ class TTAppManager {
     #endregion
 }
 
-#region TTPanelManager (TTLibraryManager, TTIndexManager, TTShellManager, TTDeskManager, TTCabinaetManager )
-class TTPanelManager {
+
+class TTPanelManager { # abstract
 
     #region variables/ new
     static [bool] $DisplayAlert = $true
@@ -732,8 +740,9 @@ class TTPanelManager {
     }
 
     #endregion
-}
 
+}
+#region TTLibraryManager, TTIndexManager, TTShellManager, TTDeskManager, TTCabinaetManager
 class TTLibraryManager : TTPanelManager {
     TTLibraryManager( [TTAppManager]$app ) : base ( 'Library', $app ){
         $this._panel =      $app.GetWPFObject('LibraryPanel')
@@ -907,7 +916,6 @@ class TTCabinetManager : TTPanelManager {
 #endregion
 
 
-#region　TTDocumentManager
 class TTDocumentManager{
     #region variants/ new
     [TTAppManager] $app
@@ -974,10 +982,7 @@ class TTDocumentManager{
     #endregion
 }
 
-#endregion
 
-
-#region　TTToolsManager / TTEditorsManager / TTBrowsersManager / TTGridsManager
 class TTToolsManager { # abstract
     #region varinats/ new
     [TTAppManager] $app
@@ -1005,12 +1010,11 @@ class TTToolsManager { # abstract
     }
 
 }
+#region　TTEditorsManager / TTBrowsersManager / TTGridsManager
 
 class TTEditorsManager : TTToolsManager{
 
     #region variants/ new
-    [ScriptBlock] $OnSave = {}
-    [ScriptBlock] $OnLoad = {}
     static [bool] $StayCursor = $false
     static [bool] $DisplaySavingMessage = $false
 
@@ -1089,7 +1093,10 @@ class TTEditorsManager : TTToolsManager{
         
         return $this
     }
-
+    #region Add_Events
+    static [ScriptBlock] $OnSaved = {}
+    static [ScriptBlock] $OnLoaded = {}
+    #endregion
 
     #region Load/ Save/ History
     [TTEditorsManager] Load( [string]$index ){
@@ -2029,7 +2036,6 @@ class TTGridsManager : TTToolsManager{
 
 
 
-#region TTPopupMenuManager
 class TTPopupMenuManager {
     #region variables/ new
     [string] $_name
@@ -2084,6 +2090,8 @@ class TTPopupMenuManager {
     
     #endregion
     
+    [void] SetDefaultStates(){
+    }
 
     #region  Caption/ Cursor/ Items/ Hide/ Show/ Tio(io)/ Left(io)
     [TTPopupMenuManager] Caption( $text ){
@@ -2155,8 +2163,6 @@ class TTPopupMenuManager {
 
     #endregion
 }
-
-#endregion
 
 
 

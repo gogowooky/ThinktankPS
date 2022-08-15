@@ -62,7 +62,8 @@ class TTObject {
             $_.Name -match 'Action.+'
 
         }.foreach{
-            @{  Action = $_.Name
+            @{
+                Action = $_.Name
                 Function = (Invoke-Expression "[$($this.gettype())]::$($_.Name)" ) 
             }
         }.where{ 0 -lt $_.Function.length }.foreach{
@@ -81,13 +82,6 @@ class TTObject {
 class TTCollection : TTObject {
 
     #region variants/ new/ GetDictionary/ GetFilename/ Initilaize 
-    hidden [ScriptBlock] $OnLoad = $null
-    hidden [ScriptBlock] $OnSave = $null
-    hidden [ScriptBlock] $OnAddChild = $null
-    hidden [ScriptBlock] $OnDeleteChild = $null
-    hidden [ScriptBlock] $OnUpdate = $null
-    hidden [ScriptBlock] $OnChange = $null
-
     static [string] $MessageOnCacheSaved = 'False'
 
     [string]$Description
@@ -134,6 +128,14 @@ class TTCollection : TTObject {
 
     #endregion ----------------------------------------------------------------------------------------------------------
 
+    #region Add_Events
+    static [ScriptBlock] $OnSaved = {}
+    static [ScriptBlock] $OnLoaded = {}
+    [void] Saved(){ &([TTCollection]::OnSaved) $this }
+    [void] Loaded(){ &([TTCollection]::OnLoaded) $this }
+    #endregion
+    
+
     #region LoadCache/ Update/ ConfigLines/ AddChild/ SaveCache
     [void] LoadCache() {
         # ファイルを読み込む (空行＊, Format-List形式(自己プロパティ), 空行＋, CSV(子プロパティ))
@@ -159,7 +161,7 @@ class TTCollection : TTObject {
         $itms.foreach{ $this.AddChild( ($_ -as $this.ChildType) ) }
         $this.loading = $false
 
-        if( $this.OnLoad ){ &($this.OnLoad) $this }
+        $this.Loaded()
 
         $this.UpdateDate = $tmp_update
     }
@@ -224,8 +226,7 @@ class TTCollection : TTObject {
         $this | Format-List | Out-File $this.GetFilename()
         $this.children.values | ConvertTo-Csv -NoTypeInformation | Out-File $this.GetFilename() -Append
 
-        if( $this.OnSave ){ &$this.OnSave $this }
-
+        $this.Saved()
     }
 
     #endregion ----------------------------------------------------------------------------------------------------------
@@ -1142,6 +1143,13 @@ class TTMemo : TTObject {
     }
 
     #endregion ----------------------------------------------------------------------------------------------------------
+
+    #region Add_Events
+    static [ScriptBlock] $OnSaved = {}
+    static [ScriptBlock] $OnLoaded = {}
+    [void] Saved(){ &([TTMemo]::OnSaved) $this }
+    [void] Loaded(){ &([TTMemo]::OnLoaded) $this }
+    #endregion
 
     #region GetDisplay
     [hashtable] GetDisplay() {      # should be override 

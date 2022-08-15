@@ -11,9 +11,6 @@ using namespace System.Windows.Documents
 
 
 
-
-
-
 class TTStateController {
     #region variants/ new/ initialize
     static [bool] $DisplaySavedMessage = $true
@@ -33,56 +30,58 @@ class TTStateController {
     [void] BindEvents( [TTAppManager]$view ){
 
         @( $view ).foreach{
-            $_._window.Add_Loaded(          { $this.event_after_window_loaded( $args ) })
-            $_._window.Add_StateChanged(    { $this.event_after_windowstate_changed( $args ) })
-            $_._window.Add_SizeChanged(     { $this.event_after_windowsize_changed( $args ) })
+            $_._window.Add_Loaded(              { $this.event_after_window_loaded( $args ) })
+            $_._window.Add_StateChanged(        { $this.event_after_windowstate_changed( $args ) })
+            $_._window.Add_SizeChanged(         { $this.event_after_windowsize_changed( $args ) })
         }
         @( $view.Library, $view.Index, $view.Shelf, $view.Desk, $view.Cabinet ).foreach{
-            $_._panel.Add_SizeChanged(      { $this.event_after_bordersize_changed( $args ) })
+            $_._panel.Add_SizeChanged(          { $this.event_after_bordersize_changed( $args ) })
         }
         @( $view.Library, $view.Index, $view.Shelf, $view.Cabinet ).foreach{
-            $this._datagrid.Add_SelectionChanged(   { $this.event_after_selecteditem_changed( $args ) })
-            $this._datagrid.Add_SourceUpdated(      {}) # 'Library.Resource'
-            $this._datagrid.Add_Sorting(            {}) # 'Library.Sort.Dir', 'Library.Sort.Column'
-            $this._datagrid.Add_TargetUpdated(      {}) # 'Library.Resource' ?
-            $this._datagrid.Add_SelectionChanged(   {}) # 'Library.Selected'
-
-            $this._textbox.Add_TextChanged( { $this.event_after_textbox_changed_for_datagrid( $args ) })
-            $this._textbox.Add_GotFocus(    { $this.event_after_focus_changed( $args ) })
-            $this._textbox.Add_TextChanged({})          # 'Library.Keyword'
+            $_._datagrid.Add_SelectionChanged(  { $this.event_after_selecteditem_changed( $args ) })
+            $_._datagrid.Add_SourceUpdated(     {}) # 'Library.Resource'
+            $_._datagrid.Add_Sorting(           {}) # 'Library.Sort.Dir', 'Library.Sort.Column'
+            $_._datagrid.Add_TargetUpdated(     {}) # 'Library.Resource' ?
+            $_._datagrid.Add_SelectionChanged(  {}) # 'Library.Selected'
+            $_._textbox.Add_TextChanged(        { $this.event_after_textbox_changed_for_datagrid( $args ) })
+            $_._textbox.Add_GotFocus(           { $this.event_after_focus_changed( $args ) })
+            $_._textbox.Add_TextChanged(        {})          # 'Library.Keyword'
         }
         @( $view.Desk ).foreach{
-            $this._textbox.Add_TextChanged(     { $global:State.event_after_textbox_changed_for_workplace( $args ) })
-            $this._textbox.Add_GotFocus(        { $global:State.event_after_focus_changed( $args ) })
-            $this._textbox.Add_TextChanged({})          # 'Library.Keyword'
+            $_._textbox.Add_TextChanged(        { $this.event_after_textbox_changed_for_workplace( $args ) })
+            $_._textbox.Add_GotFocus(           { $this.event_after_focus_changed( $args ) })
+            $_._textbox.Add_TextChanged(        {})          # 'Library.Keyword'
         }
-        @( $view.Document.Editor ).foreach{
-            $_.OnSave = { $this.event_after_editor_saved( $args ) }
-            $_.OnLoad = { $this.event_after_editor_loaded( $args ) }
-            $_.Controls.foreach{
-                $_.Add_GotFocus(        { $global:State.event_after_focus_changed( $args ) })
-                $_.Add_PreviewKeyDown(  {})
-                $_.Add_PreviewKeyUp(    {})
-            }
+
+        [TTEditorsManager]::OnSaved =   { $this.event_after_editor_saved( $args ) }
+        [TTEditorsManager]::OnLoaded =  { $this.event_after_editor_loaded( $args ) }
+        $view.Document.Editor.Controls.foreach{
+            $_.Add_GotFocus(            { $this.event_after_focus_changed( $args ) })
+            $_.Add_PreviewKeyDown(      {})
+            $_.Add_PreviewKeyUp(        {})
         }
-        @( $view.Document.Browser ).foreach{
-            $this.Controls.foreach{ 
-                $_.Add_GotFocus(        { $global:State.event_after_focus_changed( $args ) })
-                $_.Add_PreviewKeyDown(  {})
-                $_.Add_PreviewKeyUp(    {})
-            }
+
+        $view.Document.Browser.Controls.foreach{ 
+            $_.Add_GotFocus(            { $this.event_after_focus_changed( $args ) })
+            $_.Add_PreviewKeyDown(      {})
+            $_.Add_PreviewKeyUp(        {})
         }
-        @( $view.Document.Grid ).foreach{
-            $this.Controls.foreach{ 
-                $_.Add_GotFocus(        { $global:State.event_after_focus_changed( $args ) })
-                $_.Add_PreviewKeyDown(  {})
-                $_.Add_PreviewKeyUp(    {})
-            }
+
+        $view.Document.Grid.Controls.foreach{ 
+            $_.Add_GotFocus(            { $this.event_after_focus_changed( $args ) })
+            $_.Add_PreviewKeyDown(      {})
+            $_.Add_PreviewKeyUp(        {})
         }
 
     }
 
     [void] BindEvents( [TTResources]$model ){
+        [TTCollection]::OnSaved =       { $this.event_after_editor_saved( $args ) }
+        [TTCollection]::OnLoaded =      { $this.event_after_editor_loaded( $args ) }
+
+        [TTMemo]::OnSaved =             {}
+        [TTMemo]::OnLoaded =            {}
+        
     }
  
     [void] LoadStoredState(){
